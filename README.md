@@ -10,7 +10,7 @@ Ajoutez ensuite ce repo avec cette commande ([p] étant le préfixe):
 
 Ensuite, vous pouvez ajouter chaque extension une à une avec cette commande:
 
-`>cog install zzap passport`
+`[p]cog install zzap passport`
 
 Utilisez de temps en temps `[p]cog update` pour mettre à jour les extensions. Vous pouvez suivre les mises à jour majeures et mineures sur le serveur dédié à son développement (https://discord.gg/DGaM4yH)
 
