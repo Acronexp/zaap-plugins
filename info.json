@@ -1,0 +1,8 @@
+{
+    "author" : ["Acrone (Acrone#4424)"],
+    "install_msg" : "Merci d'avoir installé ce repo, pour plus d'infos rejoignez <https://discord.gg/hgyec92",
+    "name" : "ZzapPlugins",
+    "short" : "Modules dédié au développement de communautés et aux jeux",
+    "description" : "Contient différents jeux (utilisant une économie alternative à celle utilisée par Red) et diverses fonctionnalités dédiées au développement de communautés.",
+    "tags" : ["Games", "Economy", "Fun", "Community]
+}
