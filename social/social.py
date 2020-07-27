@@ -25,7 +25,8 @@ STATUS_COLORS = {
 class Social(commands.Cog):
     """Fonctionnalités sociales supplémentaires"""
 
-    def __init__(self): # Si ça marche pas, ajouter "bot: Red" ici et importer Red
+    def __init__(self):
+        super().__init__()
         self.config = Config.get_conf(self, identifier=736144321857978388, force_registration=True)
         default_member = {"first_record": 0,
                           "names": [],
