@@ -60,7 +60,7 @@ class Social(commands.Cog):
 
         [target] = si la carte affichée doit être celui du membre visé"""
         if not target: target = ctx.author
-        guild_data = self.config.member(target)
+        guild_data = await self.config.member(target)
 
         created_since, joined_since = (datetime.now() - target.created_at).days, (datetime.now() - target.joined_at).day
         booster_since = (datetime.now() - target.premium_since).days if target.premium_since else False
@@ -101,3 +101,14 @@ class Social(commands.Cog):
         em.set_image(url=avatar_url)
         await ctx.send(embed=em)
 
+    @commands.command()
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def games(self, ctx, target: discord.Member = None):
+        """Affiche les jeux détectés comme étant possédés
+
+        [target] = si les jeux affichés doivent être ceux du membre visé"""
+        if not target: target = ctx.author
+
+    @commands.Cog.listener("on_message_without_command")
+    async def _on_message(self, message):
+        data = await self.config.member(message.author)
