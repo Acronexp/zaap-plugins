@@ -6,11 +6,11 @@ D'abord, vous devez posséder [Red Bot V3](https://github.com/Cog-Creators/Red-D
 
 Ajoutez ensuite ce repo avec cette commande ([p] étant le préfixe): 
 
-`[p]repo add zzap https://github.com/Acronexp/zzap-plugins/`   
+`[p]repo add zzap https://github.com/Acronexp/zaap-plugins/`   
 
 Ensuite, vous pouvez ajouter chaque extension une à une avec cette commande:
 
-`[p]cog install zzap <nom>`
+`[p]cog install zaap <nom>`
 
 Utilisez de temps en temps `[p]cog update` pour mettre à jour les extensions. Vous pouvez suivre les mises à jour majeures et mineures sur le serveur dédié à son développement (https://discord.gg/DGaM4yH)
 
