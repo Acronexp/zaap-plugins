@@ -25,7 +25,7 @@ STATUS_COLORS = {
 class Social(commands.Cog):
     """Fonctionnalités sociales supplémentaires"""
 
-    def __init__(self):
+    def __init__(self): # Si ça marche pas, ajouter "bot: Red" ici et importer Red
         self.config = Config.get_conf(self, identifier=736144321857978388, force_registration=True)
         default_member = {"first_record": 0,
                           "names": [],
@@ -38,7 +38,6 @@ class Social(commands.Cog):
 
         self.config.register_member(**default_member)
         self.config.register_user(**default_user)
-
 
     def is_streaming(self, user: discord.Member):
         if user.activities:
