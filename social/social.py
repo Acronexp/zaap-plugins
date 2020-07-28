@@ -4,7 +4,7 @@ import discord
 
 from redbot.core import Config, checks, commands
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 ACTIVITY_TYPES = {
     discord.ActivityType.playing: "Joue",
@@ -34,7 +34,8 @@ class Social(commands.Cog):
                           "achievements": {}, # TODO: implémenter les succès
                           "mod_notes": {}}
         default_guild = {"achievements_alerts": True,
-                         "records": {}}
+                         "records": {},
+                         "secure_channel": None}
 
         self.config.register_member(**default_member)
         self.config.register_guild(**default_guild)
@@ -123,6 +124,12 @@ class Social(commands.Cog):
             string += f"> {status_string}\n"
         return string
 
+    def check_secure_channel(self, channel: discord.TextChannel):
+        guild = channel.guild
+        if "secure_channel" in self.config.guild(guild).all():
+            if channel.id == await self.config.guild(guild).secure_channel():
+                return True
+        return False
 
     @commands.command(aliases=["uc"])
     @commands.guild_only()
@@ -216,13 +223,19 @@ class Social(commands.Cog):
                         mod.set_footer(text=f"Page #{page}")
                         ntxt = chunk
                         page += 1
-                        await ctx.send(embed=mod)
+                        if self.check_secure_channel(ctx.channel):
+                            await ctx.send(embed=mod)
+                        else:
+                            await ctx.author.send(embed=mod)
                     else:
                         ntxt += chunk
                 if ntxt:
                     mod = discord.Embed(title="Notes de modération", description=ntxt, color=user.color)
                     mod.set_footer(text=f"Page #{page}")
-                    await ctx.send(embed=mod)
+                    if self.check_secure_channel(ctx.channel):
+                        await ctx.send(embed=mod)
+                    else:
+                        await ctx.author.send(embed=mod)
 
     @commands.command()
     @commands.bot_has_permissions(embed_links=True)
@@ -279,6 +292,24 @@ class Social(commands.Cog):
     async def notes(self, ctx):
         """Gestion des notes de modérateur sur les membres"""
 
+    @notes.command(name="channel")
+    async def secure_channel(self, ctx, channel: discord.TextChannel = None):
+        """Indique un channel 'sécurisé' où peuvent être affichés publiquement les notes de modérateur
+
+        Laisser vide pour retirer la sécurité.
+        Par défaut, les notes sont envoyées en MP au modérateur qui réalise la commande dans les salons qui ne sont pas sécurités"""
+        if channel:
+            if "secure_channel" not in self.config.guild(ctx.guild).all():
+                await self.config.guild(ctx.guild).set_raw("secure_channels", value=None)
+            if channel.permissions_for(ctx.me).send_messages:
+                await self.config.guild(ctx.guild).secure_channels.set(channel.id)
+                await ctx.send("**Salon sécurisé ajouté** • Ce salon affichera les notes de modération publiquement.")
+            else:
+                await ctx.send("Je n'ai pas les droits pour écrire dans ce salon, modifiez cela avant de l'ajouter comme salon sécurisé.")
+        else:
+            await self.config.guild(ctx.guild).secure_channels.set(None)
+            await ctx.send("**Salon sécurisé retiré** • Ce salon n'affichera plus les notes en public.")
+
     @notes.command(name="add")
     async def notes_add(self, ctx, user: discord.Member, *note):
         """Ajouter une note de modérateur à un membre"""
@@ -295,7 +326,7 @@ class Social(commands.Cog):
     async def notes_remove(self, ctx, user: discord.Member, num = None):
         """Retirer une note de modérateur d'un membre
 
-        Ne pas remplir [num] permet de consulter les notes et l'identifiant qui leur est lié"""
+        Ne pas remplir [num] affiche les notes et l'identifiant qui leur est lié"""
         if num:
             if num in await self.config.member(user).mod_notes():
                 await self.config.member(user).mod_notes.clear_raw(num)
@@ -308,13 +339,42 @@ class Social(commands.Cog):
                 txt += "#{}. *{}*\n".format(note, notes[note]["content"])
             em = discord.Embed(title="Notes sur {}".format(str(user)), description=txt, color=await self.bot.get_embed_color(ctx.channel))
             em.set_footer(text="Tapez ;notes remove <num> pour retirer une de ces notes")
-            await ctx.send(embed=em)
+            if self.check_secure_channel(ctx.channel):
+                await ctx.send(embed=em)
+            else:
+                await ctx.author.send(embed=em)
         else:
-            await ctx.send("Il n'y a aucune note de modération sur ce membre")
+            if self.check_secure_channel(ctx.channel):
+                await ctx.send("Il n'y a aucune note de modération sur ce membre")
+            else:
+                await ctx.author.send("Il n'y a aucune note de modération sur ce membre")
+
+    @notes.command(name="check")
+    async def notes_check(self, ctx, user: discord.Member):
+        """Affiche les notes du membre et les identifiants liés à ceux-ci"""
+        txt = ""
+        notes = await self.config.member(user).mod_notes()
+        if notes:
+            for note in notes:
+                txt += "#{}. *{}*\n".format(note, notes[note]["content"])
+            em = discord.Embed(title="Notes sur {}".format(str(user)), description=txt,
+                               color=await self.bot.get_embed_color(ctx.channel))
+            em.set_footer(text="Tapez ;notes remove <num> pour retirer une de ces notes ou ;notes edit <num> pour en éditer une")
+            if self.check_secure_channel(ctx.channel):
+                await ctx.send(embed=em)
+            else:
+                await ctx.author.send(embed=em)
+        else:
+            if self.check_secure_channel(ctx.channel):
+                await ctx.send("Il n'y a aucune note de modération sur ce membre")
+            else:
+                await ctx.author.send("Il n'y a aucune note de modération sur ce membre")
 
     @notes.command(name="edit")
     async def notes_edit(self, ctx, user: discord.Member, num, *note):
-        """Retirer une note de modérateur d'un membre"""
+        """Modifier une note de modérateur d'un membre
+
+        Utilisez `;notes check @user` pour voir les numéros liés aux différentes notes"""
         if num in await self.config.member(user).mod_notes():
             if note:
                 note = " ".join(note)
