@@ -306,12 +306,12 @@ class Social(commands.Cog):
             except KeyError:
                 await self.config.guild(ctx.guild).set_raw("secure_channel", value=None)
             if channel.permissions_for(ctx.me).send_messages:
-                await self.config.guild(ctx.guild).secure_channels.set(channel.id)
+                await self.config.guild(ctx.guild).secure_channel.set(channel.id)
                 await ctx.send("**Salon sécurisé ajouté** • Ce salon affichera les notes de modération publiquement.")
             else:
                 await ctx.send("Je n'ai pas les droits pour écrire dans ce salon, modifiez cela avant de l'ajouter comme salon sécurisé.")
         else:
-            await self.config.guild(ctx.guild).secure_channels.set(None)
+            await self.config.guild(ctx.guild).secure_channel.set(None)
             await ctx.send("**Salon sécurisé retiré** • Ce salon n'affichera plus les notes en public.")
 
     @notes.command(name="add")
