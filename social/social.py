@@ -135,7 +135,7 @@ class Social(commands.Cog):
         guild = ctx.guild
         member = await self.config.member(user).all()
 
-        created_since, joined_since = (datetime.now() - user.created_at).days, (datetime.now() - user.joined_at).day
+        created_since, joined_since = (datetime.now() - user.created_at).days, (datetime.now() - user.joined_at).days
         booster_since = (datetime.now() - user.premium_since).days if user.premium_since else False
         voice_channel = user.voice.channel.mention if user.voice else None
 
