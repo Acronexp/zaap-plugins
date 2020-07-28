@@ -120,7 +120,7 @@ class Social(commands.Cog):
             status_string, status_type = a
             if status_string is None:
                 continue
-            string += f"{status_string}\n"
+            string += f"> {status_string}\n"
         return string
 
 
@@ -153,8 +153,8 @@ class Social(commands.Cog):
         logs = member["logs"][::-1]
         names, nicknames = member["names"][::-1], member["nicknames"][::-1]
 
-        em = discord.Embed(description=self.get_status_string(user), color=embed_color)
-        em.set_author(name=user.name if not user.nick else "{} « {} »".format(user.name, user.nick))
+        em = discord.Embed(title=user.name if not user.nick else "{} « {} »".format(user.name, user.nick), description=self.get_status_string(user), color=embed_color)
+        em.set_author(name=f"Carte de membre sur {guild.name}")
         em.set_thumbnail(url=user.avatar_url)
         member_num = (sorted(guild.members, key=lambda m: m.joined_at or ctx.message.created_at).index(user) + 1)
 
