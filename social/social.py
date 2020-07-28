@@ -124,7 +124,7 @@ class Social(commands.Cog):
             string += f"> {status_string}\n"
         return string
 
-    def check_secure_channel(self, channel: discord.TextChannel):
+    async def check_secure_channel(self, channel: discord.TextChannel):
         guild = channel.guild
         if "secure_channel" in self.config.guild(guild).all():
             if channel.id == await self.config.guild(guild).secure_channel():
@@ -223,7 +223,7 @@ class Social(commands.Cog):
                         mod.set_footer(text=f"Page #{page}")
                         ntxt = chunk
                         page += 1
-                        if self.check_secure_channel(ctx.channel):
+                        if await self.check_secure_channel(ctx.channel):
                             await ctx.send(embed=mod)
                         else:
                             await ctx.author.send(embed=mod)
@@ -232,7 +232,7 @@ class Social(commands.Cog):
                 if ntxt:
                     mod = discord.Embed(title="Notes de modération", description=ntxt, color=user.color)
                     mod.set_footer(text=f"Page #{page}")
-                    if self.check_secure_channel(ctx.channel):
+                    if await self.check_secure_channel(ctx.channel):
                         await ctx.send(embed=mod)
                     else:
                         await ctx.author.send(embed=mod)
@@ -339,12 +339,12 @@ class Social(commands.Cog):
                 txt += "#{}. *{}*\n".format(note, notes[note]["content"])
             em = discord.Embed(title="Notes sur {}".format(str(user)), description=txt, color=await self.bot.get_embed_color(ctx.channel))
             em.set_footer(text="Tapez ;notes remove <num> pour retirer une de ces notes")
-            if self.check_secure_channel(ctx.channel):
+            if await self.check_secure_channel(ctx.channel):
                 await ctx.send(embed=em)
             else:
                 await ctx.author.send(embed=em)
         else:
-            if self.check_secure_channel(ctx.channel):
+            if await self.check_secure_channel(ctx.channel):
                 await ctx.send("Il n'y a aucune note de modération sur ce membre")
             else:
                 await ctx.author.send("Il n'y a aucune note de modération sur ce membre")
@@ -360,12 +360,12 @@ class Social(commands.Cog):
             em = discord.Embed(title="Notes sur {}".format(str(user)), description=txt,
                                color=await self.bot.get_embed_color(ctx.channel))
             em.set_footer(text="Tapez ;notes remove <num> pour retirer une de ces notes ou ;notes edit <num> pour en éditer une")
-            if self.check_secure_channel(ctx.channel):
+            if await self.check_secure_channel(ctx.channel):
                 await ctx.send(embed=em)
             else:
                 await ctx.author.send(embed=em)
         else:
-            if self.check_secure_channel(ctx.channel):
+            if await self.check_secure_channel(ctx.channel):
                 await ctx.send("Il n'y a aucune note de modération sur ce membre")
             else:
                 await ctx.author.send("Il n'y a aucune note de modération sur ce membre")
