@@ -154,9 +154,9 @@ class Social(commands.Cog):
             last_msg = member["cons_days"][-1]
         else:
             last_msg = time.strftime("%d/%m/%Y", time.localtime())
-        if user.id in await self.config.guild(guild).records().all():
+        try:
             first_record = datetime.fromtimestamp(await self.config.guild(guild).records.get_raw(user.id))
-        else:
+        except KeyError:
             first_record = user.joined_at
         record_since = (datetime.now() - first_record).days
         logs = member["logs"][::-1]
