@@ -185,7 +185,7 @@ class Social(commands.Cog):
             for log in logs[:3]:
                 date = datetime.fromtimestamp(log[0])
                 if date.date() == datetime.now().date():
-                    if date.strftime("%H:%M") == datetime.strftime("%H:%M"):
+                    if date.strftime("%H:%M") == datetime.now().strftime("%H:%M"):
                         hist += "• À l'instant · *{}*\n".format(log[1])
                     else:
                         hist += "• Aujourd'hui à {} · *{}*\n".format(date.strftime("%H:%M"), log[1])
