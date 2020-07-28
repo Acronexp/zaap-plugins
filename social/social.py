@@ -120,7 +120,7 @@ class Social(commands.Cog):
             status_string, status_type = a
             if status_string is None:
                 continue
-            string += f"- {status_string}\n"
+            string += f"{status_string}\n"
         return string
 
 
@@ -204,7 +204,7 @@ class Social(commands.Cog):
         await ctx.send(embed=em)
 
         if self.bot.is_mod(user):
-            notes = await member.mod_notes()
+            notes = member["mod_notes"]
             if notes:
                 ntxt = ""
                 page = 1
