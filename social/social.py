@@ -140,8 +140,11 @@ class Social(commands.Cog):
         voice_channel = user.voice.channel.mention if user.voice else None
 
         embed_color = STATUS_COLORS[user.status] if not self.is_streaming(user) else 0x6438AA
-        flames, last_msg = len(member["cons_days"]), member["cons_days"][-1] or time.strftime("%d/%m/%Y",
-                                                                                                    time.localtime())
+        flames = len(member["cons_days"])
+        if flames:
+            last_msg = member["cons_days"][-1]
+        else:
+            last_msg = time.strftime("%d/%m/%Y", time.localtime())
         if user.id in await self.config.guild(guild).records():
             first_record = datetime.fromtimestamp(await self.config.guild(guild).records.get_raw(user.id))
         else:
