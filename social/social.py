@@ -1,6 +1,3 @@
-from redbot.core import commands
-import asyncio
-import random
 import time
 from datetime import datetime, timedelta
 import discord
@@ -136,22 +133,22 @@ class Social(commands.Cog):
         [user] = si la carte affichée doit être celui du membre visé"""
         if not user: user = ctx.author
         guild = ctx.guild
-        guild_data = await self.config.member(user)
+        member = await self.config.member(user).all()
 
         created_since, joined_since = (datetime.now() - user.created_at).days, (datetime.now() - user.joined_at).day
         booster_since = (datetime.now() - user.premium_since).days if user.premium_since else False
         voice_channel = user.voice.channel.mention if user.voice else None
 
         embed_color = STATUS_COLORS[user.status] if not self.is_streaming(user) else 0x6438AA
-        flames, last_msg = len(await guild_data.cons_days()), await guild_data.cons_days()[-1] or time.strftime("%d/%m/%Y",
+        flames, last_msg = len(member["cons_days"]), member["cons_days"][-1] or time.strftime("%d/%m/%Y",
                                                                                                     time.localtime())
         if user.id in await self.config.guild(guild).records():
             first_record = datetime.fromtimestamp(await self.config.guild(guild).records.get_raw(user.id))
         else:
             first_record = user.joined_at
         record_since = (datetime.now() - first_record).days
-        logs = await guild_data.logs()[::-1]
-        names, nicknames = await guild_data.names()[::-1], await self.config.guild(guild).nicknames()[::-1]
+        logs = member["logs"][::-1]
+        names, nicknames = member["names"][::-1], member["nicknames"][::-1]
 
         em = discord.Embed(description=self.get_status_string(user), color=embed_color)
         em.set_author(name=user.name if not user.nick else "{} « {} »".format(user.name, user.nick))
@@ -204,7 +201,7 @@ class Social(commands.Cog):
         await ctx.send(embed=em)
 
         if self.bot.is_mod(user):
-            notes = await guild_data.mod_notes()
+            notes = await member.mod_notes()
             if notes:
                 ntxt = ""
                 page = 1
@@ -343,22 +340,21 @@ class Social(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message):
         if message.guild:
-            data = await self.config.member(message.author)
+            author = message.author
             last_day = (datetime.now() - timedelta(days=1)).strftime("%d/%m/%Y")
-            async with await data.cons_days() as cons_days:
+            async with await self.config.member(author).cons_days() as cons_days:
                 if last_day in cons_days:
                     if datetime.now().strftime("%d/%m/%Y") not in cons_days:
                         cons_days.append(datetime.now().strftime("%d/%m/%Y"))
                 elif datetime.now().strftime("%d/%m/%Y") not in cons_days:
-                    await data.cons_days.set([datetime.now().strftime("%d/%m/%Y")])
+                    await self.config.member(author).cons_days.set([datetime.now().strftime("%d/%m/%Y")])
 
     @commands.Cog.listener()
     async def on_member_update(self, before, after):
         if isinstance(after, discord.Member):
-            data = await self.config.member(after)
             if after.name != before.name:
                 await self.add_logs(after, f"Changement de pseudo » {after.name}")
-                async with await data.names() as names:
+                async with await self.config.member(after).names() as names:
                     if after.name not in names:
                         names.append(after.name)
                         if len(names) > 20:
@@ -368,7 +364,7 @@ class Social(commands.Cog):
                     await self.add_logs(after, f"A retiré son surnom ({before.nick})")
                 else:
                     await self.add_logs(after, f"Changement de surnom » {after.display_name}")
-                    async with await data.nicknames() as nicknames:
+                    async with await self.config.member(after).nicknames() as nicknames:
                         if after.nick not in nicknames:
                             nicknames.append(after.name)
                             if len(nicknames) > 20:
