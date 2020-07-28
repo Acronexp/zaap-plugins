@@ -158,15 +158,15 @@ class Social(commands.Cog):
         em.set_thumbnail(url=user.avatar_url)
         member_num = (sorted(guild.members, key=lambda m: m.joined_at or ctx.message.created_at).index(user) + 1)
 
-        presence_txt = "**Création du compte** • {} · **{}**j\n" \
-                       "**Arrivée sur le serveur** • {} · **{}**j\n" \
-                       "**Première trace** • {} · **{}**j\n" \
-                       "**Dernier message** • {} · \🔥{}".format(user.created_at.strftime("%d/%m/%Y"), created_since,
+        presence_txt = "**Création du compte**: {} · **{}**j\n" \
+                       "**Arrivée sur le serveur**: {} · **{}**j\n" \
+                       "**Première trace**: {} · **{}**j\n" \
+                       "**Dernier message**: {} · \🔥{}".format(user.created_at.strftime("%d/%m/%Y"), created_since,
                                                                  user.joined_at.strftime("%d/%m/%Y"), joined_since,
                                                                  first_record.strftime("%d/%m/%Y"), record_since,
                                                                  last_msg, flames)
         if booster_since:
-            presence_txt += "\n**Booste depuis** • {} · **{}**j".format(user.premium_since.strftime("%d/%m/%Y"),
+            presence_txt += "\n**Booste depuis**: {} · **{}**j".format(user.premium_since.strftime("%d/%m/%Y"),
                                                                         booster_since)
         em.add_field(name="Profil", value=presence_txt, inline=False)
         roles = user.roles[-1:0:-1]
