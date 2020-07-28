@@ -315,9 +315,7 @@ class Social(commands.Cog):
 
     @notes.command(name="edit")
     async def notes_edit(self, ctx, user: discord.Member, num, *note):
-        """Retirer une note de modérateur d'un membre
-
-        Ne pas remplir [num] permet de consulter les notes et l'identifiant qui leur est lié"""
+        """Retirer une note de modérateur d'un membre"""
         if num in await self.config.member(user).mod_notes():
             if note:
                 note = " ".join(note)
@@ -335,10 +333,11 @@ class Social(commands.Cog):
             await ctx.send("Ce numéro de note est introuvable.")
 
     async def add_logs(self, user: discord.Member, desc: str):
-        async with await self.config.member(user).logs() as logs:
+        member =  self.config.member(user)
+        async with member.logs() as logs:
             logs.append((time.time(), desc))
             if len(logs) > 10:
-                await self.config.member(user).logs.set(logs[-10:])
+                await member.logs.set(logs[-10:])
 
     @commands.Cog.listener()
     async def on_message(self, message):
