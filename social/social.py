@@ -126,10 +126,12 @@ class Social(commands.Cog):
 
     async def check_secure_channel(self, channel: discord.TextChannel):
         guild = channel.guild
-        if "secure_channel" in self.config.guild(guild).all():
-            if channel.id == await self.config.guild(guild).secure_channel():
+        try:
+            secure = await self.config.guild(guild).get_raw("secure_channel")
+            if channel.id == secure:
                 return True
-        return False
+        except KeyError:
+            return False
 
     @commands.command(aliases=["uc"])
     @commands.guild_only()
@@ -299,8 +301,10 @@ class Social(commands.Cog):
         Laisser vide pour retirer la sécurité.
         Par défaut, les notes sont envoyées en MP au modérateur qui réalise la commande dans les salons qui ne sont pas sécurités"""
         if channel:
-            if "secure_channel" not in self.config.guild(ctx.guild).all():
-                await self.config.guild(ctx.guild).set_raw("secure_channels", value=None)
+            try:
+                await self.config.guild(ctx.guild).get_raw("secure_channel")
+            except KeyError:
+                await self.config.guild(ctx.guild).set_raw("secure_channel", value=None)
             if channel.permissions_for(ctx.me).send_messages:
                 await self.config.guild(ctx.guild).secure_channels.set(channel.id)
                 await ctx.send("**Salon sécurisé ajouté** • Ce salon affichera les notes de modération publiquement.")
