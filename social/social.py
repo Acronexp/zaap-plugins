@@ -154,7 +154,7 @@ class Social(commands.Cog):
             last_msg = member["cons_days"][-1]
         else:
             last_msg = time.strftime("%d/%m/%Y", time.localtime())
-        if user.id in await self.config.guild(guild).records():
+        if user.id in await self.config.guild(guild).records().keys():
             first_record = datetime.fromtimestamp(await self.config.guild(guild).records.get_raw(user.id))
         else:
             first_record = user.joined_at
@@ -407,7 +407,7 @@ class Social(commands.Cog):
         if message.guild:
             author = message.author
             last_day = (datetime.now() - timedelta(days=1)).strftime("%d/%m/%Y")
-            async with await self.config.member(author).cons_days() as cons_days:
+            async with self.config.member(author).cons_days() as cons_days:
                 if last_day in cons_days:
                     if datetime.now().strftime("%d/%m/%Y") not in cons_days:
                         cons_days.append(datetime.now().strftime("%d/%m/%Y"))
@@ -419,7 +419,7 @@ class Social(commands.Cog):
         if isinstance(after, discord.Member):
             if after.name != before.name:
                 await self.add_logs(after, f"Changement de pseudo » {after.name}")
-                async with await self.config.member(after).names() as names:
+                async with self.config.member(after).names() as names:
                     if after.name not in names:
                         names.append(after.name)
                         if len(names) > 20:
@@ -429,7 +429,7 @@ class Social(commands.Cog):
                     await self.add_logs(after, f"A retiré son surnom ({before.nick})")
                 else:
                     await self.add_logs(after, f"Changement de surnom » {after.display_name}")
-                    async with await self.config.member(after).nicknames() as nicknames:
+                    async with self.config.member(after).nicknames() as nicknames:
                         if after.nick not in nicknames:
                             nicknames.append(after.name)
                             if len(nicknames) > 20:
