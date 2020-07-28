@@ -158,7 +158,7 @@ class Social(commands.Cog):
             first_record = datetime.fromtimestamp(await self.config.guild(guild).records.get_raw(user.id))
         except KeyError:
             first_record = user.joined_at
-        if first_record < user.joined_at:
+        if first_record > user.joined_at:
             first_record = user.joined_at
         record_since = (datetime.now() - first_record).days
         logs = member["logs"][::-1]
