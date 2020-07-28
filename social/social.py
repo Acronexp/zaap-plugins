@@ -217,13 +217,13 @@ class Social(commands.Cog):
                         mod.set_footer(text=f"Page #{page}")
                         ntxt = chunk
                         page += 1
-                        ctx.send(embed=mod)
+                        await ctx.send(embed=mod)
                     else:
                         ntxt += chunk
                 if ntxt:
                     mod = discord.Embed(title="Notes de modération", description=ntxt, color=user.color)
                     mod.set_footer(text=f"Page #{page}")
-                    ctx.send(embed=mod)
+                    await ctx.send(embed=mod)
 
     @commands.command()
     @commands.bot_has_permissions(embed_links=True)
