@@ -153,8 +153,7 @@ class Social(commands.Cog):
         logs = member["logs"][::-1]
         names, nicknames = member["names"][::-1], member["nicknames"][::-1]
 
-        em = discord.Embed(title=user.name if not user.nick else "{} « {} »".format(user.name, user.nick), description=self.get_status_string(user), color=embed_color)
-        em.set_author(name=f"Carte de membre sur {guild.name}")
+        em = discord.Embed(title=str(user) if not user.nick else "{} « {} »".format(str(user), user.nick), description=self.get_status_string(user), color=embed_color)
         em.set_thumbnail(url=user.avatar_url)
         member_num = (sorted(guild.members, key=lambda m: m.joined_at or ctx.message.created_at).index(user) + 1)
 
