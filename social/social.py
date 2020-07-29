@@ -213,7 +213,7 @@ class Social(commands.Cog):
                       icon_url="https://ponyvilleplaza.com/files/img/boost.png" if booster_since else "")
         await ctx.send(embed=em)
 
-        if self.bot.is_mod(user):
+        if await self.bot.is_mod(user):
             notes = member["mod_notes"]
             if notes:
                 ntxt = ""
