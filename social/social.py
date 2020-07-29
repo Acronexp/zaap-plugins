@@ -409,12 +409,13 @@ class Social(commands.Cog):
         if message.guild:
             author = message.author
             last_day = (datetime.now() - timedelta(days=1)).strftime("%d/%m/%Y")
-            async with self.config.member(author).cons_days() as cons_days:
-                if last_day in cons_days:
-                    if datetime.now().strftime("%d/%m/%Y") not in cons_days:
-                        cons_days.append(datetime.now().strftime("%d/%m/%Y"))
-                elif datetime.now().strftime("%d/%m/%Y") not in cons_days:
-                    await self.config.member(author).cons_days.set([datetime.now().strftime("%d/%m/%Y")])
+            if isinstance(author, discord.Member):
+                async with self.config.member(author).cons_days() as cons_days:
+                    if last_day in cons_days:
+                        if datetime.now().strftime("%d/%m/%Y") not in cons_days:
+                            cons_days.append(datetime.now().strftime("%d/%m/%Y"))
+                    elif datetime.now().strftime("%d/%m/%Y") not in cons_days:
+                        await self.config.member(author).cons_days.set([datetime.now().strftime("%d/%m/%Y")])
 
     @commands.Cog.listener()
     async def on_member_update(self, before, after):
