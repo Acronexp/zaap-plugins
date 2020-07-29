@@ -4,7 +4,7 @@ import discord
 
 from redbot.core import Config, checks, commands
 
-__version__ = "1.1.0"
+__version__ = "1.1.1"
 
 ACTIVITY_TYPES = {
     discord.ActivityType.playing: "Joue",
@@ -206,9 +206,9 @@ class Social(commands.Cog):
             em.add_field(name="Actuellement sur", value=voice_channel, inline=False)
         # em.add_field(name="Rôles", value=" ".join(["`" + role.name + "`" for role in user.roles if not role.is_default()]) or "*Aucun*")
         if names:
-            em.add_field(name="Pseudos", value=", ".join(names))
+            em.add_field(name="Pseudos", value=", ".join(names[:3]))
         if nicknames:
-            em.add_field(name="Surnoms", value=", ".join(nicknames))
+            em.add_field(name="Surnoms", value=", ".join(nicknames[:3]))
         em.set_footer(text=f"ID: {user.id} • Membre #{member_num}",
                       icon_url="https://ponyvilleplaza.com/files/img/boost.png" if booster_since else "")
         await ctx.send(embed=em)
@@ -425,7 +425,7 @@ class Social(commands.Cog):
                     if after.name not in names:
                         names.append(after.name)
                         if len(names) > 20:
-                            await self.config.member(after).names.set(names[-20:])
+                            await self.config.member(after).names.set(names[-10:])
             if after.display_name != before.display_name:
                 if after.display_name == after.name:
                     await self.add_logs(after, f"A retiré son surnom ({before.nick})")
@@ -433,9 +433,9 @@ class Social(commands.Cog):
                     await self.add_logs(after, f"Changement de surnom » {after.display_name}")
                     async with self.config.member(after).nicknames() as nicknames:
                         if after.nick not in nicknames:
-                            nicknames.append(after.name)
+                            nicknames.append(after.nick)
                             if len(nicknames) > 20:
-                                await self.config.member(after).nicknames.set(nicknames[-20:])
+                                await self.config.member(after).nicknames.set(nicknames[-10:])
             if after.avatar_url != before.avatar_url:
                 url = before.avatar_url.split("?")[0]
                 await self.add_logs(after, f"Modification de l'avatar » [@]({url})")
