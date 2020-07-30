@@ -1,0 +1,8 @@
+{
+	"author": ["Acrone"],
+	"description": "Ajoute des cartes de membres et notes de modération",
+	"install_msg": "Merci d'avoir installé ce module. Utilisez `[p]help uc` et `[p]help notes` pour plus d'infos.",
+	"short": "Fonctionnalités communautaires supplémentaires.",
+	"tags": ["social", "user", "community"],
+	"type": "COG"
+}
