@@ -1,0 +1,8 @@
+{
+	"author": ["Acrone"],
+	"description": "Enregistrez et utilisez les fichiers utilisés comme des 'stickers' personnalisés !",
+	"install_msg": "Merci d'avoir installé ce module. Utilisez `[p]help pix` pour plus d'infos.",
+	"short": "Stockage de stickers personnalisés",
+	"tags": ["images", "community", "custom"],
+	"type": "COG"
+}
