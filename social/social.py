@@ -4,7 +4,7 @@ import discord
 
 from redbot.core import Config, checks, commands
 
-__version__ = "1.1.1"
+__version__ = "1.2.0"
 
 ACTIVITY_TYPES = {
     discord.ActivityType.playing: "Joue",
@@ -121,7 +121,7 @@ class Social(commands.Cog):
             status_string, status_type = a
             if status_string is None:
                 continue
-            string += f"> {status_string}\n"
+            string += f"{status_string}\n"
         return string
 
     async def check_secure_channel(self, channel: discord.TextChannel):
@@ -425,7 +425,7 @@ class Social(commands.Cog):
                 async with self.config.member(after).names() as names:
                     if after.name not in names:
                         names.append(after.name)
-                        if len(names) > 20:
+                        if len(names) > 10:
                             await self.config.member(after).names.set(names[-10:])
             if after.display_name != before.display_name:
                 if after.display_name == after.name:
@@ -435,7 +435,7 @@ class Social(commands.Cog):
                     async with self.config.member(after).nicknames() as nicknames:
                         if after.nick not in nicknames:
                             nicknames.append(after.nick)
-                            if len(nicknames) > 20:
+                            if len(nicknames) > 10:
                                 await self.config.member(after).nicknames.set(nicknames[-10:])
             if after.avatar_url != before.avatar_url:
                 url = before.avatar_url.split("?")[0]
