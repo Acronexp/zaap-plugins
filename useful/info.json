@@ -1,0 +1,13 @@
+{
+	"author": ["Acrone"],
+	"description": "Commandes utiles supplémentaires",
+	"install_msg": "Merci d'avoir installé ce module.",
+	"short": "Ajoute des commandes fun type Wikipedia ou recherche de SCP.",
+	"tags": ["fun", "wikipedia", "community"],
+	"requirements" : [
+        "wikipedia",
+		"wikipediaapi",
+		"beautifulsoup4"
+    ],
+	"type": "COG"
+}
