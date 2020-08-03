@@ -108,16 +108,19 @@ class Useful(commands.Cog):
     @commands.command(name="scp")
     async def scp_search(self, ctx, num: int):
         """Recherche dans la base de données de la Fondation SCP (EN)"""
-        link = "http://www.scp-wiki.net/scp-{:03}".format(num)
-        async with ctx.channel.typing():
-            text = self.extract_scp(link)
-        if text:
-            texte = "\n".join(text)
-            if len(texte) > 1950:
-                texte = self.redux(texte, limite=1950)
-            texte += "\n\n[Consulter le dossier...]({})".format(link)
-            em = discord.Embed(description=texte, color=0x653C3C)
-            em.set_footer(text="SCP Foundation", icon_url="https://i.imgur.com/UKR9LxY.png?1")
-            await ctx.send(embed=em)
+        if 1 <= num <= 5999:
+            link = "http://www.scp-wiki.net/scp-{:03}".format(num)
+            async with ctx.channel.typing():
+                text = self.extract_scp(link)
+            if text:
+                texte = "\n".join(text)
+                if len(texte) > 1950:
+                    texte = self.redux(texte, limite=1950)
+                texte += "\n\n[Consulter le dossier...]({})".format(link)
+                em = discord.Embed(description=texte, color=0x653C3C)
+                em.set_footer(text="SCP Foundation", icon_url="https://i.imgur.com/UKR9LxY.png?1")
+                await ctx.send(embed=em)
+            else:
+                await ctx.send("**Inaccessible** • Le nombre est incorrect ou la page est inaccessible")
         else:
-            await ctx.send("**Inaccessible** • Le numéro est incorrect ou la page est inaccessible")
+            await ctx.send("**Inaccessible** • Les SCP ne vont pour l'instant que de 1 à 5999.")
