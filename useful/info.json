@@ -6,7 +6,7 @@
 	"tags": ["fun", "wikipedia", "community"],
 	"requirements" : [
         "wikipedia",
-		"wikipediaapi",
+		"wikipedia-api",
 		"beautifulsoup4"
     ],
 	"type": "COG"
