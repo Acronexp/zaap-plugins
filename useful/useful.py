@@ -43,14 +43,14 @@ class Useful(commands.Cog):
                 if len(resum) + len(r) > 1995:
                     resum = self.redux(resum, limite=1960)
                 p = wikiplus.page(r)
-                resum += "\n\n[En savoir plus...]({})".format(p.fullurl)
+                resum += "\n[En savoir plus...]({})".format(p.fullurl)
                 em = discord.Embed(title=r.capitalize(), description=resum, color=0xeeeeee)
                 em.set_thumbnail(url=image)
-                em.set_footer(text="Similaire: {}".format(", ".join(s[0])))
+                em.set_footer(text="Voir aussi · {}".format(", ".join(s[0][1:])))
                 return em
             else:
                 if langue == "en":
-                    return "Impossible de trouver {}".format(recherche)
+                    return "Impossible de trouver *{}*".format(recherche)
                 else:
                     return self.wiki(recherche, "en")
         except:
