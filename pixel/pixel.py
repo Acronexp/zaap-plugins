@@ -14,9 +14,6 @@ from redbot.core.data_manager import cog_data_path
 from redbot.core.utils.menus import start_adding_reactions
 from redbot.core.utils.predicates import ReactionPredicate
 
-__version__ = "1.0.0"
-__need__ = ["aiofiles"]
-
 logger = logging.getLogger("red.zaap-plugins.pixel")
 
 class PixelError(Exception):
@@ -269,7 +266,7 @@ class Pixel(commands.Cog):
                     return
                 except ExtensionNotSupported:
                     await ctx.send("**Extension non supportée** • Consultez la liste dans l'aide de la commande "
-                                   "(`;help pix add`")
+                                   "(`;help pix add`)")
                     return
             else:
                 await ctx.send("**Aucun fichier** • Fournissez un fichier pour l'ajouter (URL ou directement téléchargé sur Discord)")
@@ -477,5 +474,10 @@ class Pixel(commands.Cog):
                                     await ctx.send(
                                         "**Erreur** • Le nom fourni est le mauvais, "
                                         "cette erreur ne devrait pas arriver à moins que le stockage soit corrompu", delete_after=20)
+                                    continue
+                                except DownloadError:
+                                    await ctx.send(
+                                        "**Erreur de téléchargement** • Changez l'URL et réessayez", delete_after=20)
+                                    logger.error("Impossible de télécharger depuis {}".format(file["url"]), exc_info=True)
                                     continue
 

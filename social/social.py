@@ -200,7 +200,7 @@ class Social(commands.Cog):
                     else:
                         hist += "• Aujourd'hui à {} · *{}*\n".format(date.strftime("%H:%M"), log[1])
                 else:
-                    hist += "• {} · *{}*\n".format(date.strftime("%d/%m/%Y"), log[0])
+                    hist += "• {} · *{}*\n".format(date.strftime("%d/%m/%Y"), log[1])
             em.add_field(name="Historique", value=hist, inline=False)
         if voice_channel:
             em.add_field(name="Actuellement sur", value=voice_channel, inline=False)
