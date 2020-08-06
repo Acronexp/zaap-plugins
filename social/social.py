@@ -223,7 +223,7 @@ class Social(commands.Cog):
                         datetime.fromtimestamp(notes[n]["timestamp"]).strftime("%d/%m/%Y %H:%M"),
                         guild.get_member(notes[n]["author"]).mention, notes[n]["content"])
                     if len(ntxt) + len(chunk) > 2000:
-                        mod = discord.Embed(title="Notes de modération", description=ntxt, color=user.color)
+                        mod = discord.Embed(title="Notes de modération pour {}".format(user), description=ntxt, color=user.color)
                         mod.set_footer(text=f"Page #{page}")
                         ntxt = chunk
                         page += 1
