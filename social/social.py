@@ -1,7 +1,7 @@
 import time
 from datetime import datetime, timedelta
-import discord
 
+import discord
 from redbot.core import Config, checks, commands
 
 __version__ = "1.2.0"
@@ -262,7 +262,7 @@ class Social(commands.Cog):
         <days> = Nombre de jours à regarder, par défaut tout ceux accessible (0)"""
         after = None
         members = {}
-        await ctx.send("📈 **Mise à jour des stats.** — Ce processus peut mettre plusieurs heures si le volume de messages est important (> 1 million)")
+        await ctx.send("📈 **Mise à jour des stats.** • Ce processus peut mettre plusieurs heures si le volume de messages est important (> 1 million)")
         if days > 0:
             after = datetime.today() - timedelta(days=days)
         n = 0
@@ -285,9 +285,9 @@ class Social(commands.Cog):
             for member in members:
                 records[member] = members[member]
             await self.config.guild(ctx.guild).records.set(records)
-            await ctx.send("📈 **Mise à jour des stats.** — Réussie")
+            await ctx.send("📈 **Mise à jour des stats.** • Réussie")
         else:
-            await ctx.send("📈 **Mise à jour des stats.** — Echec (aucune donnée n'a été traitée)")
+            await ctx.send("📈 **Mise à jour des stats.** • Echec (aucune donnée n'a été traitée)")
 
 
     @commands.group()
