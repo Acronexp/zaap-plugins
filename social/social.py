@@ -219,8 +219,8 @@ class Social(commands.Cog):
                 ntxt = ""
                 page = 1
                 for n in notes:
-                    chunk = "`{}` — {}: *{}*\n".format(
-                        datetime.fromtimestamp(notes[n]["timestamp"]).strftime("%d/%m/%Y %H:%M"),
+                    chunk = "• {1} `{0}` · *{2}*\n".format(
+                        datetime.fromtimestamp(notes[n]["timestamp"]).strftime("le %d/%m/%Y à %H:%M"),
                         guild.get_member(notes[n]["author"]).mention, notes[n]["content"])
                     if len(ntxt) + len(chunk) > 2000:
                         mod = discord.Embed(title="Notes de modération pour {}".format(user), description=ntxt, color=user.color)
@@ -234,7 +234,7 @@ class Social(commands.Cog):
                     else:
                         ntxt += chunk
                 if ntxt:
-                    mod = discord.Embed(title="Notes de modération", description=ntxt, color=user.color)
+                    mod = discord.Embed(title="Notes de modération pour {}".format(user), description=ntxt, color=user.color)
                     mod.set_footer(text=f"Page #{page}")
                     if await self.check_secure_channel(ctx.channel):
                         await ctx.send(embed=mod)
