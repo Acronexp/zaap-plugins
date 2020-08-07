@@ -1,3 +1,4 @@
+import logging
 import re
 from urllib.request import urlopen
 
@@ -8,6 +9,7 @@ import wikipediaapi
 from bs4 import BeautifulSoup
 from redbot.core import commands, Config, checks
 
+logger = logging.getLogger("red.zaap-plugins.useful")
 
 class Useful(commands.Cog):
     """Commandes qui peuvent être utiles"""
@@ -163,15 +165,15 @@ class Useful(commands.Cog):
         """Modifie le compte instagram utilisé pour donner les previews"""
         tb = ""
         if username:
-            await self.config.INSTALOADER_LOGIN.set(username)
             tb += "Login ajouté\n"
         else:
             tb += "Login réinitialisé\n"
         if password:
-            await self.config.INSTALOADER_PASSWORD.set(password)
             tb += "Mot de passe ajouté\n"
         else:
             tb += "Mot de passe retiré\n"
+        await self.config.INSTALOADER_LOGIN.set(username)
+        await self.config.INSTALOADER_PASSWORD.set(password)
         await ctx.send(tb)
 
     @commands.Cog.listener()
@@ -189,6 +191,7 @@ class Useful(commands.Cog):
                         post, images, videos = self.load_instagram_post(code)
                         medias = images[1:] + videos
                         if medias:
+                            logger.info("Post instagram détecté avec médias à afficher")
                             if len(medias) > 1 or videos:
                                 profile = post.owner_profile
                                 previews = medias
