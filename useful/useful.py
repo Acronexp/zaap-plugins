@@ -130,7 +130,7 @@ class Useful(commands.Cog):
     async def on_reaction_add(self, reaction, user):
         message = reaction.message
         channel = message.channel
-        if message.server:
+        if message.guild:
             if reaction.emoji == "👁":
                 if not user.bot:
                     if message.guild.permissions_for(user).manage_messages or user == message.author:
@@ -142,23 +142,24 @@ class Useful(commands.Cog):
                                 n = cache["nb"]
                                 total = cache["total"]
                                 medias = cache["previews"]
-                                for media in medias:
-                                    em = discord.Embed(color=message.author.color, timestamp=post.date_utc)
-                                    if n == 1:
-                                        short_url = "https://www.instagram.com/p/" + post.shortcode
-                                        em.set_author(name="{} (@{})".format(profile.full_name, profile.username),
-                                                      url=short_url)
-                                    if media in images:
-                                        em.set_image(url=media)
-                                        em.set_footer(text="Preview +{}/{}".format(n, total))
-                                        await channel.send(embed=em)
-                                    else:
-                                        txt = "Preview +{}/{} · {}\n".format(
-                                            n, total, post.date_utc.strftime("Publié le %d/%m/%Y à %H:%M")) + media
-                                        await channel.send(txt)
-                                    n += 1
-                                self.cache["_instagram"][message.id]["posted"] = True
-                                try:
-                                    await message.remove_reaction("👁", user)
-                                except:
-                                    pass
+                                async with channel.typing():
+                                    for media in medias:
+                                        em = discord.Embed(color=message.author.color, timestamp=post.date_utc)
+                                        if n == 1:
+                                            short_url = "https://www.instagram.com/p/" + post.shortcode
+                                            em.set_author(name="{} (@{})".format(profile.full_name, profile.username),
+                                                          url=short_url)
+                                        if media in images:
+                                            em.set_image(url=media)
+                                            em.set_footer(text="Preview +{}/{}".format(n, total))
+                                            await channel.send(embed=em)
+                                        else:
+                                            txt = "Preview +{}/{} · {}\n".format(
+                                                n, total, post.date_utc.strftime("Publié le %d/%m/%Y à %H:%M")) + media
+                                            await channel.send(txt)
+                                        n += 1
+                                    self.cache["_instagram"][message.id]["posted"] = True
+                                    try:
+                                        await message.remove_reaction("👁", user)
+                                    except:
+                                        pass
