@@ -223,7 +223,7 @@ class Useful(commands.Cog):
         if message.guild:
             if reaction.emoji == "👁":
                 if not user.bot:
-                    if message.guild.permissions_for(user).manage_messages or user == message.author:
+                    if user.permissions_in(channel).manage_messages or user == message.author:
                         if message.id in self.cache["_instagram"]:
                             if not self.cache["_instagram"][message.id]["posted"]:
                                 cache = self.cache["_instagram"][message.id]
