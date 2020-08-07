@@ -191,7 +191,7 @@ class Useful(commands.Cog):
                     medias = images[1:] + videos
                     if medias:
                         logger.info("Post instagram détecté avec médias à afficher")
-                        if len(medias) > 1 or videos:
+                        if len(medias) > 0 or videos:
                             profile = post.owner_profile
                             previews = medias
                             n = 1
