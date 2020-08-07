@@ -1,8 +1,10 @@
 import asyncio
 import logging
 import os
+import random
 import re
 import time
+from datetime import datetime
 from urllib.parse import urlsplit
 
 import aiofiles
@@ -45,11 +47,12 @@ class Pixel(commands.Cog):
         default_guild = {"SETTINGS": {"need_approb": True,
                                       "channels_blacklist": [],
                                       "users_blacklist": [],
-                                      "antispam": True},
+                                      "antiflood": True},
                          "WAITING": {},
                          "FILES": {}}
         self.config.register_global(**default_global)
         self.config.register_guild(**default_guild)
+        self.cooldown = {}
 
 
     def _get_folder_size(self, path):
@@ -59,6 +62,11 @@ class Pixel(commands.Cog):
                 fp = os.path.join(dirpath, f)
                 total_size += os.path.getsize(fp)
         return int(total_size)
+
+    def _get_local_file_size(self, path):
+        if os.path.exists(path):
+            return int(os.path.getsize(path))
+        return 0
 
     def _get_file_length(self, url):
         h = requests.head(url, allow_redirects=True)
@@ -74,6 +82,15 @@ class Pixel(commands.Cog):
         header = h.headers
         content_type = header.get('content-type')
         return content_type.split("/")[0]
+
+    def humanize_size(self, b: int):
+        if b > 1000:
+            kb = round(b / 1e3, 2)
+            if kb > 1000:
+                mb = round(b / 1e6, 2)
+                return f"{mb} MB"
+            return f"{kb} KB"
+        return f"{b} B"
 
 
     async def get_file(self, guild: discord.Guild, name: str) -> dict:
@@ -207,7 +224,7 @@ class Pixel(commands.Cog):
         if ":" in name:
             await ctx.send("**Nom invalide** • Ne mettez pas `:` autour du nom lorsque vous proposez un fichier.")
             return
-        if name not in ["list", "liste"]:
+        if name.lower() not in ["list", "liste"]:
             await ctx.send("**Nom réservé** • Ce nom est déjà utilisé par le bot pour des fonctionnalités spécifiques.")
             return
         if name in await self.files_list(guild):
@@ -262,7 +279,7 @@ class Pixel(commands.Cog):
                                    "qui sont enregistrés en local avant d'en ajouter d'autres.")
                     return
                 except MaxFileSize:
-                    await ctx.send("**Taille maximale du fichier atteinte** • Ce fichier dépasse la limite imposée de {}B.".format(await self.config.MAX_FILE_SIZE()))
+                    await ctx.send("**Taille maximale du fichier atteinte** • Ce fichier dépasse la limite imposée de {}.".format(self.humanize_size(await self.config.MAX_FILE_SIZE())))
                     return
                 except ExtensionNotSupported:
                     await ctx.send("**Extension non supportée** • Consultez la liste dans l'aide de la commande "
@@ -323,6 +340,11 @@ class Pixel(commands.Cog):
                 try:
                     os.remove(file["path"])
                     tb += "- Fichier local supprimé\n"
+                    data = await self.config.guild(guild).FILES()
+                    index = data.index(file)
+                    file["path"] = None
+                    data[index] = file
+                    await self.config.guild(guild).FILES.set(data)
                 except Exception:
                     logger.error(f"Impossible de supprimer {name}", exc_info=True)
                     tb += "- Fichier local non supprimé\n"
@@ -358,12 +380,21 @@ class Pixel(commands.Cog):
                 file = await self.get_file(guild, file if file else name)
                 name = file["name"]
                 local_txt = "Supprimer/Retélécharger" if file["path"] else "Télécharger depuis URL"
+                size = self.humanize_size(self._get_local_file_size(file["path"])) if file["path"] else "Non téléchargé"
+                crea = datetime.fromtimestamp(file["creation"]).strftime("%d/%m/%Y")
+                author = guild.get_member(file["author"]).mention
+                count = file["count"]
+                infos = f"**Taille** » {size}\n" \
+                        f"**Date de création** » {crea}\n" \
+                        f"**Auteur** » {author}\n" \
+                        f"**Utilisations** » {count}"
                 options_txt = "🏷️ · Modifier le nom\n" \
                               "🔗 · Modifier l'[URL]({})\n" \
                               "💾 · Gestion du fichier local ({})\n" \
                               "❌ · Quitter".format(file["url"], local_txt)
                 emojis = ["🏷", "🔗", "💾", "❌"]
-                em = discord.Embed(title=f"Édition de fichier » {name}", description=options_txt)
+                em = discord.Embed(title=f"Édition de fichier » {name}", description=infos)
+                em.add_field(name="Navigation", value=options_txt, inline=False)
                 em.set_footer(text="Cliquez sur la réaction correspondante à l'action voulue")
                 msg = await ctx.send(embed=em)
 
@@ -438,7 +469,7 @@ class Pixel(commands.Cog):
                         if file["path"]:
                             options_txt = "🔄 · Retélécharger depuis l'[URL]({})\n" \
                                           "🧹 · Supprimer le fichier local ({})\n" \
-                                          "❌ · Quitter".format(file["url"], file["path"].split("/")[-1])
+                                          "❌ · Retour au menu".format(file["url"], file["path"].split("/")[-1])
                             em = discord.Embed(title=f"Édition de fichier » {name}",
                                                description=options_txt)
                             em.set_footer(text="Cliquez sur l'emoji correspondant à l'action que vous voulez réaliser")
@@ -451,10 +482,17 @@ class Pixel(commands.Cog):
                             except asyncio.TimeoutError:
                                 await msg.delete()
                                 return
+
                             if pred.result == 0:
+                                await msg.delete()
                                 try:
+                                    try:
+                                        os.remove(file["path"])
+                                        await ctx.send("Ancien fichier local supprimé avec succès", delete_after=10)
+                                    except Exception:
+                                        logger.error(f"Impossible de supprimer {name}", exc_info=True)
                                     await self.replace_download(guild, file["name"], file["url"])
-                                    await ctx.send("Retéléchargement réalisé avec succès.", delete_after=10)
+                                    await ctx.send("Retéléchargement depuis URL réalisé avec succès.", delete_after=10)
                                 except MaxFolderSize:
                                     await ctx.send(
                                         "**Taille maximale du dossier atteinte** • Supprimez quelques "
@@ -462,8 +500,8 @@ class Pixel(commands.Cog):
                                     continue
                                 except MaxFileSize:
                                     await ctx.send(
-                                        "**Taille maximale du fichier atteinte** • Le fichier pointé par l'URL est trop lourd, réessayez avec un fichier plus petit que {}B.".format(
-                                            self.config.MAX_FILE_SIZE()), delete_after=20)
+                                        "**Taille maximale du fichier atteinte** • Le fichier pointé par l'URL est trop lourd, réessayez avec un fichier plus petit que {}.".format(
+                                            self.humanize_size(await self.config.MAX_FILE_SIZE())), delete_after=20)
                                     continue
                                 except ExtensionNotSupported:
                                     await ctx.send(
@@ -480,4 +518,220 @@ class Pixel(commands.Cog):
                                         "**Erreur de téléchargement** • Changez l'URL et réessayez", delete_after=20)
                                     logger.error("Impossible de télécharger depuis {}".format(file["url"]), exc_info=True)
                                     continue
+
+                            elif pred.result == 1:
+                                await msg.delete()
+                                file = await self.get_file(guild, file["name"])
+                                if file["path"]:
+                                    try:
+                                        os.remove(file["path"])
+                                        await ctx.send("Fichier local supprimé avec succès", delete_after=10)
+                                    except Exception:
+                                        logger.error(f"Impossible de supprimer {name}", exc_info=True)
+                                        await ctx.send("Impossible de supprimer le fichier local.\n"
+                                                       "Le chemin sera tout de même effacé pour éviter les conflits.", delete_after=15)
+                                    data = await self.config.guild(guild).FILES()
+                                    index = data.index(file)
+                                    file["path"] = None
+                                    data[index] = file
+                                    await self.config.guild(guild).FILES.set(data)
+                                else:
+                                    await ctx.send("Il n'y a aucun fichier local à supprimer", delete_after=10)
+
+                            else:
+                                await msg.delete()
+                                break
+                        else:
+                            options_txt = "📥 · Télécharger depuis l'[URL]({})\n" \
+                                          "❌ · Retour au menu".format(file["url"], file["path"].split("/")[-1])
+                            em = discord.Embed(title=f"Édition de fichier » {name}",
+                                               description=options_txt)
+                            em.set_footer(text="Cliquez sur l'emoji correspondant à l'action que vous voulez réaliser")
+                            msg = await ctx.send(embed=em)
+                            emojis = ["📥", "❌"]
+                            pred = ReactionPredicate.with_emojis(emojis, msg, author)
+                            start_adding_reactions(msg, emojis)
+                            try:
+                                await self.bot.wait_for("reaction_add", check=pred, timeout=45)
+                            except asyncio.TimeoutError:
+                                await msg.delete()
+                                return
+
+                            if pred.result == 0:
+                                await msg.delete()
+                                try:
+                                    await self.replace_download(guild, file["name"], file["url"])
+                                    await ctx.send("Téléchargement réalisé avec succès.", delete_after=10)
+                                except MaxFolderSize:
+                                    await ctx.send(
+                                        "**Taille maximale du dossier atteinte** • Supprimez quelques "
+                                        "fichiers stockés localement d'abord.", delete_after=20)
+                                    continue
+                                except MaxFileSize:
+                                    await ctx.send(
+                                        "**Taille maximale du fichier atteinte** • Le fichier pointé par l'URL est trop lourd, réessayez avec un fichier plus petit que {}.".format(
+                                            self.humanize_size(await self.config.MAX_FILE_SIZE())), delete_after=20)
+                                    continue
+                                except ExtensionNotSupported:
+                                    await ctx.send(
+                                        "**Extension non supportée** • Consultez la liste dans l'aide de la commande d'ajout"
+                                        "(`;help pix add`)", delete_after=20)
+                                    continue
+                                except NameError:
+                                    await ctx.send(
+                                        "**Erreur** • Le nom fourni est le mauvais, "
+                                        "cette erreur ne devrait pas arriver à moins que le stockage soit corrompu",
+                                        delete_after=20)
+                                    continue
+                                except DownloadError:
+                                    await ctx.send(
+                                        "**Erreur de téléchargement** • Changez l'URL et réessayez", delete_after=20)
+                                    logger.error("Impossible de télécharger depuis {}".format(file["url"]),
+                                                 exc_info=True)
+                                    continue
+                            else:
+                                await msg.delete()
+                                break
+                else:
+                    await msg.delete()
+                    return
+        else:
+            await ctx.send("**Fichier inconnu** • Vérifiez le nom que vous avez fourni.\n"
+                           "Sachez que cette commande ne fonctionne pas pour les fichiers en attente d'approbation.")
+
+
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        if message.guild:
+            content = message.content
+            guild = message.guild
+            files = await self.config.guild(guild).FILES()
+            if files:
+                if ":" in content:
+                    channel, author = message.channel, message.author
+                    if author.id not in await self.config.guild(guild).SETTINGS.get_raw("users_blacklist"):
+                        if channel.id not in await self.config.guild(guild).SETTINGS.get_raw("channels_blacklist"):
+                            regex = re.compile(r'([\w?]+)?:(.*?):', re.DOTALL | re.IGNORECASE).findall(content)
+                            if regex:
+                                for param, name in regex:
+                                    if name in await self.files_list(guild):
+                                        if name in [e.name for e in guild.emojis]:
+                                            continue
+
+                                        file = await self.get_file(guild, name)
+                                        suppr = False
+                                        if param:
+                                            if "b" in param: # Donner le fichier lié à la "base" du nom
+                                                base = re.compile(r"([A-z]+)(\d*)?", re.DOTALL | re.IGNORECASE).findall(name)[0]
+                                                new_file = await self.get_file(guild, base)
+                                                if new_file:
+                                                    file = new_file
+                                            if "s" in param: # Affiche un menu avec tous les fichiers de noms similaires
+                                                base = \
+                                                re.compile(r"([A-z]+)(\d*)?", re.DOTALL | re.IGNORECASE).findall(name)[
+                                                    0]
+                                                similars = await self.get_similars(guild, base)
+                                                if len(similars) > 1:
+                                                    index = 0
+                                                    msg = None
+                                                    while True:
+                                                        if index < 0:
+                                                            index = len(similars) - 1
+                                                        elif index == len(similars):
+                                                            index = 0
+
+                                                        em = discord.Embed(title=f"Fichiers similaires » {base}",
+                                                                           description="`:{}:`".format(similars[index]["name"]))
+                                                        em.set_image(url=similars[index]["url"])
+                                                        em.set_footer(
+                                                            text=f"#{index} • Naviguez entre les pages avec les emojis ci-dessous")
+                                                        if not msg:
+                                                            msg = await channel.send(embed=em)
+                                                        else:
+                                                            await msg.edit(embed=em)
+                                                        emojis = ["⬅", "❌", "➡"]
+                                                        pred = ReactionPredicate.with_emojis(emojis, msg, author)
+                                                        start_adding_reactions(msg, emojis)
+                                                        try:
+                                                            await self.bot.wait_for("reaction_add", check=pred, timeout=30)
+                                                        except asyncio.TimeoutError:
+                                                            await msg.delete()
+                                                            break
+                                                        if pred.result == 0:
+                                                            index -= 1
+                                                        elif pred.result == 1:
+                                                            await msg.delete()
+                                                            break
+                                                        else:
+                                                            index += 1
+                                            if "?" in param:
+                                                base = \
+                                                    re.compile(r"([A-z]+)(\d*)?", re.DOTALL | re.IGNORECASE).findall(
+                                                        name)[
+                                                        0]
+                                                similars = await self.get_similars(guild, base)
+                                                file = random.choice(similars)
+                                            if "e" in param:
+                                                em = discord.Embed()
+                                                em.set_image(url=file["url"])
+                                                await channel.send(embed=em)
+                                                continue
+                                            if "u" in param:
+                                                if file["path"]:
+                                                    try:
+                                                        await channel.send(file=discord.File(file["path"]))
+                                                    except:
+                                                        logger.error(f"Impossible d'envoyer {name}", exc_info=True)
+                                            if "w" in param:
+                                                await channel.send(file["url"])
+                                            if "!" in param:
+                                                suppr = True
+
+                                        async with channel.typing():
+                                            if self.config.guild(guild).SETTINGS.get_raw("antiflood"):
+                                                ts = time.strftime("%H:%M", time.localtime())
+                                                if ts not in self.cooldown:
+                                                    self.cooldown = {ts: []}
+                                                self.cooldown[ts].append(author.id)
+                                                if self.cooldown[ts].count(author.id) > 3:
+                                                    await channel.send("{} **Cooldown** • Patientez quelques secondes "
+                                                                       "avant de poster d'autres fichiers...".format(author.mention))
+
+                                            if file["path"]:
+                                                try:
+                                                    await channel.send(file=discord.File(file["path"]))
+                                                    continue
+                                                except:
+                                                    logger.error(f"Impossible d'envoyer {name}", exc_info=True)
+                                            await channel.send(file["url"])
+
+                                    elif name.lower() in ["list", "liste"]:
+                                        async with channel.typing():
+                                            txt = ""
+                                            n = 1
+                                            liste = sorted(await self.files_list(guild))
+                                            for f in liste:
+                                                base = re.compile(r"([A-z]+)(\d*)?", re.DOTALL | re.IGNORECASE).findall(f)[0]
+                                                if f == base:
+                                                    chunk = f":***{f}***:\n"
+                                                else:
+                                                    chunk = f"| :*{f}*:\n"
+                                                if len(chunk) + len(txt) >= 1950:
+                                                    em = discord.Embed(title=f"Fichiers disponibles sur {guild.name}",
+                                                                       description=txt)
+                                                    em.set_footer(text=f"Page #{n}")
+                                                    try:
+                                                        await author.send(embed=em)
+                                                    except:
+                                                        pass
+                                                    txt = ""
+                                                    n += 1
+                                                txt += chunk
+                                            em = discord.Embed(title=f"Fichiers disponibles sur {guild.name}",
+                                                               description=txt)
+                                            em.set_footer(text=f"Page #{n}")
+                                            try:
+                                                await author.send(embed=em)
+                                            except:
+                                                pass
 
