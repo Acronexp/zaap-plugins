@@ -22,7 +22,7 @@ class Useful(commands.Cog):
                           "INSTALOADER_PASSWORD": ""}
         self.config.register_global(**default_global)
         self.instaload = instaloader.Instaloader()
-        self.cache = {"_instagram": {}}
+        self.cache = {"_instagram": {}, "instaload": False}
 
 
     def redux(self, string: str, separateur: str = ".", limite: int = 2000):
