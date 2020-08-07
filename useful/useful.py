@@ -129,10 +129,11 @@ class Useful(commands.Cog):
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction, user):
         message = reaction.message
+        channel = message.channel
         if message.server:
             if reaction.emoji == "👁":
                 if not user.bot:
-                    if user.server_permissions.manage_messages or user == message.author:
+                    if message.guild.permissions_for(user).manage_messages or user == message.author:
                         if message.id in self.cache["_instagram"]:
                             if not self.cache["_instagram"][message.id]["posted"]:
                                 cache = self.cache["_instagram"][message.id]
@@ -150,14 +151,14 @@ class Useful(commands.Cog):
                                     if media in images:
                                         em.set_image(url=media)
                                         em.set_footer(text="Preview +{}/{}".format(n, total))
-                                        await self.bot.send_message(message.channel, embed=em)
+                                        await channel.send(embed=em)
                                     else:
                                         txt = "Preview +{}/{} · {}\n".format(
                                             n, total, post.date_utc.strftime("Publié le %d/%m/%Y à %H:%M")) + media
-                                        await self.bot.send_message(message.channel, txt)
+                                        await channel.send(txt)
                                     n += 1
                                 self.cache["_instagram"][message.id]["posted"] = True
                                 try:
-                                    await self.bot.remove_reaction(message, "👁")
+                                    await message.remove_reaction("👁", user)
                                 except:
                                     pass
