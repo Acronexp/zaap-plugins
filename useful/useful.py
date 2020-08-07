@@ -135,7 +135,7 @@ class Useful(commands.Cog):
         else:
             await ctx.send("**Inaccessible** • Les SCP ne vont pour l'instant que de 1 à 5999.")
 
-    def load_instagram_post(self, code: str):
+    async def load_instagram_post(self, code: str):
         if not self.instaload.test_login():
             if not self.cache["instaload"]:
                 self.instaload.login(await self.config.INSTALOADER_LOGIN(), await self.config.INSTALOADER_PASSWORD())
@@ -188,7 +188,7 @@ class Useful(commands.Cog):
                 if r:
                     async with message.channel.typing():
                         code = r[0]
-                        post, images, videos = self.load_instagram_post(code)
+                        post, images, videos = await self.load_instagram_post(code)
                         medias = images[1:] + videos
                         if medias:
                             logger.info("Post instagram détecté avec médias à afficher")
