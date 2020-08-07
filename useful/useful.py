@@ -14,6 +14,7 @@ class Useful(commands.Cog):
     def __init__(self, bot):
         super().__init__()
         self.bot = bot
+        self.cache = {"_instagram": {}}
 
     def redux(self, string: str, separateur: str = ".", limite: int = 2000):
         n = -1
@@ -124,3 +125,39 @@ class Useful(commands.Cog):
                 await ctx.send("**Inaccessible** • Le nombre est incorrect ou la page est inaccessible")
         else:
             await ctx.send("**Inaccessible** • Les SCP ne vont pour l'instant que de 1 à 5999.")
+
+    @commands.Cog.listener()
+    async def on_reaction_add(self, reaction, user):
+        message = reaction.message
+        if message.server:
+            if reaction.emoji == "👁":
+                if not user.bot:
+                    if user.server_permissions.manage_messages or user == message.author:
+                        if message.id in self.cache["_instagram"]:
+                            if not self.cache["_instagram"][message.id]["posted"]:
+                                cache = self.cache["_instagram"][message.id]
+                                post, profile = cache["post"], cache["profile"]
+                                images, videos = cache["images"], cache["videos"]
+                                n = cache["nb"]
+                                total = cache["total"]
+                                medias = cache["previews"]
+                                for media in medias:
+                                    em = discord.Embed(color=message.author.color, timestamp=post.date_utc)
+                                    if n == 1:
+                                        short_url = "https://www.instagram.com/p/" + post.shortcode
+                                        em.set_author(name="{} (@{})".format(profile.full_name, profile.username),
+                                                      url=short_url)
+                                    if media in images:
+                                        em.set_image(url=media)
+                                        em.set_footer(text="Preview +{}/{}".format(n, total))
+                                        await self.bot.send_message(message.channel, embed=em)
+                                    else:
+                                        txt = "Preview +{}/{} · {}\n".format(
+                                            n, total, post.date_utc.strftime("Publié le %d/%m/%Y à %H:%M")) + media
+                                        await self.bot.send_message(message.channel, txt)
+                                    n += 1
+                                self.cache["_instagram"][message.id]["posted"] = True
+                                try:
+                                    await self.bot.remove_reaction(message, "👁")
+                                except:
+                                    pass
