@@ -136,11 +136,11 @@ class Useful(commands.Cog):
     def load_instagram_post(self, code: str):
         if not self.instaload.test_login():
             if not self.cache["instaload"]:
-                self.instaload.login("atombotapp", "Quelquechose")
+                self.instaload.login(self.config.INSTALOADER_LOGIN, self.config.INSTALOADER_PASSWORD)
                 self.instaload.save_session_to_file()
                 self.cache["instaload"] = True
             else:
-                self.instaload.load_session_from_file("atombotapp")
+                self.instaload.load_session_from_file(self.config.INSTALOADER_LOGIN)
 
         post = instaloader.Post.from_shortcode(self.instaload.context, code)
         images, videos = [], []
@@ -168,7 +168,7 @@ class Useful(commands.Cog):
         else:
             tb += "Login réinitialisé\n"
         if password:
-            await self.config.INSTALOADER_LOGIN.set(password)
+            await self.config.INSTALOADER_PASSWORD.set(password)
             tb += "Mot de passe ajouté\n"
         else:
             tb += "Mot de passe retiré\n"
@@ -177,7 +177,6 @@ class Useful(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message):
         if message.guild:
-            author = message.author
             if "<" or ">" in message.content:
                 message.content = message.content.replace("<", "")
                 message.content = message.content.replace(">", "")
