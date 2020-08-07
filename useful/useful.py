@@ -138,11 +138,11 @@ class Useful(commands.Cog):
     def load_instagram_post(self, code: str):
         if not self.instaload.test_login():
             if not self.cache["instaload"]:
-                self.instaload.login(self.config.INSTALOADER_LOGIN(), self.config.INSTALOADER_PASSWORD())
+                self.instaload.login(await self.config.INSTALOADER_LOGIN(), await self.config.INSTALOADER_PASSWORD())
                 self.instaload.save_session_to_file()
                 self.cache["instaload"] = True
             else:
-                self.instaload.load_session_from_file(self.config.INSTALOADER_LOGIN())
+                self.instaload.load_session_from_file(await self.config.INSTALOADER_LOGIN())
 
         post = instaloader.Post.from_shortcode(self.instaload.context, code)
         images, videos = [], []
