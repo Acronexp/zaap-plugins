@@ -186,35 +186,34 @@ class Useful(commands.Cog):
                 r = re.compile(r'(?<!!)https://www\.instagram\.com/p/([\w\-]+).*?', re.DOTALL | re.IGNORECASE).findall(
                     message.content)
                 if r:
-                    async with message.channel.typing():
-                        code = r[0]
-                        post, images, videos = await self.load_instagram_post(code)
-                        medias = images[1:] + videos
-                        if medias:
-                            logger.info("Post instagram détecté avec médias à afficher")
-                            if len(medias) > 1 or videos:
-                                profile = post.owner_profile
-                                previews = medias
-                                n = 1
-                                for media in medias:
-                                    if media in videos:
-                                        txt = "Preview +{}/{} · {}\n".format(
-                                            n, len(medias), post.date_utc.strftime("Publié le %d/%m/%Y à %H:%M")) + media
-                                        await message.channel.send(txt)
-                                        n += 1
-                                        previews.remove(media)
+                    code = r[0]
+                    post, images, videos = await self.load_instagram_post(code)
+                    medias = images[1:] + videos
+                    if medias:
+                        logger.info("Post instagram détecté avec médias à afficher")
+                        if len(medias) > 1 or videos:
+                            profile = post.owner_profile
+                            previews = medias
+                            n = 1
+                            for media in medias:
+                                if media in videos:
+                                    txt = "Preview +{}/{} · {}\n".format(
+                                        n, len(medias), post.date_utc.strftime("Publié le %d/%m/%Y à %H:%M")) + media
+                                    await message.channel.send(txt)
+                                    n += 1
+                                    previews.remove(media)
 
-                                if previews:
-                                    self.cache["_instagram"][message.id] = {"previews": previews,
-                                                                            "images": images,
-                                                                            "videos": videos,
-                                                                            "nb": n,
-                                                                            "total": len(medias),
-                                                                            "post": post,
-                                                                            "profile": profile,
-                                                                            "message": message,
-                                                                            "posted": False}
-                                    await message.add_reaction("👁")
+                            if previews:
+                                self.cache["_instagram"][message.id] = {"previews": previews,
+                                                                        "images": images,
+                                                                        "videos": videos,
+                                                                        "nb": n,
+                                                                        "total": len(medias),
+                                                                        "post": post,
+                                                                        "profile": profile,
+                                                                        "message": message,
+                                                                        "posted": False}
+                                await message.add_reaction("👁")
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction, user):
@@ -234,7 +233,7 @@ class Useful(commands.Cog):
                                 medias = cache["previews"]
                                 async with channel.typing():
                                     for media in medias:
-                                        em = discord.Embed(color=message.author.color, timestamp=post.date_utc)
+                                        em = discord.Embed(color=0xce0072, timestamp=post.date_utc)
                                         if n == 1:
                                             short_url = "https://www.instagram.com/p/" + post.shortcode
                                             em.set_author(name="{} (@{})".format(profile.full_name, profile.username),
