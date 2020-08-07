@@ -2,10 +2,11 @@ import re
 from urllib.request import urlopen
 
 import discord
+import instaloader
 import wikipedia
 import wikipediaapi
 from bs4 import BeautifulSoup
-from redbot.core import commands
+from redbot.core import commands, Config, checks
 
 
 class Useful(commands.Cog):
@@ -14,7 +15,13 @@ class Useful(commands.Cog):
     def __init__(self, bot):
         super().__init__()
         self.bot = bot
+        self.config = Config.get_conf(self, identifier=736144321857978388, force_registration=True)
+        default_global = {"INSTALOADER_LOGIN": "",
+                          "INSTALOADER_PASSWORD": ""}
+        self.config.register_global(**default_global)
+        self.instaload = instaloader.Instaloader()
         self.cache = {"_instagram": {}}
+
 
     def redux(self, string: str, separateur: str = ".", limite: int = 2000):
         n = -1
@@ -125,6 +132,87 @@ class Useful(commands.Cog):
                 await ctx.send("**Inaccessible** • Le nombre est incorrect ou la page est inaccessible")
         else:
             await ctx.send("**Inaccessible** • Les SCP ne vont pour l'instant que de 1 à 5999.")
+
+    def load_instagram_post(self, code: str):
+        if not self.instaload.test_login():
+            if not self.cache["instaload"]:
+                self.instaload.login("atombotapp", "Quelquechose")
+                self.instaload.save_session_to_file()
+                self.cache["instaload"] = True
+            else:
+                self.instaload.load_session_from_file("atombotapp")
+
+        post = instaloader.Post.from_shortcode(self.instaload.context, code)
+        images, videos = [], []
+        if post.typename == "GraphSidecar":
+            nodes = post.get_sidecar_nodes()
+            for node in nodes:
+                if node.is_video:
+                    videos.append(node.video_url)
+                else:
+                    images.append(node.display_url)
+        elif post.typename == "GraphVideo":
+            videos.append(post.video_url)
+        else:
+            images.append(post.url)
+        return post, images, videos
+
+    @commands.command()
+    @checks.is_owner()
+    async def instaloaderapi(self, ctx, username: str = "", password: str = ""):
+        """Modifie le compte instagram utilisé pour donner les previews"""
+        tb = ""
+        if username:
+            await self.config.INSTALOADER_LOGIN.set(username)
+            tb += "Login ajouté\n"
+        else:
+            tb += "Login réinitialisé\n"
+        if password:
+            await self.config.INSTALOADER_LOGIN.set(password)
+            tb += "Mot de passe ajouté\n"
+        else:
+            tb += "Mot de passe retiré\n"
+        await ctx.send(tb)
+
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        if message.guild:
+            author = message.author
+            if "<" or ">" in message.content:
+                message.content = message.content.replace("<", "")
+                message.content = message.content.replace(">", "")
+            if "https://www.instagram.com/p/" in message.content:
+                r = re.compile(r'(?<!!)https://www\.instagram\.com/p/([\w\-]+).*?', re.DOTALL | re.IGNORECASE).findall(
+                    message.content)
+                if r:
+                    async with message.channel.typing():
+                        code = r[0]
+                        post, images, videos = self.load_instagram_post(code)
+                        medias = images[1:] + videos
+                        if medias:
+                            if len(medias) > 1 or videos:
+                                profile = post.owner_profile
+                                previews = medias
+                                n = 1
+                                for media in medias:
+                                    if media in videos:
+                                        txt = "Preview +{}/{} · {}\n".format(
+                                            n, len(medias), post.date_utc.strftime("Publié le %d/%m/%Y à %H:%M")) + media
+                                        await message.channel.send(txt)
+                                        n += 1
+                                        previews.remove(media)
+
+                                if previews:
+                                    self.cache["_instagram"][message.id] = {"previews": previews,
+                                                                            "images": images,
+                                                                            "videos": videos,
+                                                                            "nb": n,
+                                                                            "total": len(medias),
+                                                                            "post": post,
+                                                                            "profile": profile,
+                                                                            "message": message,
+                                                                            "posted": False}
+                                    await message.add_reaction("👁")
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction, user):
