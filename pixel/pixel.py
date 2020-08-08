@@ -400,14 +400,16 @@ class Pixel(commands.Cog):
                 em.set_footer(text="Cliquez sur la réaction correspondante à l'action voulue")
                 msg = await ctx.send(embed=em)
 
-                pred = ReactionPredicate.with_emojis(emojis, msg, author)
+                pred = lambda r, u: u == author and r.message.id == msg.id
                 start_adding_reactions(msg, emojis)
                 try:
-                    await self.bot.wait_for("reaction_add", check=pred, timeout=30)
+                    react, user = await self.bot.wait_for("reaction_add", check=pred, timeout=30)
                 except asyncio.TimeoutError:
                     await msg.delete()
                     return
-                if pred.result == 0:
+                else:
+                    emoji = react.emoji
+                if emoji == "🏷":
                     await msg.delete()
                     em = discord.Embed(title=f"Édition de fichier » {name}",
                                        description="Quel nouveau nom voulez-vous attribuer à ce fichier ?")
@@ -436,7 +438,7 @@ class Pixel(commands.Cog):
                             await ctx.send("Nom déjà utilisé. Retour au menu...", delete_after=10)
                     else:
                         await ctx.send("Nom identique à l'actuel. Retour au menu...", delete_after=10)
-                elif pred.result == 1:
+                elif emoji == "🔗":
                     await msg.delete()
                     em = discord.Embed(title=f"Édition de fichier » {name}",
                                        description="Fournissez une nouvelle URL valide pour le fichier.")
@@ -464,7 +466,7 @@ class Pixel(commands.Cog):
                     else:
                         await ctx.send("Le fichier contenu dans l'URL donnée n'est pas supporté par le bot "
                                        "ou Discord.", delete_after=10)
-                elif pred.result == 2:
+                elif emoji == "💾":
                     await msg.delete()
                     while True:
                         file = await self.get_file(guild, file["name"])
@@ -477,15 +479,17 @@ class Pixel(commands.Cog):
                             em.set_footer(text="Cliquez sur l'emoji correspondant à l'action que vous voulez réaliser")
                             msg = await ctx.send(embed=em)
                             emojis = ["🔄", "🧹", "❌"]
-                            pred = ReactionPredicate.with_emojis(emojis, msg, author)
+                            pred = lambda r, u: u == author and r.message.id == msg.id
                             start_adding_reactions(msg, emojis)
                             try:
-                                await self.bot.wait_for("reaction_add", check=pred, timeout=45)
+                                react, user = await self.bot.wait_for("reaction_add", check=pred, timeout=30)
                             except asyncio.TimeoutError:
                                 await msg.delete()
                                 return
+                            else:
+                                emoji = react.emoji
 
-                            if pred.result == 0:
+                            if emoji == "🔄":
                                 await msg.delete()
                                 try:
                                     async with ctx.channel.typing():
@@ -522,7 +526,7 @@ class Pixel(commands.Cog):
                                     logger.error("Impossible de télécharger depuis {}".format(file["url"]), exc_info=True)
                                     continue
 
-                            elif pred.result == 1:
+                            elif emoji == "🧹":
                                 await msg.delete()
                                 file = await self.get_file(guild, file["name"])
                                 if file["path"]:
@@ -552,15 +556,17 @@ class Pixel(commands.Cog):
                             em.set_footer(text="Cliquez sur l'emoji correspondant à l'action que vous voulez réaliser")
                             msg = await ctx.send(embed=em)
                             emojis = ["📥", "❌"]
-                            pred = ReactionPredicate.with_emojis(emojis, msg, author)
+                            pred = lambda r, u: u == author and r.message.id == msg.id
                             start_adding_reactions(msg, emojis)
                             try:
-                                await self.bot.wait_for("reaction_add", check=pred, timeout=45)
+                                react, user = await self.bot.wait_for("reaction_add", check=pred, timeout=30)
                             except asyncio.TimeoutError:
                                 await msg.delete()
                                 return
+                            else:
+                                emoji = react.emoji
 
-                            if pred.result == 0:
+                            if emoji == "📥":
                                 await msg.delete()
                                 try:
                                     await self.replace_download(guild, file["name"], file["url"])
@@ -809,7 +815,7 @@ class Pixel(commands.Cog):
                 txt += f"**{name}** » {t}\n"
             em = discord.Embed(title="10 fichiers les plus lourds stockés localement", description=txt)
             em.set_footer(text="Total occupé par ce serveur = {} / {}".format(
-                self.humanize_size(self._get_folder_size(self.guild_path(guild))),
+                self.humanize_size(self._get_folder_size(await self.guild_path(guild))),
                 self.humanize_size(await self.config.FOLDER_MAX_SIZE())))
             await ctx.send(embed=em)
         else:
