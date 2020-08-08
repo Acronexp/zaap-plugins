@@ -399,11 +399,11 @@ class Pixel(commands.Cog):
                 em.set_footer(text="Cliquez sur la réaction correspondante à l'action voulue")
                 msg = await ctx.send(embed=em)
 
-
+                start_adding_reactions(msg, emojis)
                 try:
                     logger.info("En attente de réaction...")
                     react, user = await self.bot.wait_for("reaction_add",
-                                                          check=lambda r, u: u == author and r.message.id == msg.id,
+                                                          check=lambda r, u: r.message.id == msg.id,
                                                           timeout=30)
                 except asyncio.TimeoutError:
                     await msg.delete()
