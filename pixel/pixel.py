@@ -699,6 +699,7 @@ class Pixel(commands.Cog):
                                                 if file["path"]:
                                                     try:
                                                         await channel.send(files=[discord.File(file["path"])])
+                                                        continue
                                                     except:
                                                         logger.error(f"Impossible d'envoyer {name}", exc_info=True)
                                             if "w" in param:
@@ -722,7 +723,10 @@ class Pixel(commands.Cog):
                                                     continue
                                                 except:
                                                     logger.error(f"Impossible d'envoyer {name}", exc_info=True)
+                                        if not suppr:
                                             await channel.send(file["url"])
+                                        else:
+                                            await channel.send(file["url"], delete_after=10)
 
                                     elif name.lower() in ["list", "liste"]:
                                         async with channel.typing():
