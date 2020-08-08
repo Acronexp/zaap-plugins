@@ -376,7 +376,7 @@ class Pixel(commands.Cog):
             wait = await self.get_waiting(guild, name)
             data = await self.config.guild(guild).WAITING()
             data.remove(wait)
-            await self.config.guild(guild).FILES.set(data)
+            await self.config.guild(guild).WAITING.set(data)
             await ctx.send("**Proposition refusée** • Proposition de {} pour `{}` supprimée.".format(guild.get_member(
                 wait["author"]).mention, name))
         else:
