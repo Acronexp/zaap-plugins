@@ -649,6 +649,10 @@ class Pixel(commands.Cog):
                                     if name not in all_files:
                                         if name + "1" in all_files:
                                             name = f"{name}1"
+                                        else:
+                                            base, num = re.compile(r"([A-z]+)(\d*)?", re.DOTALL | re.IGNORECASE).findall(f)[0]
+                                            if num == "1" and base in all_files:
+                                                name = base
                                     if name in all_files:
                                         if name in [e.name for e in guild.emojis]:
                                             continue
