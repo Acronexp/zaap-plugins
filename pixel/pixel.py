@@ -136,8 +136,9 @@ class Pixel(commands.Cog):
         return base_name
 
     async def guild_path(self, guild: discord.Guild):
-        path = cog_data_path(self) / f"local/{guild.id}"
-        if not path.exists:
+        gid = str(guild.id)
+        path = cog_data_path(self) / f"local/{gid}"
+        if not path.is_dir():
             path.mkdir(exist_ok=True, parents=True)
         return path
 
