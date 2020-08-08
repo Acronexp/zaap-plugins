@@ -208,12 +208,12 @@ class Pixel(commands.Cog):
     def any_num(self, s):
         return any(i.isdigit() for i in s)
 
-    @commands.group(aliases=["pix"])
+    @commands.group(name="pix")
     @commands.guild_only()
-    async def pixel(self, ctx):
+    async def _pixel(self, ctx):
         """Gestion des fichiers personnalisés du serveur"""
 
-    @pixel.command(name="add")
+    @_pixel.command(name="add")
     @commands.cooldown(1, 10, commands.BucketType.member)
     async def pixel_add(self, ctx, name: str, url = None):
         """Ajouter ou proposer un fichier personnalisé (image, texte, audio ou vidéo)
@@ -323,7 +323,7 @@ class Pixel(commands.Cog):
                 "**Aucun fichier proposé** • Fournissez un fichier pour le proposer "
                 "(URL ou directement téléchargé sur Discord)")
 
-    @pixel.command(name="remove")
+    @_pixel.command(name="remove")
     @checks.admin_or_permissions(manage_messages=True)
     @commands.cooldown(1, 10, commands.BucketType.member)
     async def pixel_remove(self, ctx, name: str):
@@ -365,7 +365,7 @@ class Pixel(commands.Cog):
         else:
             await ctx.send("**Nom introuvable** • Vérifiez l'orthographe et la casse.")
 
-    @pixel.command(name="edit")
+    @_pixel.command(name="edit")
     @checks.admin_or_permissions(manage_messages=True)
     @commands.cooldown(1, 10, commands.BucketType.member)
     async def pixel_edit(self, ctx, name: str):
