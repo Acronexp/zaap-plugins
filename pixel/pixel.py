@@ -376,8 +376,6 @@ class Pixel(commands.Cog):
             await ctx.send("**Nom invalide** • Ne mettez pas `:` autour du nom.")
             return
         if name in await self.files_list(guild):
-            def emojipred(r, u):
-                return u == author and r.message.id == msg.id
             file = {}
             while True:
                 file = await self.get_file(guild, file if file else name)
@@ -401,6 +399,8 @@ class Pixel(commands.Cog):
                 em.set_footer(text="Cliquez sur la réaction correspondante à l'action voulue")
                 msg = await ctx.send(embed=em)
 
+                def emojipred(r, u):
+                    return u == author and r.message.id == msg.id
                 start_adding_reactions(msg, emojis)
                 try:
                     react, user = await self.bot.wait_for("reaction_add", check=emojipred, timeout=30)
@@ -454,10 +454,10 @@ class Pixel(commands.Cog):
                         await msg.delete()
                         continue
 
-                    if self._get_file_type(msg.content) in ["image", "audio", "video"]:
+                    if self._get_file_type(resp.content) in ["image", "audio", "video"]:
                         data = await self.config.guild(guild).FILES()
                         index = data.index(file)
-                        file["url"] = msg.content
+                        file["url"] = resp.content
                         data[index] = file
                         await self.config.guild(guild).FILES.set(data)
                         await ctx.send("Modification réalisée avec succès.\n"
@@ -479,6 +479,9 @@ class Pixel(commands.Cog):
                             em.set_footer(text="Cliquez sur l'emoji correspondant à l'action que vous voulez réaliser")
                             msg = await ctx.send(embed=em)
                             emojis = ["🔄", "🧹", "❌"]
+
+                            def emojipred(r, u):
+                                return u == author and r.message.id == msg.id
                             start_adding_reactions(msg, emojis)
                             try:
                                 react, user = await self.bot.wait_for("reaction_add", check=emojipred, timeout=30)
@@ -555,6 +558,9 @@ class Pixel(commands.Cog):
                             em.set_footer(text="Cliquez sur l'emoji correspondant à l'action que vous voulez réaliser")
                             msg = await ctx.send(embed=em)
                             emojis = ["📥", "❌"]
+
+                            def emojipred(r, u):
+                                return u == author and r.message.id == msg.id
                             start_adding_reactions(msg, emojis)
                             try:
                                 react, user = await self.bot.wait_for("reaction_add", check=emojipred, timeout=30)
