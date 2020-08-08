@@ -271,7 +271,8 @@ class Pixel(commands.Cog):
                                    "ce qui est supporté par le bot ou Discord.")
             elif ctx.message.attachments:
                 try:
-                    await self.download_attachment(ctx.message, name)
+                    async with ctx.channel.typing():
+                        await self.download_attachment(ctx.message, name)
                     await ctx.send(f"Fichier `{name}` ajouté avec succès\nUtilisez-le avec :{name}:.")
                     file = await self.get_file(guild, name)
                     await ctx.send(files=discord.File(file["path"]))
@@ -487,12 +488,13 @@ class Pixel(commands.Cog):
                             if pred.result == 0:
                                 await msg.delete()
                                 try:
-                                    try:
-                                        os.remove(file["path"])
-                                        await ctx.send("Ancien fichier local supprimé avec succès", delete_after=10)
-                                    except Exception:
-                                        logger.error(f"Impossible de supprimer {name}", exc_info=True)
-                                    await self.replace_download(guild, file["name"], file["url"])
+                                    async with ctx.channel.typing():
+                                        try:
+                                            os.remove(file["path"])
+                                            await ctx.send("Ancien fichier local supprimé avec succès", delete_after=10)
+                                        except Exception:
+                                            logger.error(f"Impossible de supprimer {name}", exc_info=True)
+                                        await self.replace_download(guild, file["name"], file["url"])
                                     await ctx.send("Retéléchargement depuis URL réalisé avec succès.", delete_after=10)
                                 except MaxFolderSize:
                                     await ctx.send(
