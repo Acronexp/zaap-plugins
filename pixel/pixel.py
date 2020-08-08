@@ -173,7 +173,7 @@ class Pixel(commands.Cog):
         seed = str(int(time.time()))
         file_name, ext = os.path.splitext(os.path.basename(urlsplit(url).path))
         file_size = self._get_file_length(url)
-        if name not in await self.files_list(guild) + await self.waiting_list(guild):
+        if name in await self.files_list(guild) + await self.waiting_list(guild):
             if ext.lower() in [".jpeg", ".jpg", ".png", ".gif", ".gifv", ".mp3", ".wav", ".mp4", ".webm", ".txt"]:
                 if file_size <= await self.config.FILE_MAX_SIZE():
                     if file_size +  self._get_folder_size(str(path)) <= await self.config.FOLDER_MAX_SIZE():
@@ -220,6 +220,7 @@ class Pixel(commands.Cog):
         __Types supportés :__ jpeg, jpg, png, gif(v), mp3, wav, mp4, webm et txt
         Si aucune URL n'est donnée, prendra le fichier importé sur Discord avec la commande"""
         author, guild = ctx.author, ctx.guild
+        em_color = await ctx.embed_color()
         if ":" in name:
             await ctx.send("**Nom invalide** • Ne mettez pas `:` autour du nom lorsque vous proposez un fichier.")
             return
@@ -247,7 +248,7 @@ class Pixel(commands.Cog):
                 await self.config.guild(guild).WAITING.set(waiting)
                 await self.config.guild(guild).FILES.set(files)
                 em = discord.Embed(description="Fichier `{}` proposé par {} approuvé par {}".format(
-                    file["name"], guild.get_member(file["author"]).mention, author.mention))
+                    file["name"], guild.get_member(file["author"]).mention, author.mention), color=em_color)
                 em.set_image(url=file["url"])
                 await ctx.send(embed=em)
             elif url:
@@ -261,7 +262,7 @@ class Pixel(commands.Cog):
                            "count": 0}
                     data.append(new)
                     await self.config.guild(guild).FILES.set(data)
-                    em = discord.Embed(description=f"Fichier `{name}` ajouté avec succès")
+                    em = discord.Embed(description=f"Fichier `{name}` ajouté avec succès", color=em_color)
                     em.set_image(url=url)
                     em.set_footer(text=f"Utilisez-le avec :{name}: sur les salons autorisés")
                     await ctx.send(embed=em)
@@ -299,7 +300,7 @@ class Pixel(commands.Cog):
             data.append(new)
             await self.config.guild(guild).WAITING.set(data)
             em = discord.Embed(description=f"Fichier `{name}` proposé. Un administrateur ou un membre avec la "
-                                           f"permission `manage_message` doit l'approuver avec `;pix add {name}`.")
+                                           f"permission `manage_message` doit l'approuver avec `;pix add {name}`.", color=em_color)
             em.set_image(url=url)
             await ctx.send(embed=em)
         elif ctx.message.attachments:
@@ -372,6 +373,7 @@ class Pixel(commands.Cog):
     async def pixel_edit(self, ctx, name: str):
         """Retirer un fichier personnalisé"""
         author, guild = ctx.author, ctx.guild
+        em_color = await ctx.embed_color()
         if ":" in name:
             await ctx.send("**Nom invalide** • Ne mettez pas `:` autour du nom.")
             return
@@ -394,7 +396,7 @@ class Pixel(commands.Cog):
                               "💾 · Gestion du fichier local ({})\n" \
                               "❌ · Quitter".format(file["url"], local_txt)
                 emojis = ["🏷", "🔗", "💾", "❌"]
-                em = discord.Embed(title=f"Édition de fichier » :{name}:", description=infos)
+                em = discord.Embed(title=f"Édition de fichier » :{name}:", description=infos, color=em_color)
                 em.add_field(name="Navigation", value=options_txt, inline=False)
                 em.set_footer(text="Cliquez sur la réaction correspondante à l'action voulue")
                 msg = await ctx.send(embed=em)
@@ -413,7 +415,7 @@ class Pixel(commands.Cog):
                 if emoji == "🏷":
                     await msg.delete()
                     em = discord.Embed(title=f"Édition de fichier » :{name}:",
-                                       description="Quel nouveau nom voulez-vous attribuer à ce fichier ?")
+                                       description="Quel nouveau nom voulez-vous attribuer à ce fichier ?", color=em_color)
                     em.set_footer(text="Le nom ne doit pas contenir de caractères spéciaux (dont ':') ou d'espaces")
                     msg = await ctx.send(embed=em)
 
@@ -442,7 +444,7 @@ class Pixel(commands.Cog):
                 elif emoji == "🔗":
                     await msg.delete()
                     em = discord.Embed(title=f"Édition de fichier » :{name}:",
-                                       description="Fournissez une nouvelle URL valide pour le fichier.")
+                                       description="Fournissez une nouvelle URL valide pour le fichier.", color=em_color)
                     em.set_footer(text="Utilisez de préférence Imgur et ayez un lien contenant l'extension du fichier")
                     msg = await ctx.send(embed=em)
 
@@ -476,7 +478,7 @@ class Pixel(commands.Cog):
                                           "🧹 · Supprimer le fichier local ({})\n" \
                                           "❌ · Retour au menu".format(file["url"], file["path"].split("/")[-1])
                             em = discord.Embed(title=f"Édition de fichier » :{name}:",
-                                               description=options_txt)
+                                               description=options_txt, color=em_color)
                             em.set_footer(text="Cliquez sur l'emoji correspondant à l'action que vous voulez réaliser")
                             msg = await ctx.send(embed=em)
                             emojis = ["🔄", "🧹", "❌"]
@@ -553,7 +555,7 @@ class Pixel(commands.Cog):
                             options_txt = "📥 · Télécharger depuis l'[URL]({})\n" \
                                           "❌ · Retour au menu".format(file["url"])
                             em = discord.Embed(title=f"Édition de fichier » :{name}:",
-                                               description=options_txt)
+                                               description=options_txt, color=em_color)
                             em.set_footer(text="Cliquez sur l'emoji correspondant à l'action que vous voulez réaliser")
                             msg = await ctx.send(embed=em)
                             emojis = ["📥", "❌"]
@@ -619,10 +621,13 @@ class Pixel(commands.Cog):
             if files:
                 if ":" in content:
                     channel, author = message.channel, message.author
+                    if author.bot:
+                        return
                     if author.id not in await self.config.guild(guild).SETTINGS.get_raw("users_blacklist"):
                         if channel.id not in await self.config.guild(guild).SETTINGS.get_raw("channels_blacklist"):
                             regex = re.compile(r'([\w?]+)?:(.*?):', re.DOTALL | re.IGNORECASE).findall(content)
                             if regex:
+                                em_color = await self.bot.get_embed_color(channel)
                                 for param, name in regex:
                                     if name in await self.files_list(guild):
                                         if name in [e.name for e in guild.emojis]:
@@ -651,7 +656,7 @@ class Pixel(commands.Cog):
                                                             index = 0
 
                                                         em = discord.Embed(title=f"Fichiers similaires » {base}",
-                                                                           description="`:{}:`".format(similars[index]["name"]))
+                                                                           description="`:{}:`".format(similars[index]["name"]), color=em_color)
                                                         em.set_image(url=similars[index]["url"])
                                                         em.set_footer(
                                                             text=f"#{index} • Naviguez entre les pages avec les emojis ci-dessous")
@@ -686,7 +691,7 @@ class Pixel(commands.Cog):
                                                 similars = await self.get_similars(guild, base)
                                                 file = random.choice(similars)
                                             if "e" in param:
-                                                em = discord.Embed()
+                                                em = discord.Embed(color=em_color)
                                                 em.set_image(url=file["url"])
                                                 await channel.send(embed=em)
                                                 continue
@@ -732,7 +737,7 @@ class Pixel(commands.Cog):
                                                     chunk = f"| :**{f}**:\n"
                                                 if len(chunk) + len(txt) >= 1950:
                                                     em = discord.Embed(title=f"Fichiers disponibles sur {guild.name}",
-                                                                       description=txt)
+                                                                       description=txt, color=em_color)
                                                     em.set_footer(text=f"Page #{n}")
                                                     try:
                                                         await author.send(embed=em)
@@ -742,7 +747,7 @@ class Pixel(commands.Cog):
                                                     n += 1
                                                 txt += chunk
                                             em = discord.Embed(title=f"Fichiers disponibles sur {guild.name}",
-                                                               description=txt)
+                                                               description=txt, color=em_color)
                                             em.set_footer(text=f"Page #{n}")
                                             try:
                                                 await author.send(embed=em)
@@ -806,6 +811,7 @@ class Pixel(commands.Cog):
     async def guildsize(self, ctx):
         """Affiche une liste des 10 fichiers les plus lourds et la place totale prise par le serveur"""
         guild = ctx.guild
+        em_color = await ctx.embed_color()
         big = []
         liste = await self.files_list(guild)
         data = await self.config.guild(guild).FILES() + await self.config.guild(guild).WAITING()
@@ -820,7 +826,7 @@ class Pixel(commands.Cog):
                 t = self.humanize_size(size)
                 txt += f"**{name}** » {t}\n"
             if txt:
-                em = discord.Embed(title="10 fichiers les plus lourds stockés localement", description=txt)
+                em = discord.Embed(title="10 fichiers les plus lourds stockés localement", description=txt, color=em_color)
                 em.set_footer(text="Total occupé par ce serveur = {} / {} disponibles".format(
                     self.humanize_size(self._get_folder_size(await self.guild_path(guild))),
                     self.humanize_size(await self.config.FOLDER_MAX_SIZE())))
