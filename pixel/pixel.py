@@ -399,7 +399,7 @@ class Pixel(commands.Cog):
                 em.set_footer(text="Cliquez sur la réaction correspondante à l'action voulue")
                 msg = await ctx.send(embed=em)
 
-                start_adding_reactions(msg, emojis)
+
                 try:
                     logger.info("En attente de réaction...")
                     react, user = await self.bot.wait_for("reaction_add",
@@ -728,9 +728,9 @@ class Pixel(commands.Cog):
                                             for f in liste:
                                                 base = re.compile(r"([A-z]+)(\d*)?", re.DOTALL | re.IGNORECASE).findall(f)[0][0]
                                                 if f == base:
-                                                    chunk = f":***{f}***:\n"
+                                                    chunk = f":**{f}**:\n"
                                                 else:
-                                                    chunk = f"| :*{f}*:\n"
+                                                    chunk = f"| :**{f}**:\n"
                                                 if len(chunk) + len(txt) >= 1950:
                                                     em = discord.Embed(title=f"Fichiers disponibles sur {guild.name}",
                                                                        description=txt)
