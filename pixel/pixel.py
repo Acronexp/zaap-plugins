@@ -49,8 +49,8 @@ class Pixel(commands.Cog):
                                       "channels_blacklist": [],
                                       "users_blacklist": [],
                                       "antiflood": True},
-                         "WAITING": {},
-                         "FILES": {}}
+                         "WAITING": [],
+                         "FILES": []}
         self.config.register_global(**default_global)
         self.config.register_guild(**default_guild)
         self.cooldown = {}
