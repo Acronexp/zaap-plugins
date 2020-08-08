@@ -224,7 +224,7 @@ class Pixel(commands.Cog):
         if ":" in name:
             await ctx.send("**Nom invalide** • Ne mettez pas `:` autour du nom lorsque vous proposez un fichier.")
             return
-        if name.lower() not in ["list", "liste"]:
+        if name.lower() in ["list", "liste"]:
             await ctx.send("**Nom réservé** • Ce nom est déjà utilisé par le bot pour des fonctionnalités spécifiques.")
             return
         if name in await self.files_list(guild):
