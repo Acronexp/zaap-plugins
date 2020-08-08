@@ -711,12 +711,16 @@ class Pixel(commands.Cog):
                                                             emoji = react.emoji
 
                                                         if emoji == "⬅":
-                                                                index -= 1
+                                                            index -= 1
                                                         elif emoji == "❌":
                                                             await msg.delete()
-                                                            break
+                                                            return
                                                         else:
                                                             index += 1
+                                                        try:
+                                                            await msg.remove_reaction(emoji, user)
+                                                        except:
+                                                            pass
                                             if "?" in param:
                                                 base, num = \
                                                 re.compile(r"([A-z]+)(\d*)?", re.DOTALL | re.IGNORECASE).findall(name)[
