@@ -403,11 +403,13 @@ class Pixel(commands.Cog):
                     return u == author and r.message.id == msg.id
                 start_adding_reactions(msg, emojis)
                 try:
+                    logger.info("En attente de réaction...")
                     react, user = await self.bot.wait_for("reaction_add", check=emojipred, timeout=30)
                 except asyncio.TimeoutError:
                     await msg.delete()
                     return
                 else:
+                    logger.info("Réaction détectée. Traitement...")
                     emoji = react.emoji
                 if emoji == "🏷":
                     await msg.delete()
