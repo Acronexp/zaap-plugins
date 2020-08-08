@@ -399,7 +399,7 @@ class Pixel(commands.Cog):
                 em.set_footer(text="Cliquez sur la réaction correspondante à l'action voulue")
                 msg = await ctx.send(embed=em)
                 def pred(r, u):
-                    logger.info("Reaction = {}, User= {}").format(repr(r), repr(u))
+                    logger.info("Reaction = {}, User = {}".format(repr(r), repr(u)))
                     return str(u) == str(author) and r.message.id == msg.id
                 start_adding_reactions(msg, emojis)
                 try:
