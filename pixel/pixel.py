@@ -404,7 +404,7 @@ class Pixel(commands.Cog):
                 start_adding_reactions(msg, emojis)
                 try:
                     logger.info("En attente de réaction...")
-                    react, user = await self.bot.wait_for("reaction_add", check=emojipred, timeout=30)
+                    react, user = await self.bot.wait_for("reaction_add", timeout=30)
                 except asyncio.TimeoutError:
                     await msg.delete()
                     return
