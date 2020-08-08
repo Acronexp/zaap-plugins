@@ -400,7 +400,8 @@ class Pixel(commands.Cog):
                 msg = await ctx.send(embed=em)
                 def pred(r, u):
                     logger.info("Reaction = {}, User = {}".format(repr(r), repr(u)))
-                    return str(u) == str(author) and r.message.id == msg.id
+                    logger.info("PV = {} ({}/{}), DV = {} ({}/{})".format(u == author, u.id, author.id, r.message.id == msg.id, r.message.id, msg.id))
+                    return u == author and r.message.id == msg.id
                 start_adding_reactions(msg, emojis)
                 try:
                     logger.info("En attente de réaction...")
