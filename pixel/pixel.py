@@ -177,7 +177,7 @@ class Pixel(commands.Cog):
             if ext.lower() in [".jpeg", ".jpg", ".png", ".gif", ".gifv", ".mp3", ".wav", ".mp4", ".webm", ".txt"]:
                 if file_size <= await self.config.FILE_MAX_SIZE():
                     if file_size +  self._get_folder_size(str(path)) <= await self.config.FOLDER_MAX_SIZE():
-                        filename = "{}_{}".format(seed, file_name)
+                        filename = "{}_{}{}".format(seed, file_name, ext)
                         filepath = "{}/{}".format(str(path), filename)
 
                         async with aiohttp.ClientSession() as session:
