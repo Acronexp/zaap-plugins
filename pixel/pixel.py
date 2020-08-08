@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import operator
 import os
 import random
 import re
@@ -146,7 +147,7 @@ class Pixel(commands.Cog):
         seed = str(int(time.time()))
         ext = os.path.splitext(msg.attachments[0].filename)[1]
         if ext.lower() in [".jpeg", ".jpg", ".png", ".gif", ".gifv", ".mp3", ".wav", ".mp4", ".webm", ".txt"]:
-            if msg.attachments[0].size <= self.config.FILE_MAX_SIZE:
+            if msg.attachments[0].size <= await self.config.FILE_MAX_SIZE():
                 if msg.attachments[0].size + self._get_folder_size(str(path)) <= await self.config.FOLDER_MAX_SIZE():
                     filename = "{}_{}".format(seed, msg.attachments[0].filename)
                     filepath = "{}/{}".format(str(path), filename)
@@ -175,7 +176,7 @@ class Pixel(commands.Cog):
         file_size = self._get_file_length(url)
         if name not in await self.files_list(guild) + await self.waiting_list(guild):
             if ext.lower() in [".jpeg", ".jpg", ".png", ".gif", ".gifv", ".mp3", ".wav", ".mp4", ".webm", ".txt"]:
-                if file_size <= self.config.FILE_MAX_SIZE:
+                if file_size <= await self.config.FILE_MAX_SIZE():
                     if file_size +  self._get_folder_size(str(path)) <= await self.config.FOLDER_MAX_SIZE():
                         filename = "{}_{}".format(seed, file_name)
                         filepath = "{}/{}".format(str(path), filename)
@@ -209,7 +210,6 @@ class Pixel(commands.Cog):
 
     @commands.group(aliases=["pix"])
     @commands.guild_only()
-    @checks.mod_or_permissions(administrator=True)
     async def pixel(self, ctx):
         """Gestion des fichiers personnalisés du serveur"""
 
@@ -237,7 +237,7 @@ class Pixel(commands.Cog):
                            "Si c'est celui-ci que vous voulez modifier, utilisez `;pix edit {}`.\n"
                            "Sinon, sachez que le nom ***{}*** est disponible.".format(name, new_name))
             return
-        if guild.permissions_for(author).administrator or guild.permissions_for(author).manage_messages \
+        if author.permissions_in(ctx.channel).administrator or author.permissions_in(ctx.channel).manage_messages \
                 and await self.config.guild(guild).SETTINGS.get_raw("need_approb"):
             if name in await self.waiting_list(guild):
                 waiting = await self.config.guild(guild).WAITING()
@@ -279,7 +279,7 @@ class Pixel(commands.Cog):
                                    "qui sont enregistrés en local avant d'en ajouter d'autres.")
                     return
                 except MaxFileSize:
-                    await ctx.send("**Taille maximale du fichier atteinte** • Ce fichier dépasse la limite imposée de {}.".format(self.humanize_size(await self.config.MAX_FILE_SIZE())))
+                    await ctx.send("**Taille maximale du fichier atteinte** • Ce fichier dépasse la limite imposée de {}.".format(self.humanize_size(await self.config.FILE_MAX_SIZE())))
                     return
                 except ExtensionNotSupported:
                     await ctx.send("**Extension non supportée** • Consultez la liste dans l'aide de la commande "
@@ -501,7 +501,7 @@ class Pixel(commands.Cog):
                                 except MaxFileSize:
                                     await ctx.send(
                                         "**Taille maximale du fichier atteinte** • Le fichier pointé par l'URL est trop lourd, réessayez avec un fichier plus petit que {}.".format(
-                                            self.humanize_size(await self.config.MAX_FILE_SIZE())), delete_after=20)
+                                            self.humanize_size(await self.config.FILE_MAX_SIZE())), delete_after=20)
                                     continue
                                 except ExtensionNotSupported:
                                     await ctx.send(
@@ -570,7 +570,7 @@ class Pixel(commands.Cog):
                                 except MaxFileSize:
                                     await ctx.send(
                                         "**Taille maximale du fichier atteinte** • Le fichier pointé par l'URL est trop lourd, réessayez avec un fichier plus petit que {}.".format(
-                                            self.humanize_size(await self.config.MAX_FILE_SIZE())), delete_after=20)
+                                            self.humanize_size(await self.config.FILE_MAX_SIZE())), delete_after=20)
                                     continue
                                 except ExtensionNotSupported:
                                     await ctx.send(
@@ -688,7 +688,7 @@ class Pixel(commands.Cog):
                                                 suppr = True
 
                                         async with channel.typing():
-                                            if self.config.guild(guild).SETTINGS.get_raw("antiflood"):
+                                            if await self.config.guild(guild).SETTINGS.get_raw("antiflood"):
                                                 ts = time.strftime("%H:%M", time.localtime())
                                                 if ts not in self.cooldown:
                                                     self.cooldown = {ts: []}
@@ -734,4 +734,140 @@ class Pixel(commands.Cog):
                                                 await author.send(embed=em)
                                             except:
                                                 pass
+
+    @commands.group()
+    @checks.is_owner()
+    async def pixellocal(self, ctx):
+        """Paramètres de stockage de Pixel"""
+
+    @pixellocal.command()
+    async def filesize(self, ctx, value: int):
+        """Change la taille maximale des fichiers (en B)"""
+        if value > 1000:
+            await self.config.FILE_MAX_SIZE.set(value)
+            await ctx.send("**Taille maximale d'un fichier** • Réglé à {}".format(self.humanize_size(value)))
+        else:
+            await ctx.send("**Taille maximale d'un fichier** • Le minimum possible est 1 kB (1000 B)")
+
+    @pixellocal.command()
+    async def foldersize(self, ctx, value: int):
+        """Change la taille maximale des dossiers des serveurs (en B)"""
+        if value > 1000000:
+            await self.config.FOLDER_MAX_SIZE.set(value)
+            await ctx.send("**Taille maximale des dossiers serveurs** • Réglé à {}".format(self.humanize_size(value)))
+        else:
+            await ctx.send("**Taille maximale des dossiers serveurs** • Le minimum possible est 1 MB (1000000 B)")
+
+
+    @commands.group(aliases=["pixset"])
+    @commands.guild_only()
+    @checks.admin_or_permissions(manage_messages=True)
+    async def pixelset(self, ctx):
+        """Commande centrale pour les paramètres de Pixel"""
+
+    @pixelset.command()
+    async def approb(self, ctx):
+        """Active/Désactive l'approbation nécessaire des modérateurs du serveur pour ajouter un fichier"""
+        guild = ctx.guild
+        val = await self.config.guild(guild).SETTINGS.get_raw("need_approb")
+        await self.config.guild(guild).SETTINGS.set_raw("need_approb", value=not val)
+        if val:
+            await ctx.send("**Approbation** • Proposer un fichier ne nécessitera plus l'approbation de la modération.")
+        else:
+            await ctx.send("**Approbation** • Proposer un fichier nécessitera désormais l'approbation de la modération.")
+
+    @pixelset.command()
+    async def antiflood(self, ctx):
+        """Active/Désactive l'antiflood (3 fichiers / minute / membre)"""
+        guild = ctx.guild
+        val = await self.config.guild(guild).SETTINGS.get_raw("antiflood")
+        await self.config.guild(guild).SETTINGS.set_raw("antiflood", value=not val)
+        if val:
+            await ctx.send("**Anti-flood** • La fonctionnalité est maintenant désactivée.")
+        else:
+            await ctx.send(
+                "**Anti-flood** • La fonctionnalité est maintenant activée.")
+
+    @pixelset.command(name="size")
+    async def guildsize(self, ctx):
+        """Affiche une liste des 10 fichiers les plus lourds et la place totale prise par le serveur"""
+        guild = ctx.guild
+        big = []
+        liste = await self.files_list(guild)
+        for f in liste:
+            file = await self.get_file(guild, f)
+            if file["path"]:
+                big.append((f, self._get_local_file_size(file["path"])))
+        if big:
+            big = sorted(big, key=operator.itemgetter(1), reverse=True)[10:]
+            txt = ""
+            for name, size in big:
+                t = self.humanize_size(size)
+                txt += f"**{name}** » {t}\n"
+            em = discord.Embed(title="10 fichiers les plus lourds stockés localement", description=txt)
+            em.set_footer(text="Total occupé par ce serveur = {} / {}".format(
+                self.humanize_size(self._get_folder_size(self.guild_path(guild))),
+                self.humanize_size(await self.config.FOLDER_MAX_SIZE())))
+            await ctx.send(embed=em)
+        else:
+            await ctx.send("**Aucune donnée à afficher** » Il semblerait qu'aucun fichier "
+                           "ne soit stocké localement pour le moment.")
+
+    @pixelset.group()
+    @checks.admin_or_permissions(ban_members=True)
+    async def userblacklist(self, ctx):
+        """Blacklister un membre du serveur"""
+
+    @userblacklist.command(name="add")
+    async def black_add_user(self, ctx, user: discord.Member):
+        """Ajouter un membre à la blacklist Pixel"""
+        guild = ctx.guild
+        liste = await self.config.guild(guild).SETTINGS.get_raw("users_blacklist")
+        if user.id not in liste:
+            liste.append(user.id)
+            await self.config.guild(guild).SETTINGS.set_raw("users_blacklist", value=liste)
+            await ctx.send("**Blacklist de membres** • *{}* ajouté.".format(user.name))
+        else:
+            await ctx.send("**Blacklist de membres** • *{}* déjà présent dans la blacklist.".format(user.name))
+
+    @userblacklist.command(name="remove")
+    async def black_remove_user(self, ctx, user: discord.Member):
+        """Retirer un membre de la blacklist Pixel"""
+        guild = ctx.guild
+        liste = await self.config.guild(guild).SETTINGS.get_raw("users_blacklist")
+        if user.id in liste:
+            liste.remove(user.id)
+            await self.config.guild(guild).SETTINGS.set_raw("users_blacklist", value=liste)
+            await ctx.send("**Blacklist de membres** • *{}* retiré.".format(user.name))
+        else:
+            await ctx.send("**Blacklist de membres** • *{}* n'est pas présent dans la blacklist.".format(user.name))
+
+    @pixelset.group()
+    @checks.admin_or_permissions(ban_members=True)
+    async def channelblacklist(self, ctx):
+        """Blacklister un channel du serveur"""
+
+    @userblacklist.command(name="add")
+    async def black_add_channel(self, ctx, channel: discord.TextChannel):
+        """Ajouter un channel à la blacklist Pixel"""
+        guild = ctx.guild
+        liste = await self.config.guild(guild).SETTINGS.get_raw("channels_blacklist")
+        if channel.id not in liste:
+            liste.append(channel.id)
+            await self.config.guild(guild).SETTINGS.set_raw("channels_blacklist", value=liste)
+            await ctx.send("**Blacklist de salons** • *{}* ajouté.".format(channel.name))
+        else:
+            await ctx.send("**Blacklist de salons** • *{}* déjà présent dans la blacklist.".format(channel.name))
+
+    @userblacklist.command(name="remove")
+    async def black_remove_channel(self, ctx, channel: discord.TextChannel):
+        """Ajouter un channel à la blacklist Pixel"""
+        guild = ctx.guild
+        liste = await self.config.guild(guild).SETTINGS.get_raw("channels_blacklist")
+        if channel.id in liste:
+            liste.remove(channel.id)
+            await self.config.guild(guild).SETTINGS.set_raw("channels_blacklist", value=liste)
+            await ctx.send("**Blacklist de salons** • *{}* retiré.".format(channel.name))
+        else:
+            await ctx.send("**Blacklist de salons** • *{}* n'est pas présent dans la blacklist.".format(channel.name))
 
