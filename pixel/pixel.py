@@ -140,7 +140,7 @@ class Pixel(commands.Cog):
             path.mkdir(exist_ok=True, parents=True)
         return path
 
-    async def download_attachment(self, msg: discord.Message, name: str):
+    async def download_attachment(self, msg: discord.Message, name: str, waiting: bool = False):
         guild = msg.guild
         path = await self.guild_path(guild)
         seed = str(int(time.time()))
@@ -151,7 +151,10 @@ class Pixel(commands.Cog):
                     filename = "{}_{}".format(seed, msg.attachments[0].filename)
                     filepath = "{}/{}".format(str(path), filename)
 
-                    data = await self.config.guild(guild).FILES()
+                    if waiting:
+                        data = await self.config.guild(guild).WAITING()
+                    else:
+                        data = await self.config.guild(guild).FILES()
                     new = {"name": name,
                            "path": filepath,
                            "url": msg.attachments[0].url,
@@ -160,7 +163,10 @@ class Pixel(commands.Cog):
                            "count": 0}
                     data.append(new)
                     await msg.attachments[0].save(filepath)
-                    await self.config.guild(guild).FILES.set(data)
+                    if waiting:
+                        await self.config.guild(guild).WAITING.set(data)
+                    else:
+                        await self.config.guild(guild).FILES.set(data)
                 else:
                     raise MaxFolderSize()
             else:
@@ -237,8 +243,15 @@ class Pixel(commands.Cog):
                            "Si c'est celui-ci que vous voulez modifier, utilisez `;pix edit {}`.\n"
                            "Sinon, sachez que le nom ***{}*** est disponible.".format(name, new_name))
             return
-        if author.permissions_in(ctx.channel).administrator or author.permissions_in(ctx.channel).manage_messages \
-                and await self.config.guild(guild).SETTINGS.get_raw("need_approb"):
+
+        def access():
+            if await self.config.guild(guild).SETTINGS.get_raw("need_approb"):
+                if author.permissions_in(ctx.channel).administrator or author.permissions_in(ctx.channel).manage_messages:
+                    return True
+                return False
+            return True
+
+        if access():
             if name in await self.waiting_list(guild):
                 waiting = await self.config.guild(guild).WAITING()
                 files = await self.config.guild(guild).FILES()
