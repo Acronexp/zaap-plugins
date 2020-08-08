@@ -163,6 +163,7 @@ class Pixel(commands.Cog):
                            "count": 0}
                     data.append(new)
                     await msg.attachments[0].save(filepath)
+
                     if waiting:
                         await self.config.guild(guild).WAITING.set(data)
                     else:
@@ -255,11 +256,12 @@ class Pixel(commands.Cog):
             if name in await self.waiting_list(guild):
                 waiting = await self.config.guild(guild).WAITING()
                 files = await self.config.guild(guild).FILES()
-                file = await self.get_waiting(guild, name)
-                waiting.remove(file)
-                files.append(file)
+                wait_file = await self.get_waiting(guild, name)
+                waiting.remove(wait_file)
+                files.append(wait_file)
                 await self.config.guild(guild).WAITING.set(waiting)
                 await self.config.guild(guild).FILES.set(files)
+                file = await self.get_file(guild, name)
                 em = discord.Embed(description="Fichier `{}` proposé par {} approuvé par {}".format(
                     file["name"], guild.get_member(file["author"]).mention, author.mention), color=em_color)
                 em.set_image(url=file["url"])
