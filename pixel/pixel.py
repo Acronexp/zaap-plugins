@@ -318,7 +318,7 @@ class Pixel(commands.Cog):
             await ctx.send(embed=em)
         elif ctx.message.attachments:
             try:
-                await self.download_attachment(ctx.message, name)
+                await self.download_attachment(ctx.message, name, waiting=True)
                 await ctx.send(f"Fichier `{name}` téléchargé et proposé. Un administrateur ou un membre avec la "
                                            f"permission `manage_message` doit l'approuver avec `;pix add {name}`.")
             except MaxFolderSize:
