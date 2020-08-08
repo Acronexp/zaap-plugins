@@ -551,7 +551,7 @@ class Pixel(commands.Cog):
                                 break
                         else:
                             options_txt = "📥 · Télécharger depuis l'[URL]({})\n" \
-                                          "❌ · Retour au menu".format(file["url"], file["path"].split("/")[-1])
+                                          "❌ · Retour au menu".format(file["url"])
                             em = discord.Embed(title=f"Édition de fichier » :{name}:",
                                                description=options_txt)
                             em.set_footer(text="Cliquez sur l'emoji correspondant à l'action que vous voulez réaliser")
