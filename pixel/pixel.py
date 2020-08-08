@@ -645,7 +645,11 @@ class Pixel(commands.Cog):
                             if regex:
                                 em_color = await self.bot.get_embed_color(channel)
                                 for param, name in regex:
-                                    if name in await self.files_list(guild):
+                                    all_files = await self.files_list(guild)
+                                    if name not in all_files:
+                                        if name + "1" in all_files:
+                                            name = f"{name}1"
+                                    if name in all_files:
                                         if name in [e.name for e in guild.emojis]:
                                             continue
 
@@ -659,14 +663,10 @@ class Pixel(commands.Cog):
                                         suppr = False
                                         if param:
                                             if "b" in param: # Donner le fichier lié à la "base" du nom
-                                                base = re.compile(r"([A-z]+)(\d*)?", re.DOTALL | re.IGNORECASE).findall(name)[0][0]
                                                 new_file = await self.get_file(guild, base)
                                                 if new_file:
                                                     file = new_file
                                             if "s" in param: # Affiche un menu avec tous les fichiers de noms similaires
-                                                base = \
-                                                re.compile(r"([A-z]+)(\d*)?", re.DOTALL | re.IGNORECASE).findall(name)[
-                                                    0][0]
                                                 similars = await self.get_similars(guild, base)
                                                 if len(similars) > 1:
                                                     index = 0
@@ -706,10 +706,6 @@ class Pixel(commands.Cog):
                                                         else:
                                                             index += 1
                                             if "?" in param:
-                                                base = \
-                                                    re.compile(r"([A-z]+)(\d*)?", re.DOTALL | re.IGNORECASE).findall(
-                                                        name)[
-                                                        0][0]
                                                 similars = await self.get_similars(guild, base)
                                                 file = random.choice(similars)
                                             if "e" in param:
@@ -759,6 +755,8 @@ class Pixel(commands.Cog):
                                                 base = re.compile(r"([A-z]+)(\d*)?", re.DOTALL | re.IGNORECASE).findall(f)[0][0]
                                                 if f == base:
                                                     chunk = f":**{f}**:\n"
+                                                elif f == f"{base}1":
+                                                    chunk = f":**{base}(1)**:\n"
                                                 else:
                                                     chunk = f"| :**{f}**:\n"
                                                 if len(chunk) + len(txt) >= 1950:
