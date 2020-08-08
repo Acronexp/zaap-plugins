@@ -275,7 +275,7 @@ class Pixel(commands.Cog):
                         await self.download_attachment(ctx.message, name)
                     await ctx.send(f"Fichier `{name}` ajouté avec succès\nUtilisez-le avec :{name}:.")
                     file = await self.get_file(guild, name)
-                    await ctx.send(files=discord.File(file["path"]))
+                    await ctx.send(files=[discord.File(file["path"])])
                 except MaxFolderSize:
                     await ctx.send("**Taille maximale du dossier atteinte** • Retirez quelques fichiers parmis ceux "
                                    "qui sont enregistrés en local avant d'en ajouter d'autres.")
@@ -682,7 +682,7 @@ class Pixel(commands.Cog):
                                             if "u" in param:
                                                 if file["path"]:
                                                     try:
-                                                        await channel.send(file=discord.File(file["path"]))
+                                                        await channel.send(files=[discord.File(file["path"])])
                                                     except:
                                                         logger.error(f"Impossible d'envoyer {name}", exc_info=True)
                                             if "w" in param:
@@ -702,7 +702,7 @@ class Pixel(commands.Cog):
 
                                             if file["path"]:
                                                 try:
-                                                    await channel.send(file=discord.File(file["path"]))
+                                                    await channel.send(file=[discord.File(file["path"])])
                                                     continue
                                                 except:
                                                     logger.error(f"Impossible d'envoyer {name}", exc_info=True)
