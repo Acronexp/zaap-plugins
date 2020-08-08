@@ -127,7 +127,7 @@ class Pixel(commands.Cog):
         similars = await self.get_similars(guild, base_name)
         if similars:
             n = 2
-            f = lambda n: base_name + str(n)
+            f = lambda nb: base_name + str(nb)
             name = f(n)
             while name in [file["name"] for file in similars]:
                 n += 1
