@@ -847,7 +847,7 @@ class Pixel(commands.Cog):
     async def channelblacklist(self, ctx):
         """Blacklister un channel du serveur"""
 
-    @userblacklist.command(name="add")
+    @channelblacklist.command(name="add")
     async def black_add_channel(self, ctx, channel: discord.TextChannel):
         """Ajouter un channel à la blacklist Pixel"""
         guild = ctx.guild
@@ -859,7 +859,7 @@ class Pixel(commands.Cog):
         else:
             await ctx.send("**Blacklist de salons** • *{}* déjà présent dans la blacklist.".format(channel.name))
 
-    @userblacklist.command(name="remove")
+    @channelblacklist.command(name="remove")
     async def black_remove_channel(self, ctx, channel: discord.TextChannel):
         """Ajouter un channel à la blacklist Pixel"""
         guild = ctx.guild
