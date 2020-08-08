@@ -778,7 +778,7 @@ class Pixel(commands.Cog):
                                                         chunk = f"`:{f}:`\n"
                                                     else:
                                                         chunk = f"`:{base}1:`\n"
-                                                elif f == f"`{base}1`":
+                                                elif f == f"{base}1":
                                                     chunk = f"`:{base}:`\n"
                                                 else:
                                                     chunk = f"∣ `:{f}:`\n"
