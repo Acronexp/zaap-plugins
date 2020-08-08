@@ -127,10 +127,10 @@ class Pixel(commands.Cog):
         similars = await self.get_similars(guild, base_name)
         if similars:
             n = 2
-            name = base_name + str(n)
+            name = f"{base_name}{n}"
             while name in [file["name"] for file in similars]:
                 n += 1
-                name = base_name + str(n)
+                name = f"{base_name}{n}"
             return name
         return base_name
 
@@ -228,7 +228,7 @@ class Pixel(commands.Cog):
             await ctx.send("**Nom réservé** • Ce nom est déjà utilisé par le bot pour des fonctionnalités spécifiques.")
             return
         if name in await self.files_list(guild):
-            base = re.compile(r"([A-z]+)(\d*)?", re.DOTALL | re.IGNORECASE).findall(name)[0]
+            base = re.compile(r"([A-z]+)(\d*)?", re.DOTALL | re.IGNORECASE).findall(name)[0][0]
             if base != name:
                 new_name = await self.find_disp_name(guild, base)
             else:
@@ -625,14 +625,14 @@ class Pixel(commands.Cog):
                                         suppr = False
                                         if param:
                                             if "b" in param: # Donner le fichier lié à la "base" du nom
-                                                base = re.compile(r"([A-z]+)(\d*)?", re.DOTALL | re.IGNORECASE).findall(name)[0]
+                                                base = re.compile(r"([A-z]+)(\d*)?", re.DOTALL | re.IGNORECASE).findall(name)[0][0]
                                                 new_file = await self.get_file(guild, base)
                                                 if new_file:
                                                     file = new_file
                                             if "s" in param: # Affiche un menu avec tous les fichiers de noms similaires
                                                 base = \
                                                 re.compile(r"([A-z]+)(\d*)?", re.DOTALL | re.IGNORECASE).findall(name)[
-                                                    0]
+                                                    0][0]
                                                 similars = await self.get_similars(guild, base)
                                                 if len(similars) > 1:
                                                     index = 0
@@ -671,7 +671,7 @@ class Pixel(commands.Cog):
                                                 base = \
                                                     re.compile(r"([A-z]+)(\d*)?", re.DOTALL | re.IGNORECASE).findall(
                                                         name)[
-                                                        0]
+                                                        0][0]
                                                 similars = await self.get_similars(guild, base)
                                                 file = random.choice(similars)
                                             if "e" in param:
@@ -714,7 +714,7 @@ class Pixel(commands.Cog):
                                             n = 1
                                             liste = sorted(await self.files_list(guild))
                                             for f in liste:
-                                                base = re.compile(r"([A-z]+)(\d*)?", re.DOTALL | re.IGNORECASE).findall(f)[0]
+                                                base = re.compile(r"([A-z]+)(\d*)?", re.DOTALL | re.IGNORECASE).findall(f)[0][0]
                                                 if f == base:
                                                     chunk = f":***{f}***:\n"
                                                 else:
