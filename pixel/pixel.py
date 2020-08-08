@@ -172,7 +172,7 @@ class Pixel(commands.Cog):
         path = await self.guild_path(guild)
         seed = str(int(time.time()))
         file_name, ext = os.path.splitext(os.path.basename(urlsplit(url).path))
-        file_size = self._get_file_length(url)
+        file_size = float(self._get_file_length(url))
         if name in await self.files_list(guild) + await self.waiting_list(guild):
             if ext.lower() in [".jpeg", ".jpg", ".png", ".gif", ".gifv", ".mp3", ".wav", ".mp4", ".webm", ".txt"]:
                 if file_size <= await self.config.FILE_MAX_SIZE():
@@ -760,19 +760,19 @@ class Pixel(commands.Cog):
         """Paramètres de stockage de Pixel"""
 
     @pixellocal.command()
-    async def filesize(self, ctx, value: int):
+    async def filesize(self, ctx, value: float):
         """Change la taille maximale des fichiers (en B)"""
         if value > 1000:
-            await self.config.FILE_MAX_SIZE.set(value)
+            await self.config.FILE_MAX_SIZE.set(float(value))
             await ctx.send("**Taille maximale d'un fichier** • Réglé à {}".format(self.humanize_size(value)))
         else:
             await ctx.send("**Taille maximale d'un fichier** • Le minimum possible est 1 kB (1000 B)")
 
     @pixellocal.command()
-    async def foldersize(self, ctx, value: int):
+    async def foldersize(self, ctx, value: float):
         """Change la taille maximale des dossiers des serveurs (en B)"""
         if value > 1000000:
-            await self.config.FOLDER_MAX_SIZE.set(value)
+            await self.config.FOLDER_MAX_SIZE.set(float(value))
             await ctx.send("**Taille maximale des dossiers serveurs** • Réglé à {}".format(self.humanize_size(value)))
         else:
             await ctx.send("**Taille maximale des dossiers serveurs** • Le minimum possible est 1 MB (1000000 B)")
