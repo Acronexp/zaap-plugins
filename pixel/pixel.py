@@ -762,13 +762,13 @@ class Pixel(commands.Cog):
                                                 if f == base:
                                                     chunk = f":**{f}**:\n"
                                                 elif f == f"{base}1":
-                                                    chunk = f":**{base}**1:\n"
+                                                    chunk = f":**{base}**:\n"
                                                 else:
                                                     chunk = f"| :**{f}**:\n"
                                                 if len(chunk) + len(txt) >= 1950:
                                                     em = discord.Embed(title=f"Fichiers disponibles sur {guild.name}",
                                                                        description=txt, color=em_color)
-                                                    em.set_footer(text=f"Page #{n}")
+                                                    em.set_footer(text=f"Page #{n} • Faire ':foobar:' ou ':foobar1:' donne la même chose")
                                                     try:
                                                         await author.send(embed=em)
                                                     except:
