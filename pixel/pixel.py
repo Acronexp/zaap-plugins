@@ -398,6 +398,7 @@ class Pixel(commands.Cog):
                 emojis = ["🏷", "🔗", "💾", "❌"]
                 em = discord.Embed(title=f"Édition de fichier » :{name}:", description=infos, color=em_color)
                 em.add_field(name="Navigation", value=options_txt, inline=False)
+                em.set_image(url=file["url"])
                 em.set_footer(text="Cliquez sur la réaction correspondante à l'action voulue")
                 msg = await ctx.send(embed=em)
                 start_adding_reactions(msg, emojis)
@@ -634,6 +635,12 @@ class Pixel(commands.Cog):
                                             continue
 
                                         file = await self.get_file(guild, name)
+                                        data = await self.config.guild(guild).FILES()
+                                        index = data.index(file)
+                                        file["count"] += 1
+                                        data[index] = file
+                                        await self.config.guild(guild).FILES.set(data)
+
                                         suppr = False
                                         if param:
                                             if "b" in param: # Donner le fichier lié à la "base" du nom
