@@ -383,11 +383,11 @@ class Pixel(commands.Cog):
                 local_txt = "Supprimer/Retélécharger" if file["path"] else "Télécharger depuis URL"
                 size = self.humanize_size(self._get_local_file_size(file["path"])) if file["path"] else "Non téléchargé"
                 crea = datetime.fromtimestamp(file["creation"]).strftime("%d/%m/%Y")
-                author = guild.get_member(file["author"]).mention
+                auth = guild.get_member(file["author"]).mention
                 count = file["count"]
                 infos = f"**Taille** » {size}\n" \
                         f"**Date de création** » {crea}\n" \
-                        f"**Auteur** » {author}\n" \
+                        f"**Auteur** » {auth}\n" \
                         f"**Utilisations** » {count}"
                 options_txt = "🏷️ · Modifier le nom\n" \
                               "🔗 · Modifier l'[URL]({})\n" \
@@ -398,15 +398,11 @@ class Pixel(commands.Cog):
                 em.add_field(name="Navigation", value=options_txt, inline=False)
                 em.set_footer(text="Cliquez sur la réaction correspondante à l'action voulue")
                 msg = await ctx.send(embed=em)
-                def pred(r, u):
-                    logger.info("Reaction = {}, User = {}".format(repr(r), repr(u)))
-                    logger.info("PV = {} ({}/{}), DV = {} ({}/{})".format(u == author, u.id, author.id, r.message.id == msg.id, r.message.id, msg.id))
-                    return u == author and r.message.id == msg.id
                 start_adding_reactions(msg, emojis)
                 try:
                     logger.info("En attente de réaction...")
                     react, user = await self.bot.wait_for("reaction_add",
-                                                          check=pred,
+                                                          check=lambda r, u: u == author and r.message.id == msg.id,
                                                           timeout=30)
                 except asyncio.TimeoutError:
                     await msg.delete()
