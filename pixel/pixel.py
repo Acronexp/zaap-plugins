@@ -756,7 +756,7 @@ class Pixel(commands.Cog):
                                                 if f == base:
                                                     chunk = f":**{f}**:\n"
                                                 elif f == f"{base}1":
-                                                    chunk = f":**{base}(1)**:\n"
+                                                    chunk = f":**{base}**1:\n"
                                                 else:
                                                     chunk = f"| :**{f}**:\n"
                                                 if len(chunk) + len(txt) >= 1950:
