@@ -692,8 +692,9 @@ class Pixel(commands.Cog):
                                                         em = discord.Embed(title=f"Fichiers similaires » {base}",
                                                                            description="`:{}:`".format(similars[index]["name"]), color=em_color)
                                                         em.set_image(url=similars[index]["url"])
+                                                        num = index - 1
                                                         em.set_footer(
-                                                            text=f"#{index} • Naviguez entre les pages avec les emojis ci-dessous")
+                                                            text=f"#{num} • Naviguez entre les pages avec les emojis ci-dessous")
                                                         if not msg:
                                                             msg = await channel.send(embed=em)
                                                         else:
@@ -773,11 +774,11 @@ class Pixel(commands.Cog):
                                             for f in liste:
                                                 base = re.compile(r"([A-z]+)(\d*)?", re.DOTALL | re.IGNORECASE).findall(f)[0][0]
                                                 if f == base:
-                                                    chunk = f":**{f}**:\n"
+                                                    chunk = f":{f}:\n"
                                                 elif f == f"{base}1":
-                                                    chunk = f":**{base}**:\n"
+                                                    chunk = f":{base}:\n"
                                                 else:
-                                                    chunk = f"| :**{f}**:\n"
+                                                    chunk = f"∣ :{f}:\n"
                                                 if len(chunk) + len(txt) >= 1950:
                                                     em = discord.Embed(title=f"Fichiers disponibles sur {guild.name}",
                                                                        description=txt, color=em_color)
