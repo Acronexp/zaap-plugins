@@ -244,14 +244,14 @@ class Pixel(commands.Cog):
                            "Sinon, sachez que le nom ***{}*** est disponible.".format(name, new_name))
             return
 
-        def access():
+        async def access():
             if await self.config.guild(guild).SETTINGS.get_raw("need_approb"):
                 if author.permissions_in(ctx.channel).administrator or author.permissions_in(ctx.channel).manage_messages:
                     return True
                 return False
             return True
 
-        if access():
+        if await access():
             if name in await self.waiting_list(guild):
                 waiting = await self.config.guild(guild).WAITING()
                 files = await self.config.guild(guild).FILES()
