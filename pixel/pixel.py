@@ -378,7 +378,7 @@ class Pixel(commands.Cog):
         if name in await self.files_list(guild):
             file = {}
             while True:
-                file = await self.get_file(guild, file if file else name)
+                file = await self.get_file(guild, file["name"] if file else name)
                 name = file["name"]
                 local_txt = "Supprimer/Retélécharger" if file["path"] else "Télécharger depuis URL"
                 size = self.humanize_size(self._get_local_file_size(file["path"])) if file["path"] else "Non téléchargé"
@@ -399,12 +399,12 @@ class Pixel(commands.Cog):
                 em.set_footer(text="Cliquez sur la réaction correspondante à l'action voulue")
                 msg = await ctx.send(embed=em)
 
-                def emojipred(r, u):
-                    return u == author and r.message.id == msg.id
                 start_adding_reactions(msg, emojis)
                 try:
                     logger.info("En attente de réaction...")
-                    react, user = await self.bot.wait_for("reaction_add", timeout=30)
+                    react, user = await self.bot.wait_for("reaction_add",
+                                                          check=lambda r, u: u == author and r.message.id == msg.id,
+                                                          timeout=30)
                 except asyncio.TimeoutError:
                     await msg.delete()
                     return
@@ -482,11 +482,9 @@ class Pixel(commands.Cog):
                             msg = await ctx.send(embed=em)
                             emojis = ["🔄", "🧹", "❌"]
 
-                            def emojipred(r, u):
-                                return u == author and r.message.id == msg.id
                             start_adding_reactions(msg, emojis)
                             try:
-                                react, user = await self.bot.wait_for("reaction_add", check=emojipred, timeout=30)
+                                react, user = await self.bot.wait_for("reaction_add", check=lambda r, u: u == author and r.message.id == msg.id, timeout=30)
                             except asyncio.TimeoutError:
                                 await msg.delete()
                                 return
@@ -561,11 +559,9 @@ class Pixel(commands.Cog):
                             msg = await ctx.send(embed=em)
                             emojis = ["📥", "❌"]
 
-                            def emojipred(r, u):
-                                return u == author and r.message.id == msg.id
                             start_adding_reactions(msg, emojis)
                             try:
-                                react, user = await self.bot.wait_for("reaction_add", check=emojipred, timeout=30)
+                                react, user = await self.bot.wait_for("reaction_add", check=lambda r, u: u == author and r.message.id == msg.id, timeout=30)
                             except asyncio.TimeoutError:
                                 await msg.delete()
                                 return
@@ -665,12 +661,10 @@ class Pixel(commands.Cog):
                                                         else:
                                                             await msg.edit(embed=em)
                                                         emojis = ["⬅", "❌", "➡"]
-                                                        def emojipred(r, u):
-                                                            return u == author and r.message.id == msg.id
                                                         start_adding_reactions(msg, emojis)
                                                         try:
                                                             react, user = await self.bot.wait_for("reaction_add",
-                                                                                                  check=emojipred,
+                                                                                                  check=lambda r, u: u == author and r.message.id == msg.id,
                                                                                                   timeout=30)
                                                         except asyncio.TimeoutError:
                                                             await msg.delete()
