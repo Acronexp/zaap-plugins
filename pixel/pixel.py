@@ -669,10 +669,16 @@ class Pixel(commands.Cog):
                                         suppr = False
                                         if param:
                                             if "b" in param: # Donner le fichier lié à la "base" du nom
+                                                base, num = \
+                                                re.compile(r"([A-z]+)(\d*)?", re.DOTALL | re.IGNORECASE).findall(name)[
+                                                    0]
                                                 new_file = await self.get_file(guild, base)
                                                 if new_file:
                                                     file = new_file
                                             if "s" in param: # Affiche un menu avec tous les fichiers de noms similaires
+                                                base, num = \
+                                                re.compile(r"([A-z]+)(\d*)?", re.DOTALL | re.IGNORECASE).findall(name)[
+                                                    0]
                                                 similars = await self.get_similars(guild, base)
                                                 if len(similars) > 1:
                                                     index = 0
@@ -712,6 +718,9 @@ class Pixel(commands.Cog):
                                                         else:
                                                             index += 1
                                             if "?" in param:
+                                                base, num = \
+                                                re.compile(r"([A-z]+)(\d*)?", re.DOTALL | re.IGNORECASE).findall(name)[
+                                                    0]
                                                 similars = await self.get_similars(guild, base)
                                                 file = random.choice(similars)
                                             if "e" in param:
@@ -743,7 +752,7 @@ class Pixel(commands.Cog):
 
                                             if file["path"]:
                                                 try:
-                                                    await channel.send(file=[discord.File(file["path"])])
+                                                    await channel.send(files=[discord.File(file["path"])])
                                                     continue
                                                 except:
                                                     logger.error(f"Impossible d'envoyer {name}", exc_info=True)
