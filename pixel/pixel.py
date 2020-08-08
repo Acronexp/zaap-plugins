@@ -274,7 +274,8 @@ class Pixel(commands.Cog):
                 try:
                     await self.download_attachment(ctx.message, name)
                     await ctx.send(f"Fichier `{name}` ajouté avec succès\nUtilisez-le avec :{name}:.")
-                    await ctx.send(files=discord.File(await self.get_file(guild, name)["path"]))
+                    file = await self.get_file(guild, name)
+                    await ctx.send(files=discord.File(file["path"]))
                 except MaxFolderSize:
                     await ctx.send("**Taille maximale du dossier atteinte** • Retirez quelques fichiers parmis ceux "
                                    "qui sont enregistrés en local avant d'en ajouter d'autres.")
