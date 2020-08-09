@@ -193,7 +193,7 @@ class Useful(commands.Cog):
     async def now(self, ctx, teller: discord.Member = None, channel: discord.TextChannel = None):
         """Enregistre les messages d'un membre sur un salon à partir de maintenant
 
-        Pour arrêter, le raconteur doit dire "stop" (sans rien d'autre)
+        Pour arrêter, le conteur doit dire "stop" (sans rien d'autre)
         - Si le <teller> n'est pas spécifié, c'est celui qui fait la commande qui l'est
         - Si le salon n'est pas spécifié, c'est celui où est réalisé la commande"""
         if not teller: teller = ctx.author
@@ -235,6 +235,12 @@ class Useful(commands.Cog):
                 em.set_footer(text=f"Page #{page}")
                 await channel.send(embed=em)
 
+        em = discord.Embed(description=f"🔴 **Début de l'enregistrement**\n"
+                                       f"Pour arrêter l'enregistrement, {teller.mention} doit dire \"stop\".\n"
+                                       f"L'enregistrement s'arrête seul si le conteur ne dit rien pendant plus de 5 min ou si l'histoire dépasse 50 000 caractères.\n",
+                           color=em_color)
+        await channel.send(embed=em)
+
         while True:
             try:
                 msg = await self.bot.wait_for("message", check=check, timeout=300)
@@ -252,10 +258,11 @@ class Useful(commands.Cog):
                 except:
                     await channel.send("**Erreur** • Je n'ai pas réussi à upload le fichier...")
                 await info.delete()
+                return
             else:
                 if msg.content:
-                    if msg.content.lower() == "stop":
-                        em = discord.Embed(description="🔴 **Fin de l'enregistrement par l'auteur**\n"
+                    if msg.content.lower() == "stop" or len(txt) >= 50000:
+                        em = discord.Embed(description="🔴 **Fin de l'enregistrement**\n"
                                                        "Il y a eu {} messages enregistrés.".format(nb), color=em_color)
                         em.set_footer(text="Veuillez patienter...")
                         info = await channel.send(embed=em)
@@ -268,6 +275,7 @@ class Useful(commands.Cog):
                         except:
                             await channel.send("**Erreur** • Je n'ai pas réussi à upload le fichier...")
                         await info.delete()
+                        return
                     else:
                         txt += msg.content + "\n"
                         nb += 1
