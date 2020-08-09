@@ -1,5 +1,8 @@
+import asyncio
 import logging
+import os
 import re
+from datetime import datetime
 from urllib.request import urlopen
 
 import discord
@@ -8,6 +11,7 @@ import wikipedia
 import wikipediaapi
 from bs4 import BeautifulSoup
 from redbot.core import commands, Config, checks
+from redbot.core.data_manager import cog_data_path
 
 logger = logging.getLogger("red.zaap-plugins.useful")
 
@@ -21,8 +25,12 @@ class Useful(commands.Cog):
         default_global = {"INSTALOADER_LOGIN": "",
                           "INSTALOADER_PASSWORD": ""}
         self.config.register_global(**default_global)
+
         self.instaload = instaloader.Instaloader()
-        self.cache = {"_instagram": {}, "instaload": False}
+        self.cache = {"_instagram": {}, "instaload": False, "tales": {}}
+
+        self.temp = cog_data_path(self) / "temp"
+        self.temp.mkdir(exist_ok=True, parents=True)
 
 
     def redux(self, string: str, separateur: str = ".", limite: int = 2000):
@@ -176,7 +184,96 @@ class Useful(commands.Cog):
         await self.config.INSTALOADER_PASSWORD.set(password)
         await ctx.send(tb)
 
-    @commands.Cog.listener()
+    @commands.group(name="tale")
+    @commands.guild_only()
+    async def _tale(self, ctx):
+        """Enregistrer une suite de messages sur un fichier .txt"""
+
+    @_tale.command()
+    async def now(self, ctx, teller: discord.Member = None, channel: discord.TextChannel = None):
+        """Enregistre les messages d'un membre sur un salon à partir de maintenant
+
+        Pour arrêter, le raconteur doit dire "stop" (sans rien d'autre)
+        - Si le <teller> n'est pas spécifié, c'est celui qui fait la commande qui l'est
+        - Si le salon n'est pas spécifié, c'est celui où est réalisé la commande"""
+        if not teller: teller = ctx.author
+        if not channel: channel = ctx.channel
+        em_color = await ctx.embed_color()
+
+        path = str(self.temp)
+        filepath = path + "/{1}_{0}.txt".format(teller.name, datetime.now().strftime("%Y%m%d%H%M"))
+        nb = 0
+        pre_txt = "| Auteur = {}\n" \
+              "| Salon = {}\n" \
+              "| Date de début = {}\n\n".format(str(teller), channel.name, datetime.now().strftime("%d/%m/%Y %H:%M"))
+        txt = ""
+
+        def check(m: discord.Message):
+            return m.author == teller and m.channel == channel
+
+        async def write(txt: str):
+            file = open(filepath, "w")
+            file.write(txt)
+            file.close()
+            return file
+
+        async def post_all(txt: str):
+            chunks = txt.split("\n")
+            page = 1
+            post = pre_txt
+            for chunk in chunks:
+                if len(chunk) + len(post) < 1950:
+                    post += chunk + "\n"
+                else:
+                    em = discord.Embed(description=post, color=em_color)
+                    em.set_footer(text=f"Page #{page}")
+                    await channel.send(embed=em)
+                    post = chunk + "\n"
+                    page += 1
+            if post:
+                em = discord.Embed(description=post, color=em_color)
+                em.set_footer(text=f"Page #{page}")
+                await channel.send(embed=em)
+
+        while True:
+            try:
+                msg = await self.bot.wait_for("message", check=check, timeout=300)
+            except asyncio.TimeoutError:
+                em = discord.Embed(description="🔴 **Fin auto. de l'enregistrement**\n"
+                                               "Aucun message n'a été écrit depuis 5 min.", color=em_color)
+                em.set_footer(text="Veuillez patienter...")
+                info = await channel.send(embed=em)
+                try:
+                    async with channel.typing():
+                        await post_all(txt)
+                        await write(pre_txt + txt)
+                    await channel.send(files=[discord.File(filepath)])
+                    os.remove(filepath)
+                except:
+                    await channel.send("**Erreur** • Je n'ai pas réussi à upload le fichier...")
+                await info.delete()
+            else:
+                if msg.content:
+                    if msg.content.lower() == "stop":
+                        em = discord.Embed(description="🔴 **Fin de l'enregistrement par l'auteur**\n"
+                                                       "Il y a eu {} messages enregistrés.".format(nb), color=em_color)
+                        em.set_footer(text="Veuillez patienter...")
+                        info = await channel.send(embed=em)
+                        try:
+                            async with channel.typing():
+                                await post_all(txt)
+                                await write(pre_txt + txt)
+                            await channel.send(files=[discord.File(filepath)])
+                            os.remove(filepath)
+                        except:
+                            await channel.send("**Erreur** • Je n'ai pas réussi à upload le fichier...")
+                        await info.delete()
+                    else:
+                        txt += msg.content + "\n"
+                        nb += 1
+
+
+@commands.Cog.listener()
     async def on_message(self, message):
         if message.guild:
             if "<" or ">" in message.content:
