@@ -204,7 +204,7 @@ class Useful(commands.Cog):
         filepath = path + "/{1}_{0}.txt".format(teller.name, datetime.now().strftime("%Y%m%d%H%M"))
         nb = 0
         pre_txt = "| Auteur = {}\n" \
-              "| Salon = {}\n" \
+              "| Salon = #{}\n" \
               "| Date de début = {}\n\n".format(str(teller), channel.name, datetime.now().strftime("%d/%m/%Y %H:%M"))
         txt = ""
 
@@ -248,7 +248,7 @@ class Useful(commands.Cog):
                 em = discord.Embed(description="🔴 **Fin auto. de l'enregistrement**\n"
                                                "Aucun message n'a été écrit depuis 5 min.", color=em_color)
                 em.set_footer(text="Veuillez patienter...")
-                info = await channel.send(embed=em)
+                await channel.send(embed=em, delete_after=20)
                 try:
                     async with channel.typing():
                         await post_all(txt)
@@ -257,7 +257,6 @@ class Useful(commands.Cog):
                     os.remove(filepath)
                 except:
                     await channel.send("**Erreur** • Je n'ai pas réussi à upload le fichier...")
-                await info.delete()
                 return
             else:
                 if msg.content:
@@ -265,7 +264,7 @@ class Useful(commands.Cog):
                         em = discord.Embed(description="🔴 **Fin de l'enregistrement**\n"
                                                        "Il y a eu {} messages enregistrés.".format(nb), color=em_color)
                         em.set_footer(text="Veuillez patienter...")
-                        info = await channel.send(embed=em)
+                        await channel.send(embed=em, delete_after=20)
                         try:
                             async with channel.typing():
                                 await post_all(txt)
@@ -274,7 +273,6 @@ class Useful(commands.Cog):
                             os.remove(filepath)
                         except:
                             await channel.send("**Erreur** • Je n'ai pas réussi à upload le fichier...")
-                        await info.delete()
                         return
                     else:
                         txt += msg.content + "\n"
