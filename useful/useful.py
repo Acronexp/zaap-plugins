@@ -239,7 +239,7 @@ class Useful(commands.Cog):
                                        f"Pour arrêter l'enregistrement, {teller.mention} doit dire \"stop\".\n"
                                        f"L'enregistrement s'arrête seul si le conteur ne dit rien pendant plus de 5 min ou si l'histoire dépasse 50 000 caractères.\n",
                            color=em_color)
-        await channel.send(embed=em)
+        debut = await channel.send(embed=em)
 
         while True:
             try:
@@ -257,6 +257,7 @@ class Useful(commands.Cog):
                     os.remove(filepath)
                 except:
                     await channel.send("**Erreur** • Je n'ai pas réussi à upload le fichier...")
+                await debut.delete()
                 return
             else:
                 if msg.content:
@@ -273,6 +274,7 @@ class Useful(commands.Cog):
                             os.remove(filepath)
                         except:
                             await channel.send("**Erreur** • Je n'ai pas réussi à upload le fichier...")
+                        await debut.delete()
                         return
                     else:
                         txt += msg.content + "\n"
