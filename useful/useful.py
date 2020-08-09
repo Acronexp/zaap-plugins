@@ -273,7 +273,7 @@ class Useful(commands.Cog):
                         nb += 1
 
 
-@commands.Cog.listener()
+    @commands.Cog.listener()
     async def on_message(self, message):
         if message.guild:
             if "<" or ">" in message.content:
