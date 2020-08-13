@@ -289,13 +289,13 @@ class Useful(commands.Cog):
         em_color = await ctx.embed_color()
         guild = ctx.guild
         try:
-            start = await guild.fetch_message(start_id)
+            start = await self.bot.fetch_message(start_id)
         except:
             await ctx.send("**Erreur** • L'identfiant du message de début n'est pas valide.")
             return
 
         try:
-            end = await guild.fetch_message(end_id)
+            end = await self.bot.fetch_message(end_id)
         except:
             await ctx.send("**Erreur** • L'identfiant du message de fin n'est pas valide.")
             return
@@ -370,6 +370,8 @@ class Useful(commands.Cog):
                     await channel.send("**Erreur** • Je n'ai pas réussi à upload le fichier...")
                 await info.delete()
                 return
+        else:
+            await ctx.send("**Auteurs différents** • L'auteur du message de départ et de fin doit être le même.")
 
     @commands.Cog.listener()
     async def on_message(self, message):
