@@ -356,8 +356,8 @@ class Useful(commands.Cog):
 
             if txt:
                 em = discord.Embed(description="🔴 **Enregistrement terminé**\n"
-                                               "Il y a eu {} messages récupérés entre {} et {}.".format(nb, start.timestamp.strftime("%Hh%M"),
-                                                                                                        end.timestamp.strftime("%Hh%M")), color=em_color)
+                                               "Il y a eu {} messages récupérés entre {} et {}.".format(nb, start.created_at.strftime("%Hh%M"),
+                                                                                                        end.created_at.strftime("%Hh%M")), color=em_color)
                 em.set_footer(text="Veuillez patienter pendant la génération du fichier .txt")
                 await channel.send(embed=em, delete_after=20)
                 try:
