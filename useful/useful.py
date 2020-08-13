@@ -335,12 +335,12 @@ class Useful(commands.Cog):
                                color=em_color)
             info = await start.channel.send(embed=em)
             path = str(self.temp)
-            filepath = path + "/{1}_{0}.txt".format(author.name, start.timestamp.strftime("%Y%m%d%H%M"))
+            filepath = path + "/{1}_{0}.txt".format(author.name, start.created_at.strftime("%Y%m%d%H%M"))
             nb = 0
             pre_txt = "| Auteur = {}\n" \
                       "| Salon = #{}\n" \
                       "| Date de début = {}\n\n".format(str(author), start.channel.name,
-                                                        start.timestamp.strftime("%d/%m/%Y %H:%M"))
+                                                        start.created_at.strftime("%d/%m/%Y %H:%M"))
             txt = ""
 
             try:
