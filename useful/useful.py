@@ -344,11 +344,14 @@ class Useful(commands.Cog):
             txt = ""
 
             try:
-                async for message in ctx.channel.history(limit=None, after=start, oldest_first=True):
+                async for message in start.channel.history(limit=None, after=start, oldest_first=True):
                     if message.author == start.author:
-                        if message != end and len(txt) >= 20000:
-                            txt += message.content + "\n"
-                            nb += 1
+                        if message.id != end_id:
+                            if len(txt) <= 20000:
+                                txt += message.content + "\n"
+                                nb += 1
+                                continue
+                        break
             except discord.Forbidden:
                 await ctx.send("Je n'ai pas accès à tous les messages demandés")
             except discord.HTTPException:
