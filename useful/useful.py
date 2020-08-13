@@ -289,13 +289,13 @@ class Useful(commands.Cog):
         em_color = await ctx.embed_color()
         guild = ctx.guild
         try:
-            start = await self.bot.fetch_message(start_id)
+            start = await ctx.fetch_message(int(start_id))
         except:
             await ctx.send("**Erreur** • L'identfiant du message de début n'est pas valide.")
             return
 
         try:
-            end = await self.bot.fetch_message(end_id)
+            end = await ctx.fetch_message(int(end_id))
         except:
             await ctx.send("**Erreur** • L'identfiant du message de fin n'est pas valide.")
             return
