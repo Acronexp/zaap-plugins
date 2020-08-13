@@ -190,6 +190,7 @@ class Useful(commands.Cog):
         """Enregistrer une suite de messages sur un fichier .txt"""
 
     @_tale.command()
+    @commands.max_concurrency(1, commands.BucketType.channel)
     async def now(self, ctx, teller: discord.Member = None, channel: discord.TextChannel = None):
         """Enregistre les messages d'un membre sur un salon à partir de maintenant
 
@@ -218,26 +219,27 @@ class Useful(commands.Cog):
             return file
 
         async def post_all(txt: str):
-            chunks = txt.split("\n")
-            page = 1
-            post = pre_txt
-            for chunk in chunks:
-                if len(chunk) + len(post) < 1950:
-                    post += chunk + "\n"
-                else:
+            if len(txt) < 10000:
+                chunks = txt.split("\n")
+                page = 1
+                post = pre_txt
+                for chunk in chunks:
+                    if len(chunk) + len(post) < 1950:
+                        post += chunk + "\n"
+                    else:
+                        em = discord.Embed(description=post, color=em_color)
+                        em.set_footer(text=f"Page #{page}")
+                        await channel.send(embed=em)
+                        post = chunk + "\n"
+                        page += 1
+                if post:
                     em = discord.Embed(description=post, color=em_color)
                     em.set_footer(text=f"Page #{page}")
                     await channel.send(embed=em)
-                    post = chunk + "\n"
-                    page += 1
-            if post:
-                em = discord.Embed(description=post, color=em_color)
-                em.set_footer(text=f"Page #{page}")
-                await channel.send(embed=em)
 
         em = discord.Embed(description=f"🔴 **Début de l'enregistrement**\n"
                                        f"Pour arrêter l'enregistrement, {teller.mention} doit dire \"stop\".\n"
-                                       f"L'enregistrement s'arrête seul si le conteur ne dit rien pendant plus de 5 min ou si l'histoire dépasse 50 000 caractères.\n",
+                                       f"L'enregistrement s'arrête seul si le conteur ne dit rien pendant plus de 5 min ou si l'histoire dépasse 20 000 caractères.\n",
                            color=em_color)
         debut = await channel.send(embed=em)
 
@@ -247,7 +249,7 @@ class Useful(commands.Cog):
             except asyncio.TimeoutError:
                 em = discord.Embed(description="🔴 **Fin auto. de l'enregistrement**\n"
                                                "Aucun message n'a été écrit depuis 5 min.", color=em_color)
-                em.set_footer(text="Veuillez patienter...")
+                em.set_footer(text="Veuillez patienter pendant la génération du fichier .txt")
                 await channel.send(embed=em, delete_after=20)
                 try:
                     async with channel.typing():
@@ -261,10 +263,10 @@ class Useful(commands.Cog):
                 return
             else:
                 if msg.content:
-                    if msg.content.lower() == "stop" or len(txt) >= 50000:
+                    if msg.content.lower() == "stop" or len(txt) >= 20000:
                         em = discord.Embed(description="🔴 **Fin de l'enregistrement**\n"
                                                        "Il y a eu {} messages enregistrés.".format(nb), color=em_color)
-                        em.set_footer(text="Veuillez patienter...")
+                        em.set_footer(text="Veuillez patienter pendant la génération du fichier .txt")
                         await channel.send(embed=em, delete_after=20)
                         try:
                             async with channel.typing():
@@ -280,6 +282,94 @@ class Useful(commands.Cog):
                         txt += msg.content + "\n"
                         nb += 1
 
+    @_tale.command()
+    @commands.max_concurrency(1, commands.BucketType.channel)
+    async def get(self, ctx, start_id, end_id):
+        """Enregistre rétroactivement les messages d'un membre sur un salon"""
+        em_color = await ctx.embed_color()
+        guild = ctx.guild
+        try:
+            start = await guild.fetch_message(start_id)
+        except:
+            await ctx.send("**Erreur** • L'identfiant du message de début n'est pas valide.")
+            return
+
+        try:
+            end = await guild.fetch_message(end_id)
+        except:
+            await ctx.send("**Erreur** • L'identfiant du message de fin n'est pas valide.")
+            return
+
+        author = start.author
+        channel = start.channel
+
+        async def write(txt: str):
+            file = open(filepath, "w")
+            file.write(txt)
+            file.close()
+            return file
+
+        async def post_all(txt: str):
+            if len(txt) < 10000:
+                chunks = txt.split("\n")
+                page = 1
+                post = pre_txt
+                for chunk in chunks:
+                    if len(chunk) + len(post) < 1950:
+                        post += chunk + "\n"
+                    else:
+                        em = discord.Embed(description=post, color=em_color)
+                        em.set_footer(text=f"Page #{page}")
+                        await channel.send(embed=em)
+                        post = chunk + "\n"
+                        page += 1
+                if post:
+                    em = discord.Embed(description=post, color=em_color)
+                    em.set_footer(text=f"Page #{page}")
+                    await channel.send(embed=em)
+
+        if start.author == end.author:
+            em = discord.Embed(description=f"🔴 **Enregistrement des messages en cours**\n"
+                                           f"Le processus peut être long si le nombre de messages est important.\n"
+                                           f"Sachez qu'il est impossible d'enregistrer plus de 20 000 caractères à la fois.",
+                               color=em_color)
+            info = await start.channel.send(embed=em)
+            path = str(self.temp)
+            filepath = path + "/{1}_{0}.txt".format(author.name, start.timestamp.strftime("%Y%m%d%H%M"))
+            nb = 0
+            pre_txt = "| Auteur = {}\n" \
+                      "| Salon = #{}\n" \
+                      "| Date de début = {}\n\n".format(str(author), start.channel.name,
+                                                        start.timestamp.strftime("%d/%m/%Y %H:%M"))
+            txt = ""
+
+            try:
+                async for message in ctx.channel.history(limit=None, after=start, oldest_first=True):
+                    if message.author == start.author:
+                        if message != end and len(txt) >= 20000:
+                            txt += message.content + "\n"
+                            nb += 1
+            except discord.Forbidden:
+                await ctx.send("Je n'ai pas accès à tous les messages demandés")
+            except discord.HTTPException:
+                await ctx.send("Une erreur Discord m'empêche de continuer la récolte des messages demandée")
+
+            if txt:
+                em = discord.Embed(description="🔴 **Enregistrement terminé**\n"
+                                               "Il y a eu {} messages récupérés entre {} et {}.".format(nb, start.timestamp.strftime("%Hh%M"),
+                                                                                                        end.timestamp.strftime("%Hh%M")), color=em_color)
+                em.set_footer(text="Veuillez patienter pendant la génération du fichier .txt")
+                await channel.send(embed=em, delete_after=20)
+                try:
+                    async with channel.typing():
+                        await post_all(txt)
+                        await write(pre_txt + txt)
+                    await channel.send(files=[discord.File(filepath)])
+                    os.remove(filepath)
+                except:
+                    await channel.send("**Erreur** • Je n'ai pas réussi à upload le fichier...")
+                await info.delete()
+                return
 
     @commands.Cog.listener()
     async def on_message(self, message):
