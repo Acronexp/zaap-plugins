@@ -284,7 +284,7 @@ class Useful(commands.Cog):
 
     @_tale.command()
     @commands.max_concurrency(1, commands.BucketType.channel)
-    async def get(self, ctx, start_id, end_id):
+    async def get(self, ctx, start_id: int, end_id: int):
         """Enregistre rétroactivement les messages d'un membre sur un salon"""
         em_color = await ctx.embed_color()
         guild = ctx.guild
