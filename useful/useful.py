@@ -351,7 +351,12 @@ class Useful(commands.Cog):
                                 txt += message.content + "\n"
                                 nb += 1
                                 continue
-                        break
+                            break
+                        else:
+                            txt += message.content + "\n"
+                            nb += 1
+                            break
+
             except discord.Forbidden:
                 await ctx.send("Je n'ai pas accès à tous les messages demandés")
             except discord.HTTPException:
