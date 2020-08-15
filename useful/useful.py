@@ -384,6 +384,83 @@ class Useful(commands.Cog):
         else:
             await ctx.send("**Auteurs différents** • L'auteur du message de départ et de fin doit être le même.")
 
+    @_tale.command()
+    @commands.max_concurrency(1, commands.BucketType.channel)
+    async def compile(self, ctx, start_id: int, end_id: int):
+        """Compile la sélection de messages en un seul message / séries de messages (embed)
+
+        Limité à 10000 caractères (équivalent à 4 messages long. max.)
+        <start_id> = Identifiant du premier message (utiliser le mode développeur)
+        <end_id> = Identifiant du dernier message"""
+        em_color = await ctx.embed_color()
+        guild = ctx.guild
+        try:
+            start = await ctx.fetch_message(int(start_id))
+        except:
+            await ctx.send("**Erreur** • L'identfiant du message de début n'est pas valide.")
+            return
+
+        try:
+            end = await ctx.fetch_message(int(end_id))
+        except:
+            await ctx.send("**Erreur** • L'identfiant du message de fin n'est pas valide.")
+            return
+
+        author = start.author
+        channel = start.channel
+
+        async def post_all(txt: str):
+            if len(txt) < 10000:
+                chunks = txt.split("\n")
+                page = 1
+                post = ""
+                for chunk in chunks:
+                    if len(chunk) + len(post) < 1950:
+                        post += chunk + "\n"
+                    else:
+                        em = discord.Embed(description=post, color=author.color, timestamp=start.created_at)
+                        em.set_author(name=author.name, url=start.jump_url, icon_url=author.avatar_url)
+                        em.set_footer(text=f"Page #{page}")
+                        await channel.send(embed=em)
+                        post = chunk + "\n"
+                        page += 1
+                if post:
+                    em = discord.Embed(description=post, color=author.color, timestamp=start.created_at)
+                    em.set_author(name=author.name, url=start.jump_url, icon_url=author.avatar_url)
+                    em.set_footer(text=f"Page #{page}")
+                    await channel.send(embed=em)
+
+        if start.author == end.author:
+            txt = ""
+            nb = 0
+            try:
+                async for message in start.channel.history(limit=None, after=start, oldest_first=True):
+                    if message.author == start.author:
+                        if message.id != end_id:
+                            if len(txt) <= 10000:
+                                txt += message.content + "\n"
+                                nb += 1
+                                continue
+                            break
+                        else:
+                            txt += message.content + "\n"
+                            nb += 1
+                            break
+
+            except discord.Forbidden:
+                await ctx.send("Je n'ai pas accès à tous les messages demandés")
+            except discord.HTTPException:
+                await ctx.send("Une erreur Discord m'empêche de continuer la récolte des messages demandée")
+
+            if txt:
+                try:
+                    async with channel.typing():
+                        await post_all(txt)
+                except:
+                    await channel.send("**Erreur** • Je n'ai pas réussi à afficher le message compilé...")
+        else:
+            await ctx.send("**Auteurs différents** • L'auteur du message de départ et de fin doit être le même.")
+
     @commands.Cog.listener()
     async def on_message(self, message):
         if message.guild:
