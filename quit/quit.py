@@ -164,7 +164,7 @@ class Quit(commands.Cog):
                         await ctx.send(
                             f"**Erreur** • La liste {n} n'existe pas. Faîtes `;quitmsg lists` pour voir les listes disponibles.")
                         return
-                await self.config.guild(ctx.guild).used.set((i.lower() for i in noms))
+                await self.config.guild(ctx.guild).used.set([i.lower() for i in noms])
                 await ctx.send(
                     "**Changement réalisé** • Les listes suivantes seront désormais utilisées: {}".format(", ".join(noms)))
             else:
