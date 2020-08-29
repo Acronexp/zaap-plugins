@@ -238,7 +238,12 @@ class Pixel(commands.Cog):
         complete_list = await self.files_list(guild)
         for n in complete_list:
             if not self.any_num(n):
-                complete_list.append(f"{n}1")
+                if f"{n}1" not in complete_list:
+                    complete_list.append(f"{n}1")
+            else:
+                base = re.compile(r"([A-z]+)(\d*)?", re.DOTALL | re.IGNORECASE).findall(name)[0][0]
+                if base not in complete_list:
+                    complete_list.append(base)
 
         if name in complete_list:
             base = re.compile(r"([A-z]+)(\d*)?", re.DOTALL | re.IGNORECASE).findall(name)[0][0]
