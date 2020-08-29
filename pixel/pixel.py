@@ -234,7 +234,13 @@ class Pixel(commands.Cog):
         if name.lower() in ["list", "liste"]:
             await ctx.send("**Nom réservé** • Ce nom est déjà utilisé par le bot pour des fonctionnalités spécifiques.")
             return
-        if name in await self.files_list(guild):
+
+        complete_list = await self.files_list(guild)
+        for n in complete_list:
+            if not self.any_num(n):
+                complete_list.append(f"{n}1")
+
+        if name in complete_list:
             base = re.compile(r"([A-z]+)(\d*)?", re.DOTALL | re.IGNORECASE).findall(name)[0][0]
             if base != name:
                 new_name = await self.find_disp_name(guild, base)
