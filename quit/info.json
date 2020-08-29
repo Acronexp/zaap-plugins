@@ -1,0 +1,8 @@
+{
+	"author": ["Acrone"],
+	"description": "Messages de départs personnalisables",
+	"install_msg": "Merci d'avoir installé ce module. Utilisez `[p]help quitmsg` pour plus d'infos.",
+	"short": "Messages de départs.",
+	"tags": ["social", "quit", "community"],
+	"type": "COG"
+}
