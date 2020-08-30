@@ -1,5 +1,5 @@
 import logging
-from random import random
+import random
 
 import discord
 from redbot.core import Config, checks, commands
