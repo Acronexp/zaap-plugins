@@ -178,7 +178,7 @@ class Quit(commands.Cog):
     async def on_member_remove(self, user):
         guild = user.guild
         if await self.config.guild(guild).channel():
-            channel = await self.config.guild(guild).channel()
+            channel = self.bot.get_channel(await self.config.guild(guild).channel())
             lists = [i for sub in [DEFAULT_LISTS[l] for l in await self.config.guild(guild).used()] for i in sub]
             msg = random.choice(lists)
             formated = msg.format(user=user, guild=user.guild, bot=self.bot.user)
