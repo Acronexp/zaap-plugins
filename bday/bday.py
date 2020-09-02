@@ -56,6 +56,7 @@ class Bday(commands.Cog):
         author = ctx.author
         if await self.config.user(author).date():
             await self.config.user(author).date.set(None)
+            await self.config.user(author).year.set(None)
             await ctx.send(
                 "**Date retirée** • Votre anniversaire ne sera plus souhaité par les serveurs ayant activé l'option.")
         else:
