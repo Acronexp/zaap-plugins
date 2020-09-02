@@ -159,7 +159,7 @@ class Bday(commands.Cog):
                                 try:
                                     member = g.get_member(user)
                                     role = g.get_role(guilds[guild]["role"])
-                                    await member.add_roles([role], reason="Anniversaire", atomic=True)
+                                    await member.add_roles(role, reason="Anniversaire")
                                 except:
                                     logger.error("Impossible de donner le rôle ID:{} à {}".format(guilds[guild]["role"], u.name), exc_info=True)
                         if send:
