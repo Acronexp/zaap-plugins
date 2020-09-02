@@ -1,0 +1,9 @@
+{
+	"author": ["Acrone"],
+	"description": "Donner automatiquement un rôle d'anniversaire à un membre !",
+	"install_msg": "Merci d'avoir installé ce module. Utilisez `[p]help pix` pour plus d'infos.",
+	"short": "Rôle et message d'anniversaire auto.",
+	"tags": ["social", "community", "birthday"],
+	"requirements" : [],
+	"type": "COG"
+}
