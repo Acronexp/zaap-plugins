@@ -18,7 +18,7 @@ class Bday(commands.Cog):
                         "year": None}
         default_guild = {"role": None,
                          "send_msg": False,
-                         "msg": "Bon anniversaire **{user.name}** !\n─ Les membres de {server.name}"}
+                         "msg": "Bon anniversaire **{user.name}** !\n─ Les membres de {guild.name}"}
         self.config.register_user(**default_user)
         self.config.register_guild(**default_guild)
         self.last_day = None
@@ -154,14 +154,14 @@ class Bday(commands.Cog):
                             g = self.bot.get_guild(guild)
                             if guilds[guild]["send_msg"]:
                                 send = True
-                                em.add_field(name=f"Message de {g.name}", value=guilds[guild]["msg"].format(user=u, guild=g))
+                                em.add_field(name=f"Message de {g.name}", value=guilds[guild]["msg"].format(user=u, guild=g, server=g))
                             if guilds[guild]["role"]:
                                 try:
                                     member = g.get_member(user)
                                     role = g.get_role(guilds[guild]["role"])
                                     await member.add_roles([role], reason="Anniversaire", atomic=True)
                                 except:
-                                    pass
+                                    logger.error("Impossible de donner le rôle ID:{} à {}".format(guilds[guild]["role"], u.name), exc_info=True)
                         if send:
                             try:
                                 await u.send(embed=em)
