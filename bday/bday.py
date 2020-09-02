@@ -172,15 +172,15 @@ class Bday(commands.Cog):
                     for guild in guilds:
                         if guilds[guild]["role"]:
                             g = self.bot.get_guild(guild)
-                            role = g.get_role(guilds[guild]["role"])
-                            if role in u.roles:
-                                try:
-                                    member = g.get_member(user)
-                                    await member.remove_roles(role, reason="Fin de l'anniversaire")
-                                except:
-                                    logger.error(
-                                        "Impossible de retirer le rôle ID:{} à {}".format(guilds[guild]["role"], u.name),
-                                        exc_info=True)
+                            try:
+                                member = g.get_member(user)
+                                role = g.get_role(guilds[guild]["role"])
+                                if role in g.roles:
+                                        await member.remove_roles(role, reason="Fin de l'anniversaire")
+                            except:
+                                logger.error(
+                                    "Impossible de retirer le rôle ID:{} à {}".format(guilds[guild]["role"], u.name),
+                                    exc_info=True)
 
             logger.info("Vérification d'anniversaire réalisée pour {}".format(now.strftime("%d/%m/%Y")))
 
