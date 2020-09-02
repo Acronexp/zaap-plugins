@@ -129,6 +129,13 @@ class Bday(commands.Cog):
             await ctx.send(
                 "**Option activée** • Les membres du serveur recevront un message auto. à leur anniversaire (par MP). Voir `;help modbday message`.")
 
+    @commands.command()
+    @checks.is_owner()
+    async def bdaycheck(self, ctx):
+        """Reset le cache et performe de nouveau un check des anniversaire de la journée (pour ceux pour lesquels il n'a pas été encore fêté)"""
+        self.last_day = None
+        await ctx.send("**Reset effectué** • Les membres n'ayant rien reçu aujourd'hui devraient pouvoir le recevoir désormais.")
+
     @commands.Cog.listener() # J'utilise ça pour éviter d'avoir à utiliser une boucle alors qu'on a besoin que d'UN check par jour, pas 3000
     async def on_message(self, message):
         now = datetime.now()
