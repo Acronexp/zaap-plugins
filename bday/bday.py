@@ -27,14 +27,27 @@ class Bday(commands.Cog):
     async def bday(self, ctx, date: str):
         """Donne au bot votre date de naissance (JJ/MM)
 
+        Mettre ? à la place de la date vous donnera la date que vous avez rentré dans le bot (s'il y en a une)
         Cette valeur est valable dans tous les serveurs où se trouve le bot"""
         author = ctx.author
-        if len(date) == 5 and "/" in date:
-            await self.config.user(author).date.set(date)
-            await ctx.send("**Date ajoutée** • Vous recevrez un rôle dédié le jour de votre anniversaire sur les serveurs ayant activé l'option.")
+        if date != "?":
+            if len(date) == 5 and "/" in date:
+                await self.config.user(author).date.set(date)
+                await ctx.send("**Date ajoutée** • Vous recevrez un rôle dédié le jour de votre anniversaire sur les serveurs ayant activé l'option.")
+            else:
+                await ctx.send(
+                    "**Erreur** • La date doit être rentrée au format JJ/MM. Si vous voulez retirer votre date de naissance, utilisez `;forgetbday`.")
+        elif await self.config.user(author).date():
+            if await self.config.user(author).year() == datetime.now().strftime("%Y"):
+                await ctx.send(
+                    "**Info** • Vous avez déjà indiqué être né un **{}**. Il a déjà été fêté cette année.".format(await self.config.user(author).date()))
+            else:
+                await ctx.send(
+                    "**Info** • Vous avez déjà indiqué être né un **{}**. Il n'a pas été encore fêté cette année.".format(
+                        await self.config.user(author).date()))
         else:
             await ctx.send(
-                "**Erreur** • La date doit être rentrée au format JJ/MM. Si vous voulez retirer votre date de naissance, utilisez `;forgetbday`.")
+                "**Info** • Vous n'avez pas encore indiqué de date d'anniversaire.")
 
     @commands.command()
     @commands.guild_only()
