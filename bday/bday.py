@@ -40,10 +40,10 @@ class Bday(commands.Cog):
         elif await self.config.user(author).date():
             if await self.config.user(author).year() == datetime.now().strftime("%Y"):
                 await ctx.send(
-                    "**Info** • Vous avez déjà indiqué être né un **{}**. Il a déjà été fêté cette année.".format(await self.config.user(author).date()))
+                    "**Info** • Vous avez déjà indiqué être né un **{}**. Je l'ai déjà été fêté avec vous cette année.".format(await self.config.user(author).date()))
             else:
                 await ctx.send(
-                    "**Info** • Vous avez déjà indiqué être né un **{}**. Il n'a pas été encore fêté cette année.".format(
+                    "**Info** • Vous avez déjà indiqué être né un **{}**. Je ne l'ai pas (encore) fêté avec vous cette année.".format(
                         await self.config.user(author).date()))
         else:
             await ctx.send(
