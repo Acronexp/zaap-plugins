@@ -6,7 +6,7 @@ from redbot.core import Config, checks, commands
 
 logger = logging.getLogger("red.zaap-plugins.bday")
 
-class Quit(commands.Cog):
+class Bday(commands.Cog):
     """Gestionnaire de messages de départ"""
 
     def __init__(self, bot):
@@ -14,7 +14,8 @@ class Quit(commands.Cog):
         self.bot = bot
         self.config = Config.get_conf(self, identifier=736144321857978388, force_registration=True)
 
-        default_user = {"date": None}
+        default_user = {"date": None,
+                        "year": None}
         default_guild = {"role": None,
                          "send_msg": False,
                          "msg": "Bon anniversaire **{user.name}** !\n─ Les membres de {server.name}"}
@@ -34,6 +35,20 @@ class Quit(commands.Cog):
         else:
             await ctx.send(
                 "**Erreur** • La date doit être rentrée au format JJ/MM. Si vous voulez retirer votre date de naissance, utilisez `;forgetbday`.")
+
+    @commands.command()
+    @commands.guild_only()
+    @checks.admin_or_permissions(manage_messages=True)
+    async def userbday(self, ctx, user: discord.User, date: str):
+        """Donne la date de naissance d'un membre (JJ/MM)"""
+        author = user
+        if len(date) == 5 and "/" in date:
+            await self.config.user(author).date.set(date)
+            await ctx.send(
+                "**Date ajoutée** • La date d'anniversaire du membre a été réglée.")
+        else:
+            await ctx.send(
+                "**Erreur** • La date d'anniversaire doit être au format JJ/MM.")
 
     @commands.command()
     async def forgetbday(self, ctx):
@@ -109,26 +124,28 @@ class Quit(commands.Cog):
             guilds = await self.config.all_guilds()
             for user in users:
                 if users[user]["date"] == now.strftime("%d/%m"):
-                    send = False
-                    u = self.bot.get_user(user)
-                    em = discord.Embed(title="Bon anniversaire !")
-                    for guild in guilds:
-                        g = self.bot.get_guild(guild)
-                        if guilds[guild]["send_msg"]:
-                            send = True
-                            em.add_field(name=f"Message de {g.name}", value=guilds[guild]["msg"].format(user=u, guild=g))
-                        if guilds[guild]["role"]:
+                    if users[user]["year"] != now.strftime("%Y"): # Vérifier qu'on a pas déjà fêté son anniv cette année, en cas de redémarrage etc.
+                        send = False
+                        u = self.bot.get_user(user)
+                        await self.config.user(u).year.set(now.strftime("%Y"))
+                        em = discord.Embed(title="Bon anniversaire !")
+                        for guild in guilds:
+                            g = self.bot.get_guild(guild)
+                            if guilds[guild]["send_msg"]:
+                                send = True
+                                em.add_field(name=f"Message de {g.name}", value=guilds[guild]["msg"].format(user=u, guild=g))
+                            if guilds[guild]["role"]:
+                                try:
+                                    member = g.get_member(user)
+                                    role = g.get_role(guilds[guild]["role"])
+                                    await member.add_roles([role], reason="Anniversaire", atomic=True)
+                                except:
+                                    pass
+                        if send:
                             try:
-                                member = g.get_member(user)
-                                role = g.get_role(guilds[guild]["role"])
-                                await member.add_roles([role], reason="Anniversaire", atomic=True)
+                                await u.send(embed=em)
                             except:
                                 pass
-                    if send:
-                        try:
-                            await u.send(embed=em)
-                        except:
-                            pass
             logger.info("Vérification d'anniversaire réalisée pour {}".format(now.strftime("%d/%m/%Y")))
 
 
