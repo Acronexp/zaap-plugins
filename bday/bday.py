@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import discord
 from redbot.core import Config, checks, commands
@@ -139,15 +139,16 @@ class Bday(commands.Cog):
     @commands.Cog.listener() # J'utilise ça pour éviter d'avoir à utiliser une boucle alors qu'on a besoin que d'UN check par jour, pas 3000
     async def on_message(self, message):
         now = datetime.now()
+        hier = now - timedelta(days=1)
         if now.date() != self.last_day:
             self.last_day = now.date()
             users = await self.config.all_users()
             guilds = await self.config.all_guilds()
             for user in users:
+                u = self.bot.get_user(user)
                 if users[user]["date"] == now.strftime("%d/%m"):
                     if users[user]["year"] != now.strftime("%Y"): # Vérifier qu'on a pas déjà fêté son anniv cette année, en cas de redémarrage etc.
                         send = False
-                        u = self.bot.get_user(user)
                         await self.config.user(u).year.set(now.strftime("%Y"))
                         em = discord.Embed(title="Bon anniversaire !")
                         for guild in guilds:
@@ -159,7 +160,7 @@ class Bday(commands.Cog):
                                 try:
                                     member = g.get_member(user)
                                     role = g.get_role(guilds[guild]["role"])
-                                    await member.add_roles(role, reason="Anniversaire")
+                                    await member.add_roles(role, reason="Anniversaire aujourd'hui")
                                 except:
                                     logger.error("Impossible de donner le rôle ID:{} à {}".format(guilds[guild]["role"], u.name), exc_info=True)
                         if send:
@@ -167,6 +168,20 @@ class Bday(commands.Cog):
                                 await u.send(embed=em)
                             except:
                                 pass
+                elif users[user]["date"] == hier.strftime("%d/%m"):
+                    for guild in guilds:
+                        if guilds[guild]["role"]:
+                            g = self.bot.get_guild(guild)
+                            role = g.get_role(guilds[guild]["role"])
+                            if role in u.roles:
+                                try:
+                                    member = g.get_member(user)
+                                    await member.remove_roles(role, reason="Fin de l'anniversaire")
+                                except:
+                                    logger.error(
+                                        "Impossible de retirer le rôle ID:{} à {}".format(guilds[guild]["role"], u.name),
+                                        exc_info=True)
+
             logger.info("Vérification d'anniversaire réalisée pour {}".format(now.strftime("%d/%m/%Y")))
 
 
