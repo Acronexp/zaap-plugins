@@ -1,0 +1,11 @@
+{
+	"author": ["Acrone"],
+	"description": "Contrôle d'un compte twitter depuis Discord",
+	"install_msg": "Merci d'avoir installé ce module.",
+	"short": "Utilisation de Twitter",
+	"tags": ["twitter", "social", "api"],
+	"requirements" : [
+		"tweepy"
+    ],
+	"type": "COG"
+}
