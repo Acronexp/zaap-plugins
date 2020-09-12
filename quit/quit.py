@@ -1,5 +1,7 @@
 import logging
 import random
+import time
+from datetime import timedelta
 
 import discord
 from redbot.core import Config, checks, commands
@@ -26,7 +28,8 @@ DEFAULT_LISTS = {
         "Plus besoin de bloquer {user.name}, il est parti !",
         "{user.name} a pris sa retraite.",
         "{user.name} a pris congé.",
-        "{user.name} est parti voir ailleurs."],
+        "{user.name} est parti voir ailleurs.",
+        "{user.name} n'est plus sur la liste."],
     "default_english": [
         "Bye {user.name} !",
         "Goodbye, {user.name} !",
@@ -45,14 +48,17 @@ DEFAULT_LISTS = {
         "{user.name} est parti se cacher sur d'autres serveurs...",
         "{user.name} n'avait pas de masque.",
         "{user.name} est parti s'entrainer pour devenir le meilleur dresseur.",
-        "{user.name} est parti dans les montagnes s'entrainer pour maitriser l'armure de bronze du Dragon.",
+        "{user.name} est parti dans les montagnes s'entrainer pour maîtriser l'armure du Dragon.",
         "{user.name} n'est plus là.",
         "{user.name} est parti prendre l'air.",
         "{user.name} s'est téléporté ailleurs.",
         "{user.name} est sorti de cette prison qu'est l'appartenance à ce serveur.",
         "{user.name} est désormais de l'autre côté du miroir.",
         "{user.name} est parti chercher les 7 boules de cristal.",
-        "{user.name} a fait une overdose de chloroquine..."
+        "{user.name} a fait une overdose de chloroquine...",
+        "Adieu, {user.name}. Tu ne nous manquera pas.",
+        "{user.name}, tu hors de ma vue.",
+        "{user.name} a rejoint la fosse aux randoms."
     ]
 }
 
@@ -70,8 +76,10 @@ class Quit(commands.Cog):
                          "meta_deco": "📣 {}",
                          "used": ["default_french"],
                          "delete_delay": 0,
-                         "custom_list": []}
+                         "custom_list": [],
+                         "toggle_temps": False}
         self.config.register_guild(**default_guild)
+        self.temps = {}
 
     @commands.group(name="quitmsg")
     @commands.guild_only()
@@ -91,6 +99,20 @@ class Quit(commands.Cog):
         else:
             await self.config.guild(ctx.guild).channel.set(None)
             await ctx.send(f"**Succès** • Plus aucun salon n'affichera les messages de départ.")
+
+    @_quitmsg.command()
+    async def chrono(self, ctx):
+        """Activer/désactiver l'ajout du chrono de connexion lorsqu'il est court (quelqu'un qui vient et repart aussitôt"""
+        if await self.config.guild(ctx.guild).channel():
+            if await self.config.guild(ctx.guild).toggle_temps():
+                await self.config.guild(ctx.guild).toggle_temps.set(False)
+                await ctx.send(f"**Désactivé** • Le chrono ne s'affichera plus.")
+            else:
+                await self.config.guild(ctx.guild).toggle_temps.set(True)
+                await ctx.send(f"**Activé** • Le temps chrono s'affichera si un membre a quitté le serveur dans un temps court après son arrivée.")
+        else:
+            await ctx.send(
+                f"**Impossible** • Activez d'abord les messages d'arrivée avec `;quitmsg toggle` avant de modifier les listes utilisées.")
 
     @_quitmsg.command()
     async def embed(self, ctx):
@@ -174,6 +196,27 @@ class Quit(commands.Cog):
             await ctx.send(
                 f"**Impossible** • Activez d'abord les messages d'arrivée avec `;quitmsg toggle` avant de modifier les listes utilisées.")
 
+    def seconds_format(self, seconds: int):
+        j = 0
+        while seconds >= 86400:
+            j += 1
+            seconds -= 86400
+        h, m, s = [int(n) for n in str(timedelta(seconds=seconds)).split(":")]
+        all = []
+        if j: all.append(str(j) + "J")
+        if h: all.append(str(h) + "h")
+        if m: all.append(str(m) + "m")
+        if s: all.append(str(s) + "s")
+        txt = " ".join(all)
+        return txt
+
+    @commands.Cog.listener()
+    async def on_member_join(self, user):
+        guild = user.guild
+        if await self.config.guild(guild).channel():
+            if await self.config.guild(guild).toggle_temps():
+                self.temps[user.id] = time.time()
+
     @commands.Cog.listener()
     async def on_member_remove(self, user):
         guild = user.guild
@@ -196,6 +239,13 @@ class Quit(commands.Cog):
                     color = 0xf04747
 
                 em = discord.Embed(description=final, color=color)
+                if await self.config.guild(guild).toggle_temps():
+                    chrono = time.time() - self.temps[user.id]
+                    if chrono <= 300:
+                        chrono = self.seconds_format(chrono)
+                        rdn = random.choice(["A survécu", "Est resté", "Est parti après", "A quitté après",
+                                             "A lurk pendant"])
+                        em.set_footer(text=f"{rdn} {chrono}")
                 if await self.config.guild(guild).delete_delay() > 0:
                     await channel.send(embed=em, delete_after= await self.config.guild(guild).delete_delay())
                 else:

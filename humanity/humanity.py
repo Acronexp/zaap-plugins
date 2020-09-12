@@ -192,8 +192,8 @@ class Humanity(commands.Cog):
                    "A chaque tour, un maître (désigné par le bot, chaque joueur l'étant tour à tour) pioche une carte noire au hasard. " \
                    "Les cartes noires possèdent des espaces vides (représentés par ❔) que les élèves (autre joueurs) doivent remplir avec des cartes blanches." \
                    " Ces cartes blanches sont des morceaux de phrases, voire simplement un unique mot, prédéfinies en avance qui permettent justement de combler les espaces vides. " \
-                   "Une fois que tout le monde a proposé sa carte, le maître va pouvoir choisir la combinaison de cartes (la noire avec la ou les blanche.s) qu'il préfère. Bien évidemment les propositions sont anonymes " \
-                   "(réalisées en MP).\n" \
+                   "Une fois que tout le monde a proposé sa carte, le maître va pouvoir choisir la combinaison de cartes " \
+                   "(la noire avec la ou les blanche.s) qu'il préfère. Bien évidemment les propositions sont anonymes (réalisées en MP).\n" \
                    "Le joueur ayant remporté {} manches gagne la partie.".format(await self.config.guild(ctx.guild).original_win())
         em_original = discord.Embed(color=Palette.white, title="Règles • Original", description=original)
 
@@ -209,8 +209,9 @@ class Humanity(commands.Cog):
 
         course = "*Mode exclusif à Zaap, dérivé des règles du mode Plus*\n" \
                  "Ce mode fonctionne comme le mode Plus mais est plus \"compétitif\" car comme au Uno, les joueurs partent avec un certain nombre de cartes ({}) et doivent s'en débarasser en premier. " \
-                 "Cela signifie que lorsqu'un joueur élève voit sa carte blanche (ou jaune) choisie comme favorite du joueur maître, il ne repioche pas de carte. Il repioche une carte que si le round n'a pas été gagné." \
-                 " En plus de cela :\n" \
+                 "Cela signifie que lorsqu'un joueur élève voit sa carte blanche (ou jaune) choisie comme favorite du joueur maître, il ne repioche pas de carte. " \
+                 "Il ne repioche une carte que si le round n'a pas été gagné. " \
+                 "En plus de cela :\n" \
                  "- Les cartes magenta ne sont pas disponibles\n" \
                  "- Le bot ne sélectionne que des cartes noires avec qu'un seul espace vide, de façon à ne se débarasser que d'une seule carte par round max\n" \
                  "- Si un joueur ne joue pas (temps de réponse écoulé) il doit piocher une carte supplémentaire\n" \

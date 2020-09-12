@@ -420,13 +420,6 @@ class Social(commands.Cog):
     @commands.Cog.listener()
     async def on_member_update(self, before, after):
         if isinstance(after, discord.Member):
-            if after.name != before.name:
-                await self.add_logs(after, f"Changement de pseudo » {after.name}")
-                async with self.config.member(after).names() as names:
-                    if after.name not in names:
-                        names.append(after.name)
-                        if len(names) > 10:
-                            await self.config.member(after).names.set(names[-10:])
             if after.display_name != before.display_name:
                 if after.display_name == after.name:
                     await self.add_logs(after, f"A retiré son surnom ({before.nick})")
@@ -437,6 +430,17 @@ class Social(commands.Cog):
                             nicknames.append(after.nick)
                             if len(nicknames) > 10:
                                 await self.config.member(after).nicknames.set(nicknames[-10:])
+
+    @commands.Cog.listener()
+    async def on_user_update(self, before, after):
+        if isinstance(after, discord.Member):
+            if after.name != before.name:
+                await self.add_logs(after, f"Changement de pseudo » {after.name}")
+                async with self.config.member(after).names() as names:
+                    if after.name not in names:
+                        names.append(after.name)
+                        if len(names) > 10:
+                            await self.config.member(after).names.set(names[-10:])
             if after.avatar_url != before.avatar_url:
                 url = before.avatar_url.split("?")[0]
                 await self.add_logs(after, f"Modification de l'avatar » [@]({url})")
