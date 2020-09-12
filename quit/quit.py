@@ -214,8 +214,7 @@ class Quit(commands.Cog):
     async def on_member_join(self, user):
         guild = user.guild
         if await self.config.guild(guild).channel():
-            if await self.config.guild(guild).toggle_temps():
-                self.temps[user.id] = time.time()
+            self.temps[user.id] = time.time()
 
     @commands.Cog.listener()
     async def on_member_remove(self, user):
@@ -240,12 +239,13 @@ class Quit(commands.Cog):
 
                 em = discord.Embed(description=final, color=color)
                 if await self.config.guild(guild).toggle_temps():
-                    chrono = time.time() - self.temps[user.id]
-                    if chrono <= 300:
-                        chrono = self.seconds_format(chrono)
-                        rdn = random.choice(["A survécu", "Est resté", "Est parti après", "A quitté après",
-                                             "A lurk pendant"])
-                        em.set_footer(text=f"{rdn} {chrono}")
+                    if user.id in self.temps:
+                        chrono = time.time() - self.temps[user.id]
+                        if chrono <= 300:
+                            chrono = self.seconds_format(chrono)
+                            rdn = random.choice(["A survécu", "Est resté", "Est parti après", "A quitté après",
+                                                 "A lurk pendant"])
+                            em.set_footer(text=f"{rdn} {chrono}")
                 if await self.config.guild(guild).delete_delay() > 0:
                     await channel.send(embed=em, delete_after= await self.config.guild(guild).delete_delay())
                 else:
