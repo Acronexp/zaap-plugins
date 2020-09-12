@@ -1,7 +1,6 @@
 import logging
 import random
 import time
-from datetime import timedelta
 
 import discord
 from redbot.core import Config, checks, commands
@@ -197,14 +196,12 @@ class Quit(commands.Cog):
                 f"**Impossible** • Activez d'abord les messages d'arrivée avec `;quitmsg toggle` avant de modifier les listes utilisées.")
 
     def seconds_format(self, seconds: int):
-        j = 0
-        while seconds >= 86400:
-            j += 1
-            seconds -= 86400
-        h, m, s = [int(n) for n in str(timedelta(seconds=seconds)).split(":")]
+        m = s = 0
+        while seconds >= 60:
+            m += 1
+            seconds -= 60
+        s = seconds
         all = []
-        if j: all.append(str(j) + "J")
-        if h: all.append(str(h) + "h")
         if m: all.append(str(m) + "m")
         if s: all.append(str(s) + "s")
         txt = " ".join(all)
