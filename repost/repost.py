@@ -1,5 +1,7 @@
 import logging
 import re
+import time
+from datetime import datetime, timedelta
 
 import discord
 from redbot.core import Config, checks, commands
@@ -23,7 +25,22 @@ class Repost(commands.Cog):
                          "delete_reposts": False,
                          "reposts": {}}
         self.config.register_guild(**default_guild)
-        self.immunity_cache = {}
+        self.immunity_cache = {[[()]]}
+        self.last_clean = None
+
+    async def clean_reposts(self, guild: discord.Guild):
+        if datetime.now().date() != self.last_clean:
+            self.last_clean = datetime.now().date()
+            reposts = await self.config.guild(guild).reposts()
+            two_weeks = datetime.now() - timedelta(weeks=2)
+            for repost in reposts:
+                for e in reposts[repost]:
+                    ts = datetime.fromtimestamp(e[2])
+                    if ts < two_weeks:
+                        reposts.remove(e)
+                if not reposts[repost]:
+                    del reposts[repost]
+            await self.config.guild(guild).reposts.set(reposts)
 
     async def load_cache(self, guild: discord.Guild):
         self.immunity_cache[guild.id] = {"users": await self.config.guild(guild).immune_users(),
@@ -84,6 +101,12 @@ class Repost(commands.Cog):
         else:
             await self.config.guild(guild).link_reposts.set(False)
             await ctx.send("**Désactivé** • Le détecteur de reposts de liens est désactivé.")
+
+    @_repost.command(hidden=True)
+    async def reset(self, ctx):
+        guild = ctx.guild
+        await self.config.guild(guild).reposts.set({})
+        await ctx.send("**Reset effectué**")
 
     @_repost.command(name="delete")
     async def delete_repost(self, ctx):
@@ -232,7 +255,7 @@ class Repost(commands.Cog):
                         if not await self.link_immune(guild, url):
                             if url in await self.config.guild(guild).reposts():
                                 repost = await self.config.guild(guild).reposts.get_raw(url)
-                                repost.append((message.id, message.author.id))
+                                repost.append((message.id, message.channel.id, time.time()))
                                 await self.config.guild(guild).reposts.set_raw(url, value=repost)
                                 if await self.config.guild(guild).delete_reposts():
                                     try:
@@ -245,7 +268,7 @@ class Repost(commands.Cog):
                                     except:
                                         raise PermissionError(f"Impossible d'ajouter un emoji au message {message.id}")
                             else:
-                                repost = [(message.id, message.author.id)]
+                                repost = [(message.id, message.channel.id, time.time())]
                                 await self.config.guild(guild).reposts.set_raw(url, value=repost)
 
     @commands.Cog.listener()
@@ -259,13 +282,13 @@ class Repost(commands.Cog):
                     if repost:
                         txt = ""
                         for r in repost["cases"]:
-                            user = guild.get_member(r[1])
-                            msg = await user.fetch_message(r[0])
+                            channel = self.bot.get_channel(r[1])
+                            msg = await channel.fetch_message(r[0])
                             if not txt:
-                                txt += "**Original** ─ [{} par {}]({})\n".format(msg.created_at.strftime("%d/%m/%Y %H:%M"), user.name,
+                                txt += "**Original** ─ [{} par {}]({})\n".format(msg.created_at.strftime("%d/%m/%Y %H:%M"), msg.author.name,
                                                              msg.jump_url)
                             else:
-                                txt += "• [{} par {}]({})\n".format(msg.created_at.strftime("%d/%m/%Y %H:%M"), user.name,
+                                txt += "• [{} par {}]({})\n".format(msg.created_at.strftime("%d/%m/%Y %H:%M"), msg.author.name,
                                                               msg.jump_url)
                         em = discord.Embed(title="Reposts de \"{}\"".format(repost["url"]), description=txt,
                                            color=await self.bot.get_embed_color(message.channel))
