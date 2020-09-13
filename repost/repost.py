@@ -54,6 +54,9 @@ class Repost(commands.Cog):
         is_yt = re.compile(r'https://www\.youtube\.com/watch\?v=([\w\-]*)', re.DOTALL | re.IGNORECASE).findall(base_link)
         if is_yt:
             return "https://youtu.be/{}".format(is_yt[0])
+        is_tw = re.compile(r'https: // twitter\.com / (?:\w *) / status / (?:\d *)(. *)', re.DOTALL | re.IGNORECASE).findall(base_link)
+        if is_tw:
+            return base_link.replace(is_tw[0], "")
         return base_link
 
     async def get_repost(self, message: discord.Message):
