@@ -98,6 +98,7 @@ class Repost(commands.Cog):
 
     @_repost.command()
     async def toggle(self, ctx):
+        """Active/désactive la détection de reposts de liens"""
         guild = ctx.guild
         if not await self.config.guild(guild).link_reposts():
             await self.config.guild(guild).link_reposts.set(True)
@@ -106,8 +107,9 @@ class Repost(commands.Cog):
             await self.config.guild(guild).link_reposts.set(False)
             await ctx.send("**Désactivé** • Le détecteur de reposts de liens est désactivé.")
 
-    @_repost.command(hidden=True)
-    async def reset(self, ctx):
+    @_repost.command(hidden=True, name="reset")
+    async def repost_reset(self, ctx):
+        """Reset les données de reposts"""
         guild = ctx.guild
         await self.config.guild(guild).reposts.set({})
         await ctx.send("**Reset effectué**")
@@ -123,11 +125,11 @@ class Repost(commands.Cog):
             await self.config.guild(guild).delete_reposts.set(False)
             await ctx.send("**Désactivé** • Les reposts ne seront plus supprimés automatiquement.")
 
-    @commands.group(name="immune")
-    async def _repost_immune(self, ctx):
+    @_repost.group(name="immune")
+    async def _immune(self, ctx):
         """Paramètres concernant l'immunité au détecteur de reposts"""
 
-    @_repost_immune.command()
+    @_immune.command()
     async def user(self, ctx, user: discord.Member):
         """Ajouter ou retirer une immunité pour un membre"""
         guild = ctx.guild
@@ -142,7 +144,7 @@ class Repost(commands.Cog):
             await ctx.send(f"**Retiré des immunisés** • {user.name} n'est désormais plus immunisé au détecteur de reposts.")
         await self.load_cache(guild)
 
-    @_repost_immune.command()
+    @_immune.command()
     async def channel(self, ctx, channel: discord.TextChannel):
         """Ajouter ou retirer une immunité pour un salon écrit"""
         guild = ctx.guild
@@ -157,7 +159,7 @@ class Repost(commands.Cog):
             await ctx.send(f"**Retiré des immunisés** • Les reposts sur {channel.mention} seront de nouveau notifiés.")
         await self.load_cache(guild)
 
-    @_repost_immune.command()
+    @_immune.command()
     async def role(self, ctx, role: discord.Role):
         """Ajouter ou retirer une immunité pour un rôle (donc les membres possédant ce rôle)"""
         guild = ctx.guild
@@ -172,7 +174,7 @@ class Repost(commands.Cog):
             await ctx.send(f"**Retiré des immunisés** • Les membres ayant le rôle {role.name} ne sont plus immunisés du détecteur de reposts.")
         await self.load_cache(guild)
 
-    @_repost_immune.command()
+    @_immune.command()
     async def link(self, ctx, lien: str):
         """Ajouter ou retirer l'immunité pour un lien, strictement ou non
 
@@ -211,7 +213,7 @@ class Repost(commands.Cog):
                     f"**Plus immunisé** • Le lien `{lien}` n'est plus immunisé aux reposts.")
         await self.load_cache(guild)
 
-    @_repost_immune.command(name="list")
+    @_immune.command(name="list")
     async def immune_list(self, ctx):
         """Liste les éléments immunisés contre le détecteur de reposts"""
         guild = ctx.guild
