@@ -200,7 +200,7 @@ class Quit(commands.Cog):
         while seconds >= 60:
             m += 1
             seconds -= 60
-        s = seconds
+        s = round(seconds, 2)
         all = []
         if m: all.append(str(m) + "m")
         if s: all.append(str(s) + "s")
