@@ -51,8 +51,9 @@ class Repost(commands.Cog):
         return self.immunity_cache[guild.id]
 
     def normalize_link(self, base_link: str):
-        if base_link.startswith("https://www.youtube.com/watch?v="):
-            return "https://youtu.be/{}".format(base_link.split("?v=")[-1])
+        is_yt = re.compile(r'https://www\.youtube\.com/watch\?v=([\w\-]*)', re.DOTALL | re.IGNORECASE).findall(base_link)
+        if is_yt:
+            return "https://youtu.be/{}".format(is_yt[0])
         return base_link
 
     async def get_repost(self, message: discord.Message):
