@@ -1,0 +1,8 @@
+{
+	"author": ["Acrone"],
+	"description": "Détecteur de reposts paramétrable",
+	"install_msg": "Merci d'avoir installé ce module. Utilisez `[p]help repost` pour plus d'infos.",
+	"short": "Détecteur de reposts.",
+	"tags": ["textchannel", "repost", "filter"],
+	"type": "COG"
+}
