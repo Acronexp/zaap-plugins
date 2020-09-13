@@ -259,7 +259,7 @@ class Repost(commands.Cog):
                     if repost:
                         txt = ""
                         for r in repost["cases"]:
-                            user = self.bot.get_user(r[1])
+                            user = guild.get_member(r[1])
                             msg = await user.fetch_message(r[0])
                             if not txt:
                                 txt += "**Original** ─ [{} par {}]({})\n".format(msg.created_at.strftime("%d/%m/%Y %H:%M"), user.name,
