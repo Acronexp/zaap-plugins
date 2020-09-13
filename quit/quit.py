@@ -240,9 +240,7 @@ class Quit(commands.Cog):
                         chrono = time.time() - self.temps[user.id]
                         if chrono <= 300:
                             chrono = self.seconds_format(chrono)
-                            rdn = random.choice(["A survécu", "Est resté", "Est parti après", "A quitté après",
-                                                 "A lurk pendant"])
-                            em.set_footer(text=f"{rdn} {chrono}")
+                            em.set_footer(text=f"⏱️ {chrono}")
                 if await self.config.guild(guild).delete_delay() > 0:
                     await channel.send(embed=em, delete_after= await self.config.guild(guild).delete_delay())
                 else:
