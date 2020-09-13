@@ -25,7 +25,7 @@ class Repost(commands.Cog):
                          "delete_reposts": False,
                          "reposts": {}}
         self.config.register_guild(**default_guild)
-        self.immunity_cache = {[[()]]}
+        self.immunity_cache = {}
         self.last_clean = None
 
     async def clean_reposts(self, guild: discord.Guild):
