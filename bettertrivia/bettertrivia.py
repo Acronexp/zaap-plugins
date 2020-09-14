@@ -183,7 +183,7 @@ class BetterTrivia(commands.Cog):
                     new_em = discord.Embed(color=em_color, title="Trivia » En attente des joueurs... (max. 8)", description=dep_msg)
                     jtxt = "\n".join([ctx.guild.get_member(u).mention for u in self.cache[chanid]["joueurs"]])
                     new_em.add_field(name="Joueurs", value=jtxt)
-                    em.set_footer(text="Lancement de la partie dans {}s ou s'il y a 8 joueurs.".format(insc_timeout))
+                    new_em.set_footer(text="Lancement de la partie dans {}s ou s'il y a 8 joueurs.".format(insc_timeout))
                     await msg.edit(embed=new_em)
                     current = len(self.cache[chanid]["joueurs"])
                 await asyncio.sleep(1)
