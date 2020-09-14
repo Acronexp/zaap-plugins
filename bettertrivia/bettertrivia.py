@@ -292,7 +292,8 @@ class BetterTrivia(commands.Cog):
                         scores[winner.id] += 1
                     await self.config.guild(ctx.guild).scores.set(scores)
                     em = discord.Embed(title="Trivia » Fin de la partie",
-                                       description="Le gagnant est {winner.mention} avec {pts} points !", color=0xFFD700)
+                                       description="Le gagnant est {winner.mention} avec {pts} points !".format(
+                                           winner=winner, pts=self.cache[chanid]["joueurs"][winner.id]), color=0xFFD700)
                     em.set_footer(text="Consultez le classement global des victoires avec ;triviatop !")
                     await ctx.send(embed=em)
                     del self.cache[chanid]
