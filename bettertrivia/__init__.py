@@ -1,4 +1,6 @@
 from .bettertrivia import BetterTrivia
 
 def setup(bot):
-    bot.add_cog(BetterTrivia(bot))
+    cog = BetterTrivia(bot)
+    await cog.initialize()
+    bot.add_cog(cog)
