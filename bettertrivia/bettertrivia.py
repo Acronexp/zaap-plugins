@@ -332,7 +332,7 @@ class BetterTrivia(commands.Cog):
         txt = ""
         liste = []
         for user in scores:
-            member = ctx.guild.get_member(user)
+            member = ctx.guild.get_member(int(user))
             if member:
                 liste.append([scores[user], member])
             else:
