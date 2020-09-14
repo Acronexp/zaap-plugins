@@ -9,9 +9,9 @@ import discord
 from redbot.core import Config, checks, commands
 from redbot.core.data_manager import cog_data_path
 
-logger = logging.getLogger("red.zaap-plugins.trivia")
+logger = logging.getLogger("red.zaap-plugins.bettertrivia")
 
-class Trivia(commands.Cog):
+class BetterTrivia(commands.Cog):
     """Testez vos connaissances sur Trivia !"""
 
     def __init__(self, bot):
@@ -31,9 +31,11 @@ class Trivia(commands.Cog):
 
         self.exts_path = cog_data_path(self) / "exts"
         self.exts_path.mkdir(exist_ok=True, parents=True)
-
-        self.Extensions = await self.load_extensions()
         self.cache = {}
+        self.Extensions = {}
+
+    async def initialize(self):
+        self.Extensions = await self.load_extensions()
 
     def filespaths(self, directory):
         for dirpath, _, filenames in os.walk(directory):
@@ -476,7 +478,7 @@ class Trivia(commands.Cog):
             await self.load_extensions()
         except Exception as e:
             logger.error(msg=f"Fichier non supprimé ({path})", exc_info=True)
-            await ctx.send("**Erreur** • Impossible de supprimer le fichier")
+            await ctx.send(f"**Erreur** • Impossible de supprimer le fichier : `{e}`")
 
     @_triviadata.command()
     async def files(self, ctx):
