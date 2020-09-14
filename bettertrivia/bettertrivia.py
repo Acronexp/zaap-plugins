@@ -293,6 +293,8 @@ class BetterTrivia(commands.Cog):
         for i in top:
             index = top.index(i) + 1
             txt += "**{}**. {}\n".format(index, i[1].name)
+        if not txt:
+            txt = "**Vide**"
         em = discord.Embed(title="Trivia » Classement du serveur", description=txt, color=await ctx.embed_color())
         await ctx.send(embed=em)
 
@@ -412,17 +414,20 @@ class BetterTrivia(commands.Cog):
         Pour proposer un pack de cartes, contactez Acrone#4424"""
         color = await self.bot.get_embed_color(ctx.channel)
         em = discord.Embed(color=color)
-        for p in self.Extensions:
-            ext = self.Extensions[p]
-            if ext["exclu"]:
-                if ctx.guild.id not in ext["exclu"]:
-                    continue
-            total = len(ext["contenu"])
-            txt = "**Description** · *{}*\n" \
-                  "**Langue** · {}\n" \
-                  "**Contenu** · {} questions\n".format(ext["desc"], ext["lang"], total)
-            em.add_field(name="{} (ID: {})".format(ext["name"], p), value=txt, inline=False)
-        await ctx.send(embed=em)
+        if self.Extensions:
+            for p in self.Extensions:
+                ext = self.Extensions[p]
+                if ext["exclu"]:
+                    if ctx.guild.id not in ext["exclu"]:
+                        continue
+                total = len(ext["contenu"])
+                txt = "**Description** · *{}*\n" \
+                      "**Langue** · {}\n" \
+                      "**Contenu** · {} questions\n".format(ext["desc"], ext["lang"], total)
+                em.add_field(name="{} (ID: {})".format(ext["name"], p), value=txt, inline=False)
+            await ctx.send(embed=em)
+        else:
+            await ctx.send("**Aucune extension disponible** • Consultez le propriétaire du bot pour en proposer.")
 
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -484,5 +489,8 @@ class BetterTrivia(commands.Cog):
     async def files(self, ctx):
         """Liste les fichiers dispos pour le Trivia"""
         arr_txt = [x for x in os.listdir(str(self.exts_path)) if x.endswith(".txt")]
-        em = discord.Embed(title="Fichiers Trivia disponibles", description="\n".join([f"*{n}*" for n in arr_txt]))
-        await ctx.send(embed=em)
+        if arr_txt:
+            em = discord.Embed(title="Fichiers Trivia disponibles", description="\n".join([f"*{n}*" for n in arr_txt]))
+            await ctx.send(embed=em)
+        else:
+            await ctx.send(f"**Vide** • Aucun fichier n'est disponible")
