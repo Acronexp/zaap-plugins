@@ -54,6 +54,7 @@ class BetterTrivia(commands.Cog):
                 questions = {}
                 n = 0
                 for l in ext:
+                    l = l.rstrip()
                     logger.info(l.rstrip())
                     if "=>" in l:
                         question, reps = [i.strip() for i in l.split("=>", 1)]
