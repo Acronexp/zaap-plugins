@@ -184,33 +184,33 @@ class Useful(commands.Cog):
         await self.config.INSTALOADER_PASSWORD.set(password)
         await ctx.send(tb)
 
-    @commands.group(name="tale")
+    @commands.group(name="savemsg")
     @commands.guild_only()
-    async def _tale(self, ctx):
+    async def _savemsg(self, ctx):
         """Enregistrer une suite de messages sur un fichier .txt"""
 
-    @_tale.command()
+    @_savemsg.command()
     @commands.max_concurrency(1, commands.BucketType.channel)
-    async def now(self, ctx, teller: discord.Member = None, channel: discord.TextChannel = None):
+    async def now(self, ctx, source: discord.Member = None, channel: discord.TextChannel = None):
         """Enregistre les messages d'un membre sur un salon à partir de maintenant
 
         Pour arrêter, le conteur doit dire "stop" (sans rien d'autre)
         - Si le <teller> n'est pas spécifié, c'est celui qui fait la commande qui l'est
         - Si le salon n'est pas spécifié, c'est celui où est réalisé la commande"""
-        if not teller: teller = ctx.author
+        if not source: source = ctx.author
         if not channel: channel = ctx.channel
         em_color = await ctx.embed_color()
 
         path = str(self.temp)
-        filepath = path + "/{1}_{0}.txt".format(teller.name, datetime.now().strftime("%Y%m%d%H%M"))
+        filepath = path + "/{1}_{0}.txt".format(source.name, datetime.now().strftime("%Y%m%d%H%M"))
         nb = 0
         pre_txt = "| Auteur = {}\n" \
               "| Salon = #{}\n" \
-              "| Date de début = {}\n\n".format(str(teller), channel.name, datetime.now().strftime("%d/%m/%Y %H:%M"))
+              "| Date de début = {}\n\n".format(str(source), channel.name, datetime.now().strftime("%d/%m/%Y %H:%M"))
         txt = ""
 
         def check(m: discord.Message):
-            return m.author == teller and m.channel == channel
+            return m.author == source and m.channel == channel
 
         async def write(txt: str):
             file = open(filepath, "w")
@@ -238,7 +238,7 @@ class Useful(commands.Cog):
                     await channel.send(embed=em)
 
         em = discord.Embed(description=f"🔴 **Début de l'enregistrement**\n"
-                                       f"Pour arrêter l'enregistrement, {teller.mention} doit dire \"stop\".\n"
+                                       f"Pour arrêter l'enregistrement, {source.mention} doit dire \"stop\".\n"
                                        f"L'enregistrement s'arrête seul si le conteur ne dit rien pendant plus de 5 min ou si l'histoire dépasse 20 000 caractères.\n",
                            color=em_color)
         debut = await channel.send(embed=em)
@@ -282,7 +282,7 @@ class Useful(commands.Cog):
                         txt += msg.content + "\n"
                         nb += 1
 
-    @_tale.command()
+    @_savemsg.command()
     @commands.max_concurrency(1, commands.BucketType.channel)
     async def get(self, ctx, start_id: int, end_id: int):
         """Enregistre rétroactivement les messages d'un membre sur un salon entre deux messages (ceux-ci compris)
@@ -384,7 +384,7 @@ class Useful(commands.Cog):
         else:
             await ctx.send("**Auteurs différents** • L'auteur du message de départ et de fin doit être le même.")
 
-    @_tale.command()
+    @_savemsg.command()
     @commands.max_concurrency(1, commands.BucketType.channel)
     async def compile(self, ctx, start_id: int, end_id: int):
         """Compile la sélection de messages en un seul message / séries de messages (embed)

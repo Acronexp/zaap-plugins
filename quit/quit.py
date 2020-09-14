@@ -131,7 +131,7 @@ class Quit(commands.Cog):
         `user` = Prend la couleur du membre qui vient de quitter (par défaut)
         `core` = Prend la couleur des embeds par défaut du bot défini dans les options de coeur
         `bot` = Prend la couleur du bot sur le serveur
-        'red` = Rouge de la palette utilisée par Discord"""
+        `red` = Rouge de la palette utilisée par Discord"""
         if await self.config.guild(ctx.guild).use_embed():
             if type.lower() in ["user", "core", "bot", "red"]:
                 await self.config.guild(ctx.guild).embed_color.set(type)
