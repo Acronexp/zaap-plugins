@@ -200,9 +200,9 @@ class BetterTrivia(commands.Cog):
                     good = [str(ans.index(sample["good_ans"]) + 1), sample["good_ans"]]
                     all_ans = dict(map(lambda x: (ans.index(x) + 1, x), ans))
 
-                    em = discord.Embed(title=f"Manche #{round}", description=sample["question"], color=em_color)
+                    em = discord.Embed(title=f"Trivia » Manche #{round}", description=sample["question"], color=em_color)
                     q = await ctx.send(embed=em)
-                    await asyncio.sleep(10)
+                    await asyncio.sleep(5)
 
                     reps = ""
                     emoji = [":one:", ":two:", ":three:", ":four:"]
