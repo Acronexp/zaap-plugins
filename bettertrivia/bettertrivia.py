@@ -266,7 +266,7 @@ class BetterTrivia(commands.Cog):
                                  key=operator.itemgetter(0))
                     for p in top:
                         user = ctx.guild.get_member(p[1])
-                        cls += f"**{p[0]}**pts » {user.mention}\n"
+                        cls += f"**{p[0]}** pts » {user.mention}\n"
                     em.add_field(name="Classement actuel", value=cls)
                     await ctx.send(embed=em)
 
@@ -341,7 +341,7 @@ class BetterTrivia(commands.Cog):
         for i in top:
             index = top.index(i) + 1
             member = i[1]
-            txt += "**{}**. {}\n".format(index, member.name)
+            txt += "**{}**. {} — {} pts\n".format(index, member.name, i[0])
         if not txt:
             txt = "**Vide**"
         em = discord.Embed(title="Trivia » Classement du serveur", description=txt, color=await ctx.embed_color())
