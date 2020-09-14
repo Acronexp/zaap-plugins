@@ -332,12 +332,11 @@ class BetterTrivia(commands.Cog):
         txt = ""
         liste = []
         for user in scores:
-            try:
-                member = ctx.guild.get_member(user)
+            member = ctx.guild.get_member(user)
+            if member:
                 liste.append([scores[user], member])
-            except Exception as e:
-                logger.error(e, exc_info=True)
-                continue
+            else:
+                logger.error(f"Impossible d'obtenir le membre ID = {user}")
         top = sorted(liste, key=operator.itemgetter(0), reverse=True)
         for i in top:
             index = top.index(i) + 1
