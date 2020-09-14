@@ -27,7 +27,7 @@ class BetterTrivia(commands.Cog):
                          "max_rounds": 30}
         default_global = {"Exts": {}}
         self.config.register_guild(**default_guild)
-        self.config.register_guild(**default_global)
+        self.config.register_global(**default_global)
 
         self.exts_path = cog_data_path(self) / "exts"
         self.exts_path.mkdir(exist_ok=True, parents=True)
@@ -55,7 +55,6 @@ class BetterTrivia(commands.Cog):
                 n = 0
                 for l in ext:
                     l = l.rstrip()
-                    logger.info(l.rstrip())
                     if "=>" in l:
                         question, reps = [i.strip() for i in l.split("=>", 1)]
                         reps = [r.strip() for r in reps.split(";")]
@@ -69,10 +68,8 @@ class BetterTrivia(commands.Cog):
 
                     elif l.startswith("&NAME="):
                         name = l.split("=", 1)[1]
-                        logger.info(f"--NAME = {name}")
                     elif l.startswith("&DESC="):
                         desc = l.split("=", 1)[1]
-                        logger.info(f"--DESC = {desc}")
                     elif l.startswith("&AUTHOR="):
                         s_author = l.split("=", 1)[1]
                         if s_author.isdigit():
