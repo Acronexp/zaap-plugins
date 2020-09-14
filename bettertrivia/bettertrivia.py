@@ -510,6 +510,7 @@ class BetterTrivia(commands.Cog):
                 elif message.content in self.cache[channel_id]["all_reponses"]:
                     if message.author.id in self.cache[channel_id]["joueurs"]:
                         if message.author.id not in self.cache[channel_id]["tried"]:
+                            self.cache[channel_id]["tried"].append(message.author.id)
                             if message.content in self.cache[channel_id]["reponse"] and not self.cache[channel_id]["round_winner"]:
                                 self.cache[channel_id]["round_winner"] = message.author
 
