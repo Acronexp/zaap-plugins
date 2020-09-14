@@ -334,13 +334,14 @@ class BetterTrivia(commands.Cog):
         for user in scores:
             try:
                 member = ctx.guild.get_member(user)
+                liste.append([scores[user], member])
             except:
-                member = self.bot.get_user(user)
-            liste.append([scores[user], member])
+                continue
         top = sorted(liste, key=operator.itemgetter(0), reverse=True)
         for i in top:
             index = top.index(i) + 1
-            txt += "**{}**. {}\n".format(index, i[1].name)
+            member = i[1]
+            txt += "**{}**. {}\n".format(index, member.name)
         if not txt:
             txt = "**Vide**"
         em = discord.Embed(title="Trivia » Classement du serveur", description=txt, color=await ctx.embed_color())
