@@ -328,7 +328,7 @@ class BetterTrivia(commands.Cog):
     @commands.guild_only()
     async def triviatop(self, ctx):
         """Consulter le classement global sur le serveur"""
-        scores = await self.config.guild(ctx.guild).scores()
+        scores = await self.config.guild(ctx.guild).get_raw("scores")
         txt = ""
         liste = []
         for user in scores:
