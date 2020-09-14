@@ -429,7 +429,7 @@ class BetterTrivia(commands.Cog):
                 if ext["exclu"]:
                     if ctx.guild.id not in ext["exclu"]:
                         continue
-                total = len(ext["contenu"])
+                total = len(ext["content"])
                 txt = "**Description** · *{}*\n" \
                       "**Langue** · {}\n" \
                       "**Contenu** · {} questions\n".format(ext["desc"], ext["lang"], total)
