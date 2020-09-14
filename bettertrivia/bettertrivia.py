@@ -294,6 +294,9 @@ class BetterTrivia(commands.Cog):
         channel = ctx.channel
         if channel.id in self.cache:
             self.cache[channel.id]["stop"] = True
+            await ctx.send("**Stop initié** • La partie en cours devrait bientôt se terminer.")
+        else:
+            await ctx.send("**Aucune partie sur ce salon** • Vous devez utiliser cette commande sur le salon où se déroule la partie.")
 
     @commands.command(aliases=["trvtop"])
     @commands.guild_only()
