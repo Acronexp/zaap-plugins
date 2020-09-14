@@ -170,20 +170,25 @@ class BetterTrivia(commands.Cog):
                                      "Quels sont les participants ?", "Où sont les participants ?",
                                      "Que les joueurs se signalent !"])
             jtxt = "\n".join([ctx.guild.get_member(u).mention for u in self.cache[chanid]["joueurs"]])
-            em = discord.Embed(color=em_color, title="Trivia » En attente des joueurs...", description=dep_msg)
+            em = discord.Embed(color=em_color, title="Trivia » En attente des joueurs... (max. 8)", description=dep_msg)
             em.add_field(name="Joueurs", value=jtxt)
 
             msg = await ctx.send(embed=em)
             current = 1
             timeout = time.time() + await self.config.guild(ctx.guild).insc_timeout()
-            while len(self.cache[chanid]["joueurs"]) < 8 or time.time() < timeout:
+            while len(self.cache[chanid]["joueurs"]) < 8 and time.time() < timeout and not self.cache[chanid]["stop"]:
                 if len(self.cache[chanid]["joueurs"]) > current:
-                    new_em = discord.Embed(color=em_color, title="Trivia » En attente des joueurs...", description=dep_msg)
+                    new_em = discord.Embed(color=em_color, title="Trivia » En attente des joueurs... (max. 8)", description=dep_msg)
                     jtxt = "\n".join([ctx.guild.get_member(u).mention for u in self.cache[chanid]["joueurs"]])
                     new_em.add_field(name="Joueurs", value=jtxt)
                     await msg.edit(embed=new_em)
                     current = len(self.cache[chanid]["joueurs"])
-                await asyncio.sleep(2)
+                await asyncio.sleep(1)
+            if self.cache[chanid]["stop"]:
+                await ctx.send(
+                    "**Partie interrompue** • L'inscription a été stoppée par le créateur de la partie ou un modérateur.")
+                del self.cache[chanid]
+                return
             self.cache[chanid]["insc"] = False
             if len(self.cache[chanid]["joueurs"]) >= 2:
                 new_em = discord.Embed(color=em_color, title="Trivia » Lancement de la partie...", description="La partie va bientôt démarrer, préparez-vous.")
@@ -200,7 +205,9 @@ class BetterTrivia(commands.Cog):
                     return False
 
                 round = 0
-                while not await any_winner() or not available or round >= await self.config.guild(ctx.guild).max_rounds() or self.cache[chanid]["stop"]:
+                secu = 0
+                while not await any_winner() and available and round <= await self.config.guild(ctx.guild).max_rounds() and \
+                        not self.cache[chanid]["stop"] and secu != 3:
                     round += 1
                     rand = random.choice(available)
                     available.remove(rand)
@@ -225,9 +232,11 @@ class BetterTrivia(commands.Cog):
                     await q.edit(embed=em)
 
                     timeout = time.time() + await self.config.guild(ctx.guild).round_timeout()
-                    while not self.cache[chanid]["round_winner"] or time.time() < timeout:
-                        await asyncio.sleep(0.5)
+                    while not self.cache[chanid]["round_winner"] and time.time() < timeout:
+                        await asyncio.sleep(0.25)
 
+                    if not self.cache[chanid]["tried"]:
+                        secu += 1
                     if self.cache[chanid]["round_winner"]:
                         winner = self.cache[chanid]["round_winner"]
                         answer = good[1]
@@ -260,6 +269,11 @@ class BetterTrivia(commands.Cog):
                     self.cache[chanid]["round_winner"] = False
                     self.cache[chanid]["tried"] = []
                     await asyncio.sleep(10)
+                if secu == 3:
+                    await ctx.send(
+                        "**Partie annulée** • Plus personne ne joue depuis 3 manches.")
+                    del self.cache[chanid]
+                    return
                 if round > 3:
                     winner = max([[self.cache[chanid]["joueurs"][j], j] for j in self.cache[chanid]["joueurs"]],
                                      key=operator.itemgetter(0))
