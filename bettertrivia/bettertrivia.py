@@ -159,6 +159,7 @@ class BetterTrivia(commands.Cog):
             chanid = ctx.channel.id
 
             self.cache[chanid] = {"joueurs": {ctx.author.id: 0},
+                                  "initiateur": ctx.author.id,
                                   "insc": True,
                                   "reponse": [],
                                   "all_reponses": [],
@@ -293,8 +294,11 @@ class BetterTrivia(commands.Cog):
         """Arrêter la partie en cours"""
         channel = ctx.channel
         if channel.id in self.cache:
-            self.cache[channel.id]["stop"] = True
-            await ctx.send("**Stop initié** • La partie en cours devrait bientôt se terminer.")
+            if ctx.author.id == self.cache[channel.id]["initiateur"] or ctx.author.permissions_in(channel).manage_messages:
+                self.cache[channel.id]["stop"] = True
+                await ctx.send("**Stop initié** • La partie en cours devrait bientôt se terminer.")
+            else:
+                await ctx.send("**Impossible** • Vous devez être le créateur de la partie ou un modérateur pour arrêter celle-ci.")
         else:
             await ctx.send("**Aucune partie sur ce salon** • Vous devez utiliser cette commande sur le salon où se déroule la partie.")
 
