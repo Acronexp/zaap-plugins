@@ -307,6 +307,28 @@ class BetterTrivia(commands.Cog):
         em = discord.Embed(title="Trivia » Classement du serveur", description=txt, color=await ctx.embed_color())
         await ctx.send(embed=em)
 
+    @commands.command(name="trivialist", aliases=["trlist"])
+    async def disp_list(self, ctx):
+        """Consulter la liste des packs disponibles
+
+        Pour proposer un pack de cartes, contactez Acrone#4424"""
+        color = await self.bot.get_embed_color(ctx.channel)
+        em = discord.Embed(color=color)
+        if self.Extensions:
+            for p in self.Extensions:
+                ext = self.Extensions[p]
+                if ext["exclu"]:
+                    if ctx.guild.id not in ext["exclu"]:
+                        continue
+                total = len(ext["content"])
+                txt = "**Description** · *{}*\n" \
+                      "**Langue** · {}\n" \
+                      "**Contenu** · {} questions\n".format(ext["desc"], ext["lang"], total)
+                em.add_field(name="{} (ID: {})".format(ext["name"], p), value=txt, inline=False)
+            await ctx.send(embed=em)
+        else:
+            await ctx.send("**Aucune extension disponible** • Consultez le propriétaire du bot pour en proposer.")
+
     @commands.group(name="triviaset")
     @commands.guild_only()
     @checks.admin_or_permissions(manage_messages=True)
@@ -369,7 +391,7 @@ class BetterTrivia(commands.Cog):
         else:
             await ctx.send(f"**Valeur invalide** • Elle doit se situer entre 10 et 100 manches")
 
-    @_triviaset.group(name="defext", aliases=["extensions"])
+    @_triviaset.group(name="ext", aliases=["extensions"])
     async def _extensions(self, ctx):
         """Gestion des extensions à utiliser par défaut (packs de questions)"""
 
@@ -382,21 +404,21 @@ class BetterTrivia(commands.Cog):
             if ext["exclu"]:
                 if ctx.guild.id not in ext["exclu"]:
                     await ctx.send(
-                        f"**Exclusivité non respectée** • L'extension {ext_id} est exclusive à un serveur et ne peut être utilisée ici.")
+                        f"**Exclusivité non respectée** • L'extension `{ext_id}` est exclusive à un serveur et ne peut être utilisée ici.")
                     return
             exts = await self.config.guild(ctx.guild).default_extensions()
             if ext_id.lower() not in exts:
                 exts.append(ext_id.lower())
                 await self.config.guild(ctx.guild).default_extensions.set(exts)
                 await ctx.send(
-                    f"**Extension ajoutée** • L'extension {ext_id} sera chargée par défaut aux prochaines parties.")
+                    f"**Extension ajoutée** • L'extension `{ext_id}` sera chargée par défaut aux prochaines parties.")
             else:
                 await ctx.send(
                     f"**Déjà utilisée** • Vous utilisez déjà cette extension dans vos parties."
                 )
         else:
             await ctx.send(
-                f"**Extension inconnue** • {ext_id} ne semble pas exister. Consultez la liste avec `;triviaset defext list`.")
+                f"**Extension inconnue** • `{ext_id}` ne semble pas exister. Consultez la liste avec `;trivialist`.")
 
     @_extensions.command(name="remove")
     async def ext_remove(self, ctx, ext_id: str):
@@ -408,35 +430,29 @@ class BetterTrivia(commands.Cog):
                 exts.remove(ext_id.lower())
                 await self.config.guild(ctx.guild).default_extensions.set(exts)
                 await ctx.send(
-                    f"**Extension retirée** • L'extension {ext_id} ne sera plus chargée par défaut aux prochaines parties.")
+                    f"**Extension retirée** • L'extension `{ext_id}` ne sera plus chargée par défaut aux prochaines parties.")
             else:
                 await ctx.send(
                     f"**Non-utilisée** • Cette extension n'est pas utilisée sur le serveur.")
         else:
             await ctx.send(
-                f"**Extension inconnue** • {ext_id} ne semble pas exister. Consultez la liste avec `;triviaset defext list`.")
+                f"**Extension inconnue** • `{ext_id}` ne semble pas exister. Consultez la liste avec `;trivialist`.")
 
     @_extensions.command(name="list")
-    async def ext_list(self, ctx):
-        """Consulter la liste des packs disponibles
-
-        Pour proposer un pack de cartes, contactez Acrone#4424"""
+    async def ext_loaded(self, ctx):
+        """Donne la liste des extensions chargées"""
+        liste = self.Extensions
+        exts = await self.config.guild(ctx.guild).default_extensions()
         color = await self.bot.get_embed_color(ctx.channel)
-        em = discord.Embed(color=color)
-        if self.Extensions:
-            for p in self.Extensions:
-                ext = self.Extensions[p]
-                if ext["exclu"]:
-                    if ctx.guild.id not in ext["exclu"]:
-                        continue
-                total = len(ext["content"])
-                txt = "**Description** · *{}*\n" \
-                      "**Langue** · {}\n" \
-                      "**Contenu** · {} questions\n".format(ext["desc"], ext["lang"], total)
-                em.add_field(name="{} (ID: {})".format(ext["name"], p), value=txt, inline=False)
-            await ctx.send(embed=em)
-        else:
-            await ctx.send("**Aucune extension disponible** • Consultez le propriétaire du bot pour en proposer.")
+        txt = ""
+        for e in exts:
+            if e in liste:
+                ext = liste[e]
+                txt += "- **{}** (`{}`)\n".format(liste[e]["name"], e)
+        if not txt:
+            txt = "Aucune extension n'est chargée"
+        em = discord.Embed(title="Extensions chargées", description=txt, color=color)
+        await ctx.send(embed=em)
 
     @commands.Cog.listener()
     async def on_message(self, message):
