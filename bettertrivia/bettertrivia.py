@@ -438,9 +438,9 @@ class BetterTrivia(commands.Cog):
             await ctx.send(
                 f"**Extension inconnue** • `{ext_id}` ne semble pas exister. Consultez la liste avec `;trivialist`.")
 
-    @_extensions.command(name="list")
+    @_extensions.command(name="default")
     async def ext_loaded(self, ctx):
-        """Donne la liste des extensions chargées"""
+        """Donne la liste des extensions chargées par défaut"""
         liste = self.Extensions
         exts = await self.config.guild(ctx.guild).default_extensions()
         color = await self.bot.get_embed_color(ctx.channel)
@@ -450,8 +450,9 @@ class BetterTrivia(commands.Cog):
                 ext = liste[e]
                 txt += "- **{}** (`{}`)\n".format(liste[e]["name"], e)
         if not txt:
-            txt = "Aucune extension n'est chargée"
-        em = discord.Embed(title="Extensions chargées", description=txt, color=color)
+            txt = "Aucune extension n'est chargée par défaut"
+        em = discord.Embed(title="Extensions chargées par défaut", description=txt, color=color)
+        em.set_footer(text="Il est possible de choisir les extensions à charger avec la commande `;trivia`")
         await ctx.send(embed=em)
 
     @commands.Cog.listener()
