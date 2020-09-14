@@ -38,13 +38,16 @@ class BetterTrivia(commands.Cog):
         self.Extensions = await self.load_extensions()
 
     def filespaths(self, directory):
+        paths = []
         for dirpath, _, filenames in os.walk(directory):
             for f in filenames:
                 if f.endswith(".txt"):
-                    yield os.path.abspath(os.path.join(dirpath, f))
+                    paths.append(os.path.abspath(os.path.join(dirpath, f)))
+        return paths
 
     async def load_extensions(self):
         exts = {}
+        tb = []
         for path in self.filespaths(str(self.exts_path)):
             with open(path, 'r') as ext:
                 name = desc = author = lang = exclu = None
@@ -71,12 +74,14 @@ class BetterTrivia(commands.Cog):
                         if s_author.isdigit():
                             author = int(s_author)
                         else:
+                            logger.info(f"Extension path={path} non chargée car auteur invalide")
                             break
                     elif l.startswith("&LANG="):
                         s_lang = l.split("=", 1)[1]
                         if len(s_lang) == 2:
                             lang = s_lang
                         else:
+                            logger.info(f"Extension path={path} non chargée car langue invalide")
                             break
                     elif l.startswith("&EXCLU="):
                         s_exclu = l.split("=", 1)[1]
@@ -98,7 +103,10 @@ class BetterTrivia(commands.Cog):
                         await self.config.Exts.set(all_exts)
                     elif all_exts[id]["hide"]:
                         del exts[id]
+                        logger.info(f"Extension path={path} non chargée paramètres réglées sur 'hide'")
                         continue
+                    tb.append(id)
+        logger.info("Extensions trivia chargées : {}".format(", ".join(tb)))
         return exts
 
     @commands.command()
