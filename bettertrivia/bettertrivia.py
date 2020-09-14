@@ -183,14 +183,14 @@ class BetterTrivia(commands.Cog):
                 await msg.edit(embed=new_em)
                 await asyncio.sleep(5)
 
-                def any_winner():
+                async def any_winner():
                     for j in self.cache[chanid]["joueurs"]:
                         if self.cache[chanid]["joueurs"][j] >= await self.config.guild(ctx.guild).max_points():
                             return j
                     return False
 
                 round = 0
-                while not any_winner() or not available or round >= await self.config.guild(ctx.guild).max_rounds():
+                while not await any_winner() or not available or round >= await self.config.guild(ctx.guild).max_rounds():
                     round += 1
                     rand = random.choice(available)
                     available.remove(rand)
