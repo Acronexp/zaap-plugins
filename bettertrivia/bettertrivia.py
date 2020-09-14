@@ -68,8 +68,10 @@ class BetterTrivia(commands.Cog):
 
                     elif l.startswith("&NAME="):
                         name = l.split("=", 1)[1]
+                        logger.info(f"--NAME = {name}")
                     elif l.startswith("&DESC="):
                         desc = l.split("=", 1)[1]
+                        logger.info(f"--DESC = {desc}")
                     elif l.startswith("&AUTHOR="):
                         s_author = l.split("=", 1)[1]
                         if s_author.isdigit():
