@@ -3,7 +3,7 @@ import os
 from collections import namedtuple
 
 import discord
-from redbot.core import Config, checks, commands
+from redbot.core import Config, commands
 from redbot.core.data_manager import cog_data_path
 
 logger = logging.getLogger("red.zaap-plugins.humanity")
@@ -101,20 +101,6 @@ class Humanity(commands.Cog):
     @_humanity.group(name="set")
     async def _humanity_set(self, ctx):
         """Options de partie"""
-
-    @_humanity_set.command(name="default")
-    @checks.admin_or_permissions(manage_messages=True)
-    async def default_mode(self, ctx, mode: str = DEFAULT_MODE):
-        """Modifie le mode par défaut (utilisé si non précisé lors du démarrage de la partie)"""
-        mode = mode.lower()
-        if mode in ["original", "plus", "course"]:
-            await self.config.guild(ctx.guild).default_mode.set(mode)
-            await ctx.send(
-                f"**Mode par défaut modifié** • Le mode {mode} se lancera si aucun mode n'est spécifié lors du démarrage d'une partie.")
-        else:
-            await ctx.send(
-                f"**Erreur** • Le mode '{mode}' n'existe pas. Choisissez entre `original`, `plus` et `course`.")
-
 
     @_humanity.group(name="packs")
     async def _humanity_packs(self, ctx):
@@ -217,7 +203,7 @@ class Humanity(commands.Cog):
                  "- Si un joueur ne joue pas (temps de réponse écoulé) il doit piocher une carte supplémentaire\n" \
                  "Le joueur s'étant débarassé de toute ses cartes en premier gagne la partie.".format(await self.config.guild(ctx.guild).course_start())
         em_course = discord.Embed(color=Palette.yellow, title="Règles • Course", description=course)
-
+t
         await ctx.send(embeds=[em_original, em_plus, em_course])
 
 
