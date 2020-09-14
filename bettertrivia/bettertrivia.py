@@ -335,7 +335,8 @@ class BetterTrivia(commands.Cog):
             try:
                 member = ctx.guild.get_member(user)
                 liste.append([scores[user], member])
-            except:
+            except Exception as e:
+                logger.error(e, exc_info=True)
                 continue
         top = sorted(liste, key=operator.itemgetter(0), reverse=True)
         for i in top:
