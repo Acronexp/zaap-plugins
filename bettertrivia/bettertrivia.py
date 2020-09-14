@@ -463,6 +463,16 @@ class BetterTrivia(commands.Cog):
         """Gestion des fichiers Trivia"""
 
     @_triviadata.command()
+    async def upload(self, ctx, name: str):
+        """Charge sur Discord un fichier Trivia"""
+        name += ".txt"
+        path = self.exts_path / name
+        try:
+            await ctx.send("Voici votre fichier :", files=[discord.File(path)])
+        except:
+            await ctx.send("**Fichier introuvable**")
+
+    @_triviadata.command()
     async def download(self, ctx):
         """Télécharge un fichier .txt pour l'inclure dans Trivia"""
         files = ctx.message.attachments
