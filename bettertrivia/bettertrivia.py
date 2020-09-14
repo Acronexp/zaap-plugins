@@ -110,7 +110,7 @@ class BetterTrivia(commands.Cog):
         logger.info("Extensions trivia chargées : {}".format(", ".join(tb)))
         return exts
 
-    @commands.command()
+    @commands.command(aliases=["trv"])
     @commands.guild_only()
     @commands.max_concurrency(1, commands.BucketType.guild)
     async def trivia(self, ctx, *extensions):
@@ -163,13 +163,13 @@ class BetterTrivia(commands.Cog):
                                   "reponse": [],
                                   "all_reponses": [],
                                   "round_winner": False,
-                                  "tried": []}
+                                  "tried": [],
+                                  "stop": False}
             dep_msg = random.choice(["Qui joue ?", "Qui est présent ?", "Qui veut jouer ?",
                                      "Quels sont les participants ?", "Où sont les participants ?",
                                      "Que les joueurs se signalent !"])
-            base_em = discord.Embed(color=em_color, title="Trivia » En attente des joueurs...", description=dep_msg)
             jtxt = "\n".join([ctx.guild.get_member(u).mention for u in self.cache[chanid]["joueurs"]])
-            em = base_em
+            em = discord.Embed(color=em_color, title="Trivia » En attente des joueurs...", description=dep_msg)
             em.add_field(name="Joueurs", value=jtxt)
 
             msg = await ctx.send(embed=em)
@@ -177,7 +177,7 @@ class BetterTrivia(commands.Cog):
             timeout = time.time() + await self.config.guild(ctx.guild).insc_timeout()
             while len(self.cache[chanid]["joueurs"]) < 8 or time.time() < timeout:
                 if len(self.cache[chanid]["joueurs"]) > current:
-                    new_em = base_em
+                    new_em = discord.Embed(color=em_color, title="Trivia » En attente des joueurs...", description=dep_msg)
                     jtxt = "\n".join([ctx.guild.get_member(u).mention for u in self.cache[chanid]["joueurs"]])
                     new_em.add_field(name="Joueurs", value=jtxt)
                     await msg.edit(embed=new_em)
@@ -199,7 +199,7 @@ class BetterTrivia(commands.Cog):
                     return False
 
                 round = 0
-                while not await any_winner() or not available or round >= await self.config.guild(ctx.guild).max_rounds():
+                while not await any_winner() or not available or round >= await self.config.guild(ctx.guild).max_rounds() or self.cache[chanid]["stop"]:
                     round += 1
                     rand = random.choice(available)
                     available.remove(rand)
@@ -259,7 +259,7 @@ class BetterTrivia(commands.Cog):
                     self.cache[chanid]["round_winner"] = False
                     self.cache[chanid]["tried"] = []
                     await asyncio.sleep(10)
-                if round > 1:
+                if round > 3:
                     winner = max([[self.cache[chanid]["joueurs"][j], j] for j in self.cache[chanid]["joueurs"]],
                                      key=operator.itemgetter(0))
                     winner, pts = ctx.guild.get_member(winner[1]), winner[0]
@@ -276,16 +276,26 @@ class BetterTrivia(commands.Cog):
                     del self.cache[chanid]
                 else:
                     await ctx.send("**Scores insuffisants** • Trop peu de manches se sont déroulées pour déterminer un vaincqueur.")
+                    del self.cache[chanid]
             else:
                 await ctx.send("**Joueurs insuffisants** • Il doit y avoir au moins 2 joueurs dans la partie.\n"
                                "Astuce : rejoignez une partie en vous signalant au bot lors de l'appel (ex. \"moi\")")
+                del self.cache[chanid]
         else:
             await ctx.send("**Aucune extension disponible** • Aucune question n'a pu être chargée. Cela peut être dû à :\n"
                            "- Le chargement d'extensions vides ou invalides\n"
                            "- Le chargement d'extensions réservées à d'autres serveurs (exclusivité)\n"
                            "- Le manque de questions chargées (mini. 30)")
 
-    @commands.command()
+    @commands.command(aliases=["trvstop"])
+    @commands.guild_only()
+    async def triviastop(self, ctx):
+        """Arrêter la partie en cours"""
+        channel = ctx.channel
+        if channel.id in self.cache:
+            self.cache[channel.id]["stop"] = True
+
+    @commands.command(aliases=["trvtop"])
     @commands.guild_only()
     async def triviatop(self, ctx):
         """Consulter le classement global sur le serveur"""
@@ -307,7 +317,7 @@ class BetterTrivia(commands.Cog):
         em = discord.Embed(title="Trivia » Classement du serveur", description=txt, color=await ctx.embed_color())
         await ctx.send(embed=em)
 
-    @commands.command(name="trivialist", aliases=["trlist"])
+    @commands.command(name="trivialist", aliases=["trvlist"])
     async def disp_list(self, ctx):
         """Consulter la liste des packs disponibles
 
@@ -329,7 +339,7 @@ class BetterTrivia(commands.Cog):
         else:
             await ctx.send("**Aucune extension disponible** • Consultez le propriétaire du bot pour en proposer.")
 
-    @commands.group(name="triviaset")
+    @commands.group(name="triviaset", aliases=["trvset"])
     @commands.guild_only()
     @checks.admin_or_permissions(manage_messages=True)
     async def _triviaset(self, ctx):
@@ -390,6 +400,12 @@ class BetterTrivia(commands.Cog):
             await ctx.send(f"**Maximum modifié** • Au bout de {manches} manches, la partie s'arrêtera et désignera le gagnant si personne n'a atteint le max. de points.")
         else:
             await ctx.send(f"**Valeur invalide** • Elle doit se situer entre 10 et 100 manches")
+
+    @_triviaset.command(name="reset", hidden=True)
+    async def reset_data(self, ctx):
+        """Reset les données et paramètres du serveur. Opération IRREVERSIBLE"""
+        await self.config.guild(ctx.guild).clear()
+        await ctx.send("**Reset complet effectué** • Les données de ce serveur ont été supprimées et remises à défaut")
 
     @_triviaset.group(name="ext", aliases=["extensions"])
     async def _extensions(self, ctx):
