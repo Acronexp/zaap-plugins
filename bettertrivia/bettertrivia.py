@@ -172,15 +172,18 @@ class BetterTrivia(commands.Cog):
             jtxt = "\n".join([ctx.guild.get_member(u).mention for u in self.cache[chanid]["joueurs"]])
             em = discord.Embed(color=em_color, title="Trivia » En attente des joueurs... (max. 8)", description=dep_msg)
             em.add_field(name="Joueurs", value=jtxt)
+            insc_timeout = await self.config.guild(ctx.guild).insc_timeout()
+            em.set_footer(text="Lancement de la partie dans {}s ou s'il y a 8 joueurs.".format(insc_timeout))
 
             msg = await ctx.send(embed=em)
             current = 1
-            timeout = time.time() + await self.config.guild(ctx.guild).insc_timeout()
+            timeout = time.time() + insc_timeout
             while len(self.cache[chanid]["joueurs"]) < 8 and time.time() < timeout and not self.cache[chanid]["stop"]:
                 if len(self.cache[chanid]["joueurs"]) > current:
                     new_em = discord.Embed(color=em_color, title="Trivia » En attente des joueurs... (max. 8)", description=dep_msg)
                     jtxt = "\n".join([ctx.guild.get_member(u).mention for u in self.cache[chanid]["joueurs"]])
                     new_em.add_field(name="Joueurs", value=jtxt)
+                    em.set_footer(text="Lancement de la partie dans {}s ou s'il y a 8 joueurs.".format(insc_timeout))
                     await msg.edit(embed=new_em)
                     current = len(self.cache[chanid]["joueurs"])
                 await asyncio.sleep(1)
@@ -209,13 +212,16 @@ class BetterTrivia(commands.Cog):
                 while not await any_winner() and available and round <= await self.config.guild(ctx.guild).max_rounds() and \
                         not self.cache[chanid]["stop"] and secu != 3:
                     round += 1
-                    rand = random.choice(available)
-                    available.remove(rand)
-                    sample = questions[rand]
-                    ans = [sample["good_ans"]] + random.sample(sample["ex_ans"], 3)
-                    random.shuffle(ans)
-                    good = [str(ans.index(sample["good_ans"]) + 1), sample["good_ans"]]
-                    all_ans = dict(map(lambda x: (ans.index(x) + 1, x), ans))
+                    rand = random.choice(available) # On sélectionne une question au hasard
+                    available.remove(rand) # On retire la question du deck
+                    sample = questions[rand] # On prend le dict de la question
+                    ans = [sample["good_ans"]] + random.sample(sample["ex_ans"], 3) # Les réponses sont la bonne + 3 fausses
+                    random.shuffle(ans) # On mélange les réponses
+                    good = []
+                    all_ans = dict(map(lambda x: (ans.index(x) + 1, x), ans)) # On mappe les réponses avec leur chiffre
+                    for a in all_ans: # On cherche le bon index de la bonne réponse
+                        if all_ans[a] == sample["good_ans"]:
+                            good = [str(a), sample["good_ans"]]
 
                     em = discord.Embed(title=f"Trivia » Manche #{round}", description=sample["question"], color=em_color)
                     q = await ctx.send(embed=em)
@@ -226,7 +232,7 @@ class BetterTrivia(commands.Cog):
                     for r in all_ans:
                         reps += "{} — **{}**\n".format(emoji[r-1], all_ans[r])
                     self.cache[chanid]["reponse"] = good
-                    self.cache[chanid]["all_reponses"] = ans + [1, 2, 3, 4]
+                    self.cache[chanid]["all_reponses"] = ans + ["1", "2", "3", "4"]
                     em.add_field(name="Réponses possibles", value=reps, inline=False)
                     em.set_footer(text="Répondez avec le numéro correspondant à la bonne réponse • Vous n'avez qu'une chance")
                     await q.edit(embed=em)
@@ -269,6 +275,7 @@ class BetterTrivia(commands.Cog):
                     self.cache[chanid]["round_winner"] = False
                     self.cache[chanid]["tried"] = []
                     await asyncio.sleep(10)
+
                 if secu == 3:
                     await ctx.send(
                         "**Partie annulée** • Plus personne ne joue depuis 3 manches.")
