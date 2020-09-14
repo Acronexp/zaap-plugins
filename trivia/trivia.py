@@ -473,6 +473,7 @@ class Trivia(commands.Cog):
         try:
             os.remove(str(path))
             await ctx.send("**Fichier supprimé**")
+            await self.load_extensions()
         except Exception as e:
             logger.error(msg=f"Fichier non supprimé ({path})", exc_info=True)
             await ctx.send("**Erreur** • Impossible de supprimer le fichier")
