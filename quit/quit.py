@@ -57,7 +57,11 @@ DEFAULT_LISTS = {
         "{user.name} a fait une overdose de chloroquine...",
         "Adieu, {user.name}. Tu ne nous manquera pas.",
         "{user.name}, tu hors de ma vue.",
-        "{user.name} a rejoint la fosse aux randoms."
+        "{user.name} a rejoint la fosse aux randoms.",
+        "*                         *                  *\n"
+        "    *                 ඞ                *                    *\n"
+        "            *                 *                    *         *\n"
+        "    *        {user.name} était l'imposteur"
     ]
 }
 
