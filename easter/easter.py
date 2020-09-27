@@ -22,7 +22,7 @@ class Easter(commands.Cog):
         if content.lower() == "quoi" or content.lower() == "quoi ?":
             try:
                 async for msg in message.channel.history(limit=10, before=message):
-                    if msg.author != message.author:
+                    if msg.author != message.author and not msg.author.bot:
                         await message.channel.send(f"📢 {msg.author.name} a dit **{msg.content}**")
                         return
             except:
