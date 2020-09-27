@@ -19,7 +19,7 @@ class Easter(commands.Cog):
                 await message.add_reaction("😡")
             except:
                 pass
-        if content.lower() == "quoi":
+        if content.lower() == "quoi" or content.lower() == "quoi ?":
             try:
                 async for msg in message.channel.history(limit=10, before=message):
                     if msg.author != message.author:
