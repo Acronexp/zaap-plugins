@@ -351,7 +351,7 @@ class BetterTrivia(commands.Cog):
     async def disp_list(self, ctx):
         """Consulter la liste des packs disponibles
 
-        Pour proposer un pack de cartes, contactez Acrone#4424"""
+        Pour proposer un pack de cartes, contactez le propriétaire du bot (v. ;contact)"""
         color = await self.bot.get_embed_color(ctx.channel)
         em = discord.Embed(color=color)
         if self.Extensions:
