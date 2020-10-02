@@ -87,7 +87,7 @@ class Extra(commands.Cog):
         notif = await ctx.send("Patientez durant le scan de votre image... (peut être long si l'image est grande)")
         try:
             link = self.read_qrcode(img_url)
-            await ctx.send("**Voici le(s) lien(s) que j'ai trouvé dans votre image** » {}".format(", ".join(link)))
+            await ctx.send("**Voici le contenu j'ai trouvé dans les QRCODE de votre image** » {}".format(", ".join(link)))
         except:
             await ctx.send("**Erreur** • Aucun QRCODE reconnu dans cette image")
         await notif.delete()
