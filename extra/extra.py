@@ -95,6 +95,7 @@ class Extra(commands.Cog):
     @commands.command()
     async def covid(self, ctx, code_pays: str = None):
         """Affiche les stats d'un pays sur le Covid si le code du pays est précisé, sinon les stats globales (monde)"""
+        code_pays = code_pays.upper()
         if code_pays:
             try:
                 stats = self.get_covid_status(code_pays)
