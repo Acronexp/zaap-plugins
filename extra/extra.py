@@ -28,7 +28,7 @@ class Extra(commands.Cog):
 
     def create_qrcode(self, link: str, size: str = "200x200"):
         """Transformation de lien en QRCODE (si trop long, passe par relink automatiquement)"""
-        if len(link) >= 500:
+        if len(link) >= 800 and link.startswith("http"):
             link = self.relink(link)
         result = requests.get(f"https://api.qrserver.com/v1/create-qr-code/?data={link}&size={size}")
         if result:
@@ -71,15 +71,19 @@ class Extra(commands.Cog):
         await notif.delete()
 
     @commands.command(aliases=["qrcode"])
-    async def createqrcode(self, ctx, lien: str):
-        """Transforme un lien en QRCODE"""
+    async def createqrcode(self, ctx, *content):
+        """Transforme du contenu en QRCODE"""
         notif = await ctx.send("Création du QRCODE en cours...")
-        try:
-            qrcode = self.create_qrcode(lien)
-            await ctx.send("**Voici votre QRCODE** » {}".format(qrcode))
-        except:
-            await ctx.send("**Erreur** • Impossible de créer votre QRCODE")
-        await notif.delete()
+        if content:
+            content = " ".join(content)
+            try:
+                qrcode = self.create_qrcode(content)
+                await ctx.send("**Voici votre QRCODE** » {}".format(qrcode))
+            except:
+                await ctx.send("**Erreur** • Impossible de créer votre QRCODE")
+            await notif.delete()
+        else:
+            await ctx.send_help()
 
     @commands.command()
     async def readqrcode(self, ctx, img_url: str):
