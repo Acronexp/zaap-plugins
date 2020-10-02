@@ -52,8 +52,8 @@ class Extra(commands.Cog):
             json = result.json()
             if country_code:
                 for c in json["Countries"]:
-                    if country_code.upper() == json["Countries"][c]["CountryCode"]:
-                        return json["Countries"][c]
+                    if country_code.upper() == [c]["CountryCode"]:
+                        return c
                 else:
                     raise KeyError("Ce code pays n'existe pas")
             return json
