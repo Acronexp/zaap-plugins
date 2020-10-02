@@ -91,6 +91,9 @@ class Extra(commands.Cog):
         if not img_url:
             if ctx.message.attachments:
                 img_url = ctx.message.attachments[0].url
+            else:
+                await ctx.send("**Fournissez une image** • Donnez une URL ou glissez un fichier avec la commande.")
+                return
         notif = await ctx.send("Patientez durant le scan de votre image... (peut être long si l'image est grande)")
         try:
             link = self.read_qrcode(img_url)
