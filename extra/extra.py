@@ -73,8 +73,8 @@ class Extra(commands.Cog):
     @commands.command(aliases=["qrcode"])
     async def createqrcode(self, ctx, *content):
         """Transforme du contenu en QRCODE"""
-        notif = await ctx.send("Création du QRCODE en cours...")
         if content:
+            notif = await ctx.send("Création du QRCODE en cours...")
             content = " ".join(content)
             try:
                 qrcode = self.create_qrcode(content)
