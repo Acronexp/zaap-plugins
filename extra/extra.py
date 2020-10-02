@@ -18,7 +18,7 @@ class Extra(commands.Cog):
         default_guild = {}
         self.config.register_guild(**default_guild)
 
-    async def relink(self, link: str):
+    def relink(self, link: str):
         """Raccourcissement de lien en utilisant rel.ink"""
         base = "https://rel.ink/"
         result = requests.post("https://rel.ink/api/links/", {"url": link})
@@ -26,7 +26,7 @@ class Extra(commands.Cog):
             return base + result.json()["hashid"]
         raise ConnectionError("Le lien n'a pu être créé")
 
-    async def create_qrcode(self, link: str, size: str = "200x200"):
+    def create_qrcode(self, link: str, size: str = "200x200"):
         """Transformation de lien en QRCODE (si trop long, passe par relink automatiquement)"""
         if len(link) >= 500:
             link = self.relink(link)
@@ -35,7 +35,7 @@ class Extra(commands.Cog):
             return result.url
         raise ConnectionError("Le QRcode n'a pu être créé")
 
-    async def read_qrcode(self, img: str):
+    def read_qrcode(self, img: str):
         """Lecture de(s) QRCODE d'une image fournie en URL"""
         result = requests.get(f"https://api.qrserver.com/v1/read-qr-code/?fileurl={img}")
         if result:
@@ -45,7 +45,7 @@ class Extra(commands.Cog):
             return results
         raise ConnectionError("Aucun QRcode n'a pu être lu")
 
-    async def get_covid_status(self, country_code: str = None):
+    def get_covid_status(self, country_code: str = None):
         """Renvoie le résumé quotidien de l'évolution du covid-19 dans le monde, ou dans un pays spécifié"""
         result = requests.get("https://api.covid19api.com/summary")
         if result:
