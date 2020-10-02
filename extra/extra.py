@@ -116,6 +116,7 @@ class Extra(commands.Cog):
             maj = convert_date(stats["Date"])
             em.timestamp = maj
             em.add_field(name="Dernière mise à jour", value=today)
+            em.set_footer(text="Dernière MAJ")
             await ctx.send(embed=em)
         else:
             try:
