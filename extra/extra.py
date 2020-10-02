@@ -51,11 +51,11 @@ class Extra(commands.Cog):
         if result:
             json = result.json()
             if country_code:
-                for country in json["Countries"]:
-                    if country_code.upper() == json["Countries"][country]["CountryCode"]:
-                        return json["Countries"][country]
-                    else:
-                        raise KeyError("Ce code pays n'existe pas")
+                for c in json["Countries"]:
+                    if country_code.upper() == json["Countries"][c]["CountryCode"]:
+                        return json["Countries"][c]
+                else:
+                    raise KeyError("Ce code pays n'existe pas")
             return json
         raise ConnectionError("Aucune info n'a été reçue depuis l'API")
 
@@ -95,17 +95,18 @@ class Extra(commands.Cog):
     @commands.command()
     async def covid(self, ctx, code_pays: str = None):
         """Affiche les stats d'un pays sur le Covid si le code du pays est précisé, sinon les stats globales (monde)"""
-        code_pays = code_pays.upper()
         if code_pays:
+            code_pays = code_pays.upper()
             try:
                 stats = self.get_covid_status(code_pays)
             except Exception as e:
+                print(e)
                 await ctx.send(f"**Erreur** • {e}")
                 return
             desc = "**Cas confirmés** : {}\n".format(stats["TotalConfirmed"])
             desc += "**Morts** : {}\n".format(stats["TotalDeaths"])
             desc += "**Rétablis** : {}".format(stats["TotalRecovered"])
-            em = discord.Embed(title="STATS COVID-19 • :flag_{}: {}".format(stats["CountryCode"], stats["Country"]),
+            em = discord.Embed(title="STATS COVID-19 • :flag_{}: {}".format(stats["CountryCode"].lower(), stats["Country"]),
                                description=desc,
                                color=await ctx.embed_color())
             today = "**Nouveaux cas confirmés** : {}\n".format(stats["NewConfirmed"])
