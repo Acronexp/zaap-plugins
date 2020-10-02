@@ -85,7 +85,7 @@ class Extra(commands.Cog):
         else:
             await ctx.send_help()
 
-    @commands.command()
+    @commands.command(aliases=["rqrcode"])
     async def readqrcode(self, ctx, img_url: str = None):
         """Tente de lire les QRCODE d'une image"""
         if not img_url:
