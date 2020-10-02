@@ -86,8 +86,11 @@ class Extra(commands.Cog):
             await ctx.send_help()
 
     @commands.command()
-    async def readqrcode(self, ctx, img_url: str):
+    async def readqrcode(self, ctx, img_url: str = None):
         """Tente de lire les QRCODE d'une image"""
+        if not img_url:
+            if ctx.message.attachments:
+                img_url = ctx.message.attachments[0].url
         notif = await ctx.send("Patientez durant le scan de votre image... (peut être long si l'image est grande)")
         try:
             link = self.read_qrcode(img_url)
