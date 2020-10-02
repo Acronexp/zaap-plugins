@@ -1,0 +1,9 @@
+{
+	"author": ["Acrone"],
+	"description": "Ensemble de petites fonctionnalités utiles utilisant diverses API publiques",
+	"install_msg": "Merci d'avoir installé ce module. Consultez `[p]help` pour voir les commandes disponibles",
+	"short": "Ensemble de petites fonctionnalités utiles",
+	"tags": ["useful", "utility"],
+	"requirements" : [],
+	"type": "COG"
+}

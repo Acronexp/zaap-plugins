@@ -243,6 +243,8 @@ class BetterTrivia(commands.Cog):
 
                     if not self.cache[chanid]["tried"]:
                         secu += 1
+                    else:
+                        secu = 0
                     if self.cache[chanid]["round_winner"]:
                         winner = self.cache[chanid]["round_winner"]
                         answer = good[1]
