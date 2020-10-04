@@ -61,9 +61,9 @@ class Dank(commands.Cog):
             logger.error("Error downloading", exc_info=True)
             return False
 
-    @commands.command(aliases=["sm"])
+    @commands.command(aliases=["dank"])
     @commands.cooldown(1, 5, commands.BucketType.guild)
-    async def simplememe(self, ctx, texte: str, url = None):
+    async def dankmeme(self, ctx, texte: str, url = None):
         """Ajoute du texte en haut d'une image pour en faire un meme"""
         if url is None:
             url = await self.search_for_images(ctx)
@@ -80,7 +80,7 @@ class Dank(commands.Cog):
                 if os.path.exists(source):
                     text = text.replace("|", "\n")
                     name = time.strftime("%Y%m%d%H%M%S")
-                    args = ['python', '-m', 'dankcli', source, text, '-f', name]
+                    args = ['dankcli', source, text, '-f', name]
                     sub = subprocess.Popen(args, stdout=subprocess.PIPE, cwd=str(self.temp))
                     sub.wait()
                     if sub.returncode == 0:
