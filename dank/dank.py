@@ -87,7 +87,12 @@ class Dank(commands.Cog):
                         path = self.temp / f"{name}.png"
                         if os.path.exists(str(path)):
                             return path
-                raise OSError("Fichier introuvable")
+                        else:
+                            raise OSError("Fichier résultat introuvable")
+                    else:
+                        raise OSError("Returncode du subprocess == 0")
+                else:
+                    raise OSError("Fichier source introuvable")
 
             task = self.bot.loop.run_in_executor(None, make_meme, f, texte)
             try:
