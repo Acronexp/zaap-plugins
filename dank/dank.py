@@ -90,7 +90,7 @@ class Dank(commands.Cog):
                         else:
                             raise OSError("Fichier résultat introuvable")
                     else:
-                        raise OSError("Returncode du subprocess == 0")
+                        raise OSError("Erreur subprocess : " + sub.communicate())
                 else:
                     raise OSError("Fichier source introuvable")
 
