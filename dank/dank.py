@@ -70,7 +70,7 @@ class Dank(commands.Cog):
         if not url:
             return await ctx.send("**???** • Aucune image trouvée")
         async with ctx.typing():
-            await ctx.send("Veuillez patienter...")
+            notif = await ctx.send("Veuillez patienter...")
             f = await self.download(url)
             if not f:
                 return await ctx.send("**Erreur** • Echec du téléchargement de l'image\n"
@@ -85,8 +85,13 @@ class Dank(commands.Cog):
                     sub = subprocess.Popen(args, stdout=subprocess.PIPE, cwd=str(self.temp))
                     sub.wait()
                     path = self.temp / f"{name}.{ext}"
+                    maybe_path = str(self.temp / f"{name}.")
                     if os.path.exists(str(path)):
                         return path
+                    elif os.path.exists(maybe_path + "png"):
+                        return maybe_path + "png"
+                    elif os.path.exists(maybe_path + "jpg"):
+                        return maybe_path + "jpg"
                     else:
                         os.remove(f)
                         raise OSError("Fichier résultat introuvable")
@@ -118,3 +123,4 @@ class Dank(commands.Cog):
 
             os.remove(f)
             os.remove(path)
+            await notif.delete()
