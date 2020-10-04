@@ -83,14 +83,11 @@ class Dank(commands.Cog):
                     args = ['python', '-m', 'dankcli', source, text, '-f', name]
                     sub = subprocess.Popen(args, stdout=subprocess.PIPE, cwd=str(self.temp), shell=True)
                     sub.wait()
-                    if sub.returncode == 0:
-                        path = self.temp / f"{name}.png"
-                        if os.path.exists(str(path)):
-                            return path
-                        else:
-                            raise OSError("Fichier résultat introuvable")
+                    path = self.temp / f"{name}.png"
+                    if os.path.exists(str(path)):
+                        return path
                     else:
-                        raise OSError("Erreur subprocess : " + repr(sub.communicate()))
+                        raise OSError("Fichier résultat introuvable")
                 else:
                     raise OSError("Fichier source introuvable")
 
