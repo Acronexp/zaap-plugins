@@ -80,27 +80,34 @@ class Dank(commands.Cog):
                 if os.path.exists(source):
                     text = text.replace("|", "\n")
                     name = time.strftime("%Y%m%d%H%M%S")
-                    args = ['python', '-m', 'dankcli', source, text, '-f', name]
+                    args = ['python3', '-m', 'dankcli', source, text, '-f', name]
                     sub = subprocess.Popen(args, stdout=subprocess.PIPE, cwd=str(self.temp), shell=True)
                     sub.wait()
                     path = self.temp / f"{name}.png"
                     if os.path.exists(str(path)):
                         return path
                     else:
+                        os.remove(f)
                         raise OSError("Fichier résultat introuvable")
                 else:
+                    os.remove(f)
                     raise OSError("Fichier source introuvable")
 
             task = self.bot.loop.run_in_executor(None, make_meme, f, texte)
             try:
                 path = await asyncio.wait_for(task, timeout=60)
             except asyncio.TimeoutError:
+                os.remove(f)
                 return await ctx.send("**Trop long** • Le processus a mis trop de temps à créer l'image")
 
             if not ctx.channel.permissions_for(ctx.me).send_messages:
+                os.remove(f)
+                os.remove(path)
                 return
             if not ctx.channel.permissions_for(ctx.me).attach_files:
                 await ctx.send("**Permissions manquantes** • Je ne peux pas envoyer de fichiers")
+                os.remove(f)
+                os.remove(path)
                 return
 
             try:
@@ -108,5 +115,5 @@ class Dank(commands.Cog):
             except:
                 await ctx.send("**Erreur** • Je n'ai pas pu envoyer le fichier (prob. trop lourd)")
 
-            os.remove(path)
             os.remove(f)
+            os.remove(path)
