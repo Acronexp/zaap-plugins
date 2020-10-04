@@ -73,9 +73,10 @@ class Dank(commands.Cog):
             await ctx.send("Veuillez patienter...")
             f = await self.download(url)
             if not f:
-                return await ctx.send("**Erreur** • Echec du téléchargement de l'image")
+                return await ctx.send("**Erreur** • Echec du téléchargement de l'image\n"
+                                      "Avez-vous mis votre texte entre guillemets ? Si ce n'est pas le cas, le bot a simplement confondu votre texte avec une URL.")
 
-            def make_meme(self, source, text: str):
+            def make_meme(source, text: str):
                 if os.path.exists(source):
                     text = text.replace("|", "\n")
                     name = time.strftime("%Y%m%d%H%M%S")

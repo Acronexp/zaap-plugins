@@ -1,9 +1,9 @@
 {
 	"author": ["Acrone"],
-	"description": "Donner automatiquement un rôle d'anniversaire à un membre !",
-	"install_msg": "Merci d'avoir installé ce module. Utilisez `[p]help modbday` pour plus d'infos.",
-	"short": "Rôle et message d'anniversaire auto.",
-	"tags": ["social", "community", "birthday"],
+	"description": "Ajoute du texte en haut de l'image, comme un meme façon 2020",
+	"install_msg": "Merci d'avoir installé ce module. Utilisez `[p]help simplememe` pour plus d'infos.",
+	"short": "Création de memes simples",
+	"tags": ["meme", "fun", "image"],
 	"min_python_version" : [3, 6, 0],
 	"permissions" : [
         "attach_files"
