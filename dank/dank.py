@@ -81,7 +81,7 @@ class Dank(commands.Cog):
                     text = text.replace("|", "\n")
                     name = time.strftime("%Y%m%d%H%M%S")
                     args = ['python', '-m', 'dankcli', source, text, '-f', name]
-                    sub = subprocess.Popen(args, stdout=subprocess.PIPE, cwd=self.temp)
+                    sub = subprocess.Popen(args, stdout=subprocess.PIPE, cwd=str(self.temp))
                     sub.wait()
                     if sub.returncode == 0:
                         path = self.temp / f"{name}.png"
