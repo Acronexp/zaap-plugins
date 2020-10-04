@@ -1,0 +1,15 @@
+{
+	"author": ["Acrone"],
+	"description": "Donner automatiquement un rôle d'anniversaire à un membre !",
+	"install_msg": "Merci d'avoir installé ce module. Utilisez `[p]help modbday` pour plus d'infos.",
+	"short": "Rôle et message d'anniversaire auto.",
+	"tags": ["social", "community", "birthday"],
+	"min_python_version" : [3, 6, 0],
+	"permissions" : [
+        "attach_files"
+    ],
+	"requirements" : [
+		"dankcli"
+	],
+	"type": "COG"
+}
