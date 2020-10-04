@@ -15,7 +15,7 @@ from redbot.core.data_manager import cog_data_path
 logger = logging.getLogger("red.zaap-plugins.dank")
 
 IMAGE_LINKS = re.compile(
-    r"(https?:\/\/[^\"\'\s]*\.(?:png|jpg|jpeg|png)(\?size=[0-9]*)?)", flags=re.I
+    r"(https?:\/\/[^\"\'\s]*\.(?:png|jpg|jpeg|png|gif|svg)(\?size=[0-9]*)?)", flags=re.I
 )
 
 class Dank(commands.Cog):
@@ -77,13 +77,14 @@ class Dank(commands.Cog):
                                       "Avez-vous mis votre texte entre guillemets ? Si ce n'est pas le cas, le bot a simplement confondu votre texte avec une URL.")
 
             def make_meme(source, text: str):
+                ext = source.split(".")[-1]
                 if os.path.exists(source):
                     text = text.replace("|", "\n")
                     name = time.strftime("%Y%m%d%H%M%S")
                     args = ['python3', '-m', 'dankcli', source, text, '-f', name]
                     sub = subprocess.Popen(args, stdout=subprocess.PIPE, cwd=str(self.temp))
                     sub.wait()
-                    path = self.temp / f"{name}.png"
+                    path = self.temp / f"{name}.{ext}"
                     if os.path.exists(str(path)):
                         return path
                     else:
