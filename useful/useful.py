@@ -2,9 +2,13 @@ import asyncio
 import logging
 import os
 import re
+import time
 from datetime import datetime
+from urllib.parse import urlsplit
 from urllib.request import urlopen
 
+import aiofiles
+import aiohttp
 import discord
 import instaloader
 import wikipedia
@@ -14,6 +18,10 @@ from redbot.core import commands, Config, checks
 from redbot.core.data_manager import cog_data_path
 
 logger = logging.getLogger("red.zaap-plugins.useful")
+
+FILES_LINKS = re.compile(
+    r"(https?:\/\/[^\"\'\s]*\.(?:png|jpg|jpeg|gif|svg|mp4)(\?size=[0-9]*)?)", flags=re.I
+)
 
 class Useful(commands.Cog):
     """Commandes qui peuvent être utiles"""
@@ -183,6 +191,54 @@ class Useful(commands.Cog):
         await self.config.INSTALOADER_LOGIN.set(username)
         await self.config.INSTALOADER_PASSWORD.set(password)
         await ctx.send(tb)
+
+    async def search_for_files(self, ctx, limit: int = 1):
+        urls = []
+        async for message in ctx.channel.history(limit=10):
+            if message.attachments:
+                for attachment in message.attachments:
+                    urls.append([attachment.url, message])
+            match = FILES_LINKS.match(message.content)
+            if match:
+                urls.append([match.group(1), message])
+        return urls[:limit]
+
+    async def download(self, url: str):
+        seed = str(int(time.time()))
+        file_name, ext = os.path.splitext(os.path.basename(urlsplit(url).path))
+        filename = "{}_{}{}".format(seed, file_name, ext)
+        filepath = "{}/{}".format(str(self.temp), filename)
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url) as resp:
+                    if resp.status == 200:
+                        f = await aiofiles.open(str(filepath), mode='wb')
+                        await f.write(await resp.read())
+                        await f.close()
+                    else:
+                        raise ConnectionError()
+            return filepath
+        except Exception:
+            logger.error("Error downloading", exc_info=True)
+            return False
+
+    @commands.command()
+    async def spoiler(self, ctx, url = None):
+        """Reposte l'image en spoiler"""
+        if not url:
+            url = await self.search_for_files(ctx)
+            url = url[0]
+            if not url:
+                return await ctx.send("**???** • Aucun fichier trouvé à mettre en spoiler")
+        async with ctx.channel.typing():
+            filepath = await self.download(url[0])
+            await url[1].delete()
+            file = discord.File(filepath, spoiler=True)
+            try:
+                await ctx.send(file=file)
+            except:
+                await ctx.send("**Impossible** • Je n'ai pas réussi à upload la version sous Spoiler")
+            os.remove(filepath)
 
     @commands.group(name="savemsg")
     @commands.guild_only()
