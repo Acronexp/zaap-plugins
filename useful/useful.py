@@ -234,6 +234,8 @@ class Useful(commands.Cog):
                 return await ctx.send("**???** • Aucun fichier trouvé à mettre en spoiler")
             else:
                 url = url[0]
+        else:
+            url = [url, ctx.message]
         async with ctx.channel.typing():
             content = "De {}".format(url[1].author.mention)
             if url[1].content and url[1].content != ";spoiler":
