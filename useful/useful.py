@@ -195,7 +195,7 @@ class Useful(commands.Cog):
     async def search_for_files(self, ctx, nb: int = 1):
         urls = []
         async for message in ctx.channel.history(limit=10):
-            if message.author == ctx.author or ctx.author.permissions_in(ctx.channel).manage_messages():
+            if message.author == ctx.author or ctx.author.permissions_in(ctx.channel).manage_messages:
                 if message.attachments:
                     for attachment in message.attachments:
                         urls.append([attachment.url, message])
