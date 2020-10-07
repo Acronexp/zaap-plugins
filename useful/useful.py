@@ -195,12 +195,13 @@ class Useful(commands.Cog):
     async def search_for_files(self, ctx, nb: int = 1):
         urls = []
         async for message in ctx.channel.history(limit=10):
-            if message.attachments:
-                for attachment in message.attachments:
-                    urls.append([attachment.url, message])
-            match = FILES_LINKS.match(message.content)
-            if match:
-                urls.append([match.group(1), message])
+            if message.author == ctx.author or ctx.author.permissions_in(ctx.channel).manage_messages():
+                if message.attachments:
+                    for attachment in message.attachments:
+                        urls.append([attachment.url, message])
+                match = FILES_LINKS.match(message.content)
+                if match:
+                    urls.append([match.group(1), message])
         if urls:
             return urls[:nb]
         return []
@@ -234,17 +235,12 @@ class Useful(commands.Cog):
             else:
                 url = url[0]
         async with ctx.channel.typing():
-            msg = url[1]
+            content = url[1].content
             filepath = await self.download(url[0])
-            if msg.content:
-                content = msg.content
-            await msg.delete()
+            await url[1].delete()
             file = discord.File(filepath, spoiler=True)
             try:
-                if content:
-                    await ctx.send(file=file)
-                else:
-                    await ctx.send(content, file=file)
+                await ctx.send(content, file=file)
             except:
                 await ctx.send("**Impossible** • Je n'ai pas réussi à upload la version sous Spoiler")
             os.remove(filepath)
