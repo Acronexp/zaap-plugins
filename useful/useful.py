@@ -195,13 +195,12 @@ class Useful(commands.Cog):
     async def search_for_files(self, ctx, nb: int = 1):
         urls = []
         async for message in ctx.channel.history(limit=10):
-            if message.created_at.timestamp() >= time.time() - 60:
-                if message.attachments:
-                    for attachment in message.attachments:
-                        urls.append([attachment.url, message])
-                match = FILES_LINKS.match(message.content)
-                if match:
-                    urls.append([match.group(1), message])
+            if message.attachments:
+                for attachment in message.attachments:
+                    urls.append([attachment.url, message])
+            match = FILES_LINKS.match(message.content)
+            if match:
+                urls.append([match.group(1), message])
         if urls:
             return urls[:nb]
         return []
