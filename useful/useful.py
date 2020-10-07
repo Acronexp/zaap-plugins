@@ -235,7 +235,9 @@ class Useful(commands.Cog):
             else:
                 url = url[0]
         async with ctx.channel.typing():
-            content = url[1].content
+            content = ""
+            if url[1].content:
+                content = ">>> {} : {}".format(url[1].author.mention, url[1].content)
             filepath = await self.download(url[0])
             await url[1].delete()
             file = discord.File(filepath, spoiler=True)
