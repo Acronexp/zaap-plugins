@@ -202,7 +202,9 @@ class Useful(commands.Cog):
                 match = FILES_LINKS.match(message.content)
                 if match:
                     urls.append([match.group(1), message])
-        return urls[:nb]
+        if urls:
+            return urls[:nb]
+        return []
 
     async def download(self, url: str):
         seed = str(int(time.time()))
@@ -228,9 +230,10 @@ class Useful(commands.Cog):
         """Reposte l'image en spoiler"""
         if not url:
             url = await self.search_for_files(ctx)
-            url = url[0]
             if not url:
                 return await ctx.send("**???** • Aucun fichier trouvé à mettre en spoiler")
+            else:
+                url = url[0]
         async with ctx.channel.typing():
             msg = url[1]
             filepath = await self.download(url[0])
