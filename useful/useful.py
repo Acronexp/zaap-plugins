@@ -202,7 +202,9 @@ class Useful(commands.Cog):
                 match = FILES_LINKS.match(message.content)
                 if match:
                     urls.append([match.group(1), message])
-        return urls[:nb]
+        if urls:
+            return urls[:nb]
+        return []
 
     async def download(self, url: str):
         seed = str(int(time.time()))
