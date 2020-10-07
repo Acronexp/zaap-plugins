@@ -239,7 +239,7 @@ class Useful(commands.Cog):
         async with ctx.channel.typing():
             content = "De {}".format(url[1].author.mention)
             if url[1].content and url[1].content != ctx.message.content:
-                sanit_content = " ".join([i for i in url[1].content if not i.startswith("http")])
+                sanit_content = " ".join([i for i in url[1].content.split() if not i.startswith("http")])
                 content = ">>> {} : {}".format(url[1].author.mention, sanit_content)
             filepath = await self.download(url[0])
             await url[1].delete()
