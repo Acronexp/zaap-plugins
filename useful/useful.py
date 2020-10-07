@@ -235,7 +235,7 @@ class Useful(commands.Cog):
             else:
                 url = url[0]
         async with ctx.channel.typing():
-            content = ""
+            content = "De {}".format(url[1].author.mention)
             if url[1].content:
                 content = ">>> {} : {}".format(url[1].author.mention, url[1].content)
             filepath = await self.download(url[0])
