@@ -192,16 +192,17 @@ class Useful(commands.Cog):
         await self.config.INSTALOADER_PASSWORD.set(password)
         await ctx.send(tb)
 
-    async def search_for_files(self, ctx, limit: int = 1):
+    async def search_for_files(self, ctx, nb: int = 1):
         urls = []
         async for message in ctx.channel.history(limit=10):
-            if message.attachments:
-                for attachment in message.attachments:
-                    urls.append([attachment.url, message])
-            match = FILES_LINKS.match(message.content)
-            if match:
-                urls.append([match.group(1), message])
-        return urls[:limit]
+            if message.created_at.timestamp() <= time.time() - 60:
+                if message.attachments:
+                    for attachment in message.attachments:
+                        urls.append([attachment.url, message])
+                match = FILES_LINKS.match(message.content)
+                if match:
+                    urls.append([match.group(1), message])
+        return urls[:nb]
 
     async def download(self, url: str):
         seed = str(int(time.time()))
@@ -231,11 +232,17 @@ class Useful(commands.Cog):
             if not url:
                 return await ctx.send("**???** • Aucun fichier trouvé à mettre en spoiler")
         async with ctx.channel.typing():
+            msg = url[1]
             filepath = await self.download(url[0])
-            await url[1].delete()
+            if msg.content:
+                content = msg.content
+            await msg.delete()
             file = discord.File(filepath, spoiler=True)
             try:
-                await ctx.send(file=file)
+                if content:
+                    await ctx.send(file=file)
+                else:
+                    await ctx.send(content, file=file)
             except:
                 await ctx.send("**Impossible** • Je n'ai pas réussi à upload la version sous Spoiler")
             os.remove(filepath)
