@@ -258,7 +258,7 @@ class October(commands.Cog):
                                 if list(cache["distrib_users"].keys()) != userlist:
                                     userlist = list(cache["distrib_users"].keys())
                                     tabl = []
-                                    for uid, gain in cache["distrib_users"].iteritems():
+                                    for uid, gain in cache["distrib_users"].items():
                                         tabl.append((channel.guild.get_member(uid).mention, CANDIES[gain]["name"]))
                                     nem = discord.Embed(title="Récolte d'Halloween • Distribution générale",
                                                        description=text + ctxt,
@@ -280,7 +280,7 @@ class October(commands.Cog):
                             await spawn.remove_reaction("🤲", self.bot.user)
                             if cache["distrib_users"]:
                                 tabl = []
-                                for uid, gain in cache["distrib_users"].iteritems():
+                                for uid, gain in cache["distrib_users"].items():
                                     tabl.append((channel.guild.get_member(uid).mention, CANDIES[gain]["name"]))
                                 end_em = discord.Embed(title="Récolte d'Halloween • Distribution générale (terminée)",
                                                     description=end_msg,
