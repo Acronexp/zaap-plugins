@@ -238,7 +238,7 @@ class October(commands.Cog):
                             ctxt = ""
                             for c in candies_id:
                                 candy = CANDIES[c]
-                                ctxt = "- **{}**\n".format(candy["name"])
+                                ctxt += "- **{}**\n".format(candy["name"])
 
                             emcolor = HALLOWEEN_COLOR()
                             em = discord.Embed(title="Récolte d'Halloween • Distribution générale", description=text + ctxt,
