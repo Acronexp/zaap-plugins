@@ -702,12 +702,24 @@ class October(commands.Cog):
                 if e.startswith("dur"):
                     if status[e] > 0:
                         st.append("`" + EFFECT_TRAD_FR[e] + "`")
-            stats = "**Effets en cours** · {}\n\n".format(" ".join(st) if st else "Aucun")
+            stats = "**Effets en cours** · {}\n" \
+                    "**Score · {}\n\n".format(" ".join(st) if st else "Aucun", await self.config.member(ctx.author.score()))
             em = discord.Embed(title="Votre inventaire", description=stats + tabl, color=HALLOWEEN_COLOR())
             em.set_footer(text="Pour en manger un, faîtes ;hw eat <bonbon>")
             await ctx.send(embed=em)
         else:
-            await ctx.send("**Inventaire vide** • Essayez d'avoir des bonbons !")
+            status = self.get_member_status(ctx.author)
+            st = []
+            for e in status:
+                if e.startswith("dur"):
+                    if status[e] > 0:
+                        st.append("`" + EFFECT_TRAD_FR[e] + "`")
+            stats = "**Effets en cours** · {}\n" \
+                    "**Score · {}\n\n".format(" ".join(st) if st else "Aucun",
+                                              await self.config.member(ctx.author.score()))
+            em = discord.Embed(title="Votre inventaire", description=stats + "**Inventaire vide**", color=HALLOWEEN_COLOR())
+            em.set_footer(text="Essayez de gagner des bonbons en les attrapant sur les salons écrits !")
+            await ctx.send(embed=em)
 
     @_halloween.command(name="give")
     @commands.guild_only()
@@ -739,8 +751,7 @@ class October(commands.Cog):
         if before:
             after = sorted(before, key=operator.itemgetter(0), reverse=True)
             tabl = "```{}```".format(tabulate(after, headers=["Membre", "Score"]))
-            em = discord.Embed(title="Top sur {} • Event d'Halloween".format(ctx.guild.name), description=tabl, color=HALLOWEEN_COLOR(),
-                               timestamp=ctx.message.timestamp)
+            em = discord.Embed(title="Top sur {} • Event d'Halloween".format(ctx.guild.name), description=tabl, color=HALLOWEEN_COLOR())
             await ctx.send(embed=em)
         else:
             await ctx.send("Aucun top à afficher")
