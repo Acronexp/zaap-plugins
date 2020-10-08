@@ -248,14 +248,14 @@ class October(commands.Cog):
                             spawn = await spawn_channel.send(embed=em)
                             start_adding_reactions(spawn, ["🤲"])
 
-                            cache["distrib_users"] = []
+                            cache["distrib_users"] = {}
                             cache["distrib_candies"] = candies_id
                             cache["distrib_msg"] = spawn.id
                             userlist = []
                             timeout = time.time() + 60
                             while time.time() < timeout and len(cache["distrib_users"]) < (len(candies_id) * 2):
-                                if cache["distrib_users"].keys() != userlist:
-                                    userlist = cache["distrib_users"]
+                                if list(cache["distrib_users"].keys()) != userlist:
+                                    userlist = list(cache["distrib_users"].keys())
                                     tabl = []
                                     for uid, gain in cache["distrib_users"].iteritems():
                                         tabl.append((channel.guild.get_member(uid).mention, CANDIES[gain]["name"]))
