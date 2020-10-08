@@ -334,7 +334,7 @@ class October(commands.Cog):
             if status["dur_ego"]:
                 if time.time() >= status["ego_cd"]:
                     if not random.randint(0, 4):
-                        status["ego_cd"] = time.time() + 30
+                        status["ego_cd"] = time.time() + 45
                         txt = random.choice([
                             "Agenouillez-vous, **{}** va parler.",
                             "Notre maître à tous **{}** va parler :pray:...",
@@ -368,13 +368,16 @@ class October(commands.Cog):
             return [i[1] for i in so]
         return None
 
-    async def manage_effects(self, ctx, candy_id: str):
+    async def manage_effects(self, ctx, candy_id: str, exclude_effects: list = None):
         user = ctx.author
         candy = CANDIES[candy_id]
         status = self.get_member_status(user)
         if status["dur_malus"] != 0:
             return await ctx.send("**Vous êtes malade** • Vous ne pouvez plus manger de bonbons pendant quelques minutes...")
         effect = random.choices(candy["ep"], candy["ew"], k=1)[0]
+        if exclude_effects:
+            if effect in exclude_effects:
+                effect = "none"
         if effect == "none":
             await self.remove_candy(user, candy_id)
             async with ctx.channel.typing():
@@ -406,7 +409,6 @@ class October(commands.Cog):
                 em.set_footer(text="Vous mangez x1 {}".format(candy["name"]))
                 await ctx.send(embed=em)
             if not status["dur_flip"]:
-                await self.remove_candy(user, candy_id)
                 original = user.display_name
                 char = "abcdefghijklmnopqrstuvwxyz"
                 tran = "ɐqɔpǝɟƃɥᴉɾʞlɯuodbɹsʇnʌʍxʎz"
@@ -416,7 +418,11 @@ class October(commands.Cog):
                 tran = "∀qƆpƎℲפHIſʞ˥WNOԀQᴚS┴∩ΛMX⅄Z"
                 table = str.maketrans(char, tran)
                 name = name.translate(table)
-                await user.edit(nick=name, reason="Effet event d'halloween")
+                try:
+                    await user.edit(nick=name, reason="Effet event d'halloween")
+                except:
+                    return await self.manage_effects(ctx, candy_id, exclude_effects=["flip"])
+                await self.remove_candy(user, candy_id)
                 status["dur_flip"] = BASE_DURATIONS["flip"]
                 basetime = time.time()
                 while time.time() <= (basetime + status["dur_flip"]):
