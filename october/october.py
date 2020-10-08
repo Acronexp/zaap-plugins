@@ -809,7 +809,7 @@ class October(commands.Cog):
 
         Assurez-vous que les rôles soient au dessus des autres rôles communs des membres (et sans droits particuliers)"""
         guild = ctx.guild
-        if all(red, orange, yellow, green, blue, purple):
+        if all([red, orange, yellow, green, blue, purple]):
             set_roles = await self.config.guild(guild).rainbow_roles()
             set_roles["red"] = red.id
             set_roles["orange"] = orange.id
