@@ -15,13 +15,13 @@ logger = logging.getLogger("red.zaap-plugins.october")
 HALLOWEEN_COLOR = lambda: random.choice([0x5E32BA, 0xEB6123, 0x18181A, 0x96C457])
 
 CANDIES = {
-    "berlingot": {"name": "Berlingot", "ep": ["none", "rainbow"], "ew": [3, 1, 2],
+    "berlingot": {"name": "Berlingot", "ep": ["none", "rainbow"], "ew": [3, 1],
                   "img": ""},
     "marshmallow": {"name": "Marshmallow", "ep": ["none", "haunt", "ego"], "ew": [3, 2, 1],
                     "img": ""},
     "calisson": {"name": "Calisson", "ep": ["none", "fortune", "flip"], "ew": [2, 1, 2],
                  "img": ""},
-    "caramel": {"name": "Caramel", "ep": ["haunt", "ego"], "ew": [3, 1, 2],
+    "caramel": {"name": "Caramel", "ep": ["haunt", "ego"], "ew": [3, 1],
                 "img": ""},
     "chewinggum": {"name": "Chewing-gum", "ep": ["none", "room", "malus"], "ew": [3, 1, 1],
                    "img": ""},
@@ -29,7 +29,7 @@ CANDIES = {
                "img": ""},
     "guimauve": {"name": "Guimauve", "ep": ["none", "loss", "fortune"], "ew": [1, 1, 1],
                  "img": ""},
-    "reglisse": {"name": "Réglisse", "ep": ["malus", "flip"], "ew": [2, 1, 3],
+    "reglisse": {"name": "Réglisse", "ep": ["malus", "flip"], "ew": [2, 1],
                  "img": ""},
     "sucette": {"name": "Sucette", "ep": ["room", "ego", "haunt"], "ew": [2, 1, 2],
                 "img": ""},
@@ -652,7 +652,7 @@ class October(commands.Cog):
 
     @_halloween.command(aliases=["mange"])
     @commands.guild_only()
-    @commands.cooldown(1, 30, commands.BucketType.member)
+    @commands.cooldown(1, 10, commands.BucketType.member)
     async def eat(self, ctx, *candy):
         """Manger un bonbon de votre inventaire
 
