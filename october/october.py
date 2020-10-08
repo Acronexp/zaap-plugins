@@ -271,7 +271,7 @@ class October(commands.Cog):
                                                        description=text + ctxt,
                                                        color=emcolor)
                                     nem.set_footer(text="Cliquez sur la réaction pour en obtenir un (au hasard)")
-                                    nem.add_field(name="— Obtenus —", value="```{}```".format(tabulate(tabl, headers=["Membre", "Bonbon"])))
+                                    nem.add_field(name="» Obtenus", value="```{}```".format(tabulate(tabl, headers=["Membre", "Bonbon"])))
                                     await spawn.edit(embed=nem)
                                 await asyncio.sleep(1)
                             await spawn.delete()
@@ -293,14 +293,14 @@ class October(commands.Cog):
                                                     description=end_msg,
                                                     color=emcolor)
                                 end_em.set_footer(text="ASTUCE · " + random.choice(ASTUCES))
-                                end_em.add_field(name="— Obtenus —", value="```{}```".format(tabulate(tabl, headers=["Membre", "Bonbon"])))
+                                end_em.add_field(name="» Obtenus", value="```{}```".format(tabulate(tabl, headers=["Membre", "Bonbon"])))
                                 await spawn_channel.send(embed=end_em, delete_delay=10)
                             else:
                                 end_em = discord.Embed(title="Récolte d'Halloween • Distribution générale (terminée)",
                                                        description=end_msg,
                                                        color=emcolor)
                                 end_em.set_footer(text="ASTUCE · " + random.choice(ASTUCES))
-                                end_em.add_field(name="— Obtenus —", value="Personne n'a participé à la distribution")
+                                end_em.add_field(name="» Obtenus", value="Personne n'a participé à la distribution")
                                 await spawn_channel.send(embed=end_em, delete_delay=10)
             status = self.get_member_status(message.author)
             if status["dur_haunt"]:
@@ -703,7 +703,7 @@ class October(commands.Cog):
                     if status[e] > 0:
                         st.append("`" + EFFECT_TRAD_FR[e] + "`")
             stats = "**Effets en cours** · {}\n" \
-                    "**Score · {}\n\n".format(" ".join(st) if st else "Aucun", await self.config.member(ctx.author).score())
+                    "**Score** · {}\n\n".format(" ".join(st) if st else "Aucun", await self.config.member(ctx.author).score())
             em = discord.Embed(title="Votre inventaire", description=stats + tabl, color=HALLOWEEN_COLOR())
             em.set_footer(text="Pour en manger un, faîtes ;hw eat <bonbon>")
             await ctx.send(embed=em)
