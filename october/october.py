@@ -461,17 +461,17 @@ class October(commands.Cog):
                     new_role = old_role = None
                     basetime = time.time()
                     while time.time() <= (basetime + self.get_member_status(user)["dur_rainbow"]):
-                        await asyncio.sleep(30)
                         if old_role:
                             await user.remove_roles([old_role], reason="Effet d'event halloween")
                             new_role = cycle_roles(old_role)
-                            await user.add_roles([new_role], reason="Effet d'event halloween")
+                            await user.add_roles(new_role, reason="Effet d'event halloween")
                         else:
                             new_role = cycle_roles()
-                            await user.add_roles([new_role], reason="Effet d'event halloween")
+                            await user.add_roles(new_role, reason="Effet d'event halloween")
+                        await asyncio.sleep(30)
                         old_role = new_role
                     if old_role:
-                        await user.remove_roles([old_role], reason="Fin effet d'event halloween")
+                        await user.remove_roles(old_role, reason="Fin effet d'event halloween")
                     status["dur_rainbow"] = 0
                     return True
                 else:
