@@ -63,6 +63,13 @@ BASE_DURATIONS = {
     "room": 600
 }
 
+EFFECT_TRAD_FR = {"dur_flip": "renversé",
+                  "dur_rainbow": "arc-en-ciel",
+                  "dur_haunt": "hanté",
+                  "dur_ego": "égo",
+                  "dur_malus": "malus",
+                  "dur_room": "secret"}
+
 class OctoberError(Exception):
     pass
 
@@ -689,7 +696,14 @@ class October(commands.Cog):
             for i in inv:
                 items.append([CANDIES[i]["name"], inv[i]])
             tabl = "```{}```".format(tabulate(items, headers=["Bonbon", "Quantité"]))
-            em = discord.Embed(title="Votre inventaire", description=tabl, color=HALLOWEEN_COLOR())
+            status = self.get_member_status(ctx.author)
+            st = []
+            for e in status:
+                if e.startswith("dur"):
+                    if status[e] > 0:
+                        st.append("`" + EFFECT_TRAD_FR[e] + "`")
+            stats = "**Effets en cours** · {}\n\n".format(" ".join(st) if st else "Aucun")
+            em = discord.Embed(title="Votre inventaire", description=stats + tabl, color=HALLOWEEN_COLOR())
             em.set_footer(text="Pour en manger un, faîtes ;hw eat <bonbon>")
             await ctx.send(embed=em)
         else:
