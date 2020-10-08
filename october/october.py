@@ -715,7 +715,7 @@ class October(commands.Cog):
                     if status[e] > 0:
                         st.append("`" + EFFECT_TRAD_FR[e] + "`")
             stats = "**Effets en cours** · {}\n" \
-                    "**Score · {}\n\n".format(" ".join(st) if st else "Aucun",
+                    "**Score** · {}\n\n".format(" ".join(st) if st else "Aucun",
                                               await self.config.member(ctx.author).score())
             em = discord.Embed(title="Votre inventaire", description=stats + "**Inventaire vide**", color=HALLOWEEN_COLOR())
             em.set_footer(text="Essayez de gagner des bonbons en les attrapant sur les salons écrits !")
@@ -798,13 +798,13 @@ class October(commands.Cog):
             await ctx.send(f"**Salon retiré** • Plus aucun bonbon n'apparaîtra sur ce serveur.")
 
     @_halloween_set.command()
-    async def rainbowroles(self, ctx, *,
-                           red: discord.Role,
-                           orange: discord.Role,
-                           yellow: discord.Role,
-                           green: discord.Role,
-                           blue: discord.Role,
-                           purple: discord.Role):
+    async def rainbowroles(self, ctx,
+                           red: discord.Role = None,
+                           orange: discord.Role = None,
+                           yellow: discord.Role = None,
+                           green: discord.Role = None,
+                           blue: discord.Role = None,
+                           purple: discord.Role = None):
         """Lie 6 rôles (rouge, orange, jaune, vert, bleu et violet) pour l'effet arc-en-ciel
 
         Assurez-vous que les rôles soient au dessus des autres rôles communs des membres (et sans droits particuliers)"""
