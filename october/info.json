@@ -1,0 +1,11 @@
+{
+	"author": ["Acrone"],
+	"description": "Event d'Halloween 2020 (pensé originellement pour l'Appart)",
+	"install_msg": "Merci d'avoir installé ce module.",
+	"short": "Event d'Halloween",
+	"tags": ["fun", "halloween"],
+	"requirements" : [
+		"tabulate"
+	],
+	"type": "COG"
+}
