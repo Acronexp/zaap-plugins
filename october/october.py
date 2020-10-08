@@ -99,7 +99,7 @@ class October(commands.Cog):
     def get_cache(self, guild: discord.Guild, reset: bool = False):
         if guild.id not in self.cache or reset:
             self.cache[guild.id] = {"spawn_counter": 0,
-                                    "last_spawn": time.time(),
+                                    "last_spawn": 0,
 
                                     "distrib_msg": None,
                                     "distrib_users": {},
@@ -177,7 +177,7 @@ class October(commands.Cog):
                     logger.info("Spawn lancé")
                     cache["last_spawn"] = time.time()
                     cache["spawn_counter"] = 0
-                    await asyncio.sleep(random.randint(5, 20))
+                    await asyncio.sleep(random.randint(1, 3))
                     spawn_channel = message.guild.get_channel(await self.config.guild(message.guild).spawn_channel())
                     if spawn_channel:
                         type = random.choice(["fastest", "giveaway"])
@@ -267,7 +267,7 @@ class October(commands.Cog):
                                     await spawn.edit(embed=nem)
                                 await asyncio.sleep(1)
                             await spawn.delete()
-                            if time.time() >= timeout and len(cache["distrib_users"]):
+                            if time.time() >= timeout and len(cache["distrib_users"]) >= (len(candies_id) * 2) :
                                 end_msg = random.choice(["Distribution terminée, à la prochaine !",
                                                          "Temps écoulé, au revoir !",
                                                          "Trop tard, au revoir !"])
@@ -315,7 +315,7 @@ class October(commands.Cog):
                     if user.id not in cache["distrib_users"]:
                         candy = random.choice(cache["distrib_candies"])
                         await self.add_candy(user, candy, 1)
-                        cache["distrib_users"].append(user.id)
+                        cache["distrib_users"][user.id] = candy
 
     @commands.Cog.listener()
     async def on_typing(self, channel, user, start):
