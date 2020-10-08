@@ -273,7 +273,7 @@ class October(commands.Cog):
                                     nem.set_footer(text="Cliquez sur la réaction pour en obtenir un (au hasard)")
                                     nem.add_field(name="» Obtenus", value="```{}```".format(tabulate(tabl, headers=["Membre", "Bonbon"])))
                                     await spawn.edit(embed=nem)
-                                await asyncio.sleep(1)
+                                await asyncio.sleep(0.5)
                             await spawn.delete()
                             if time.time() >= timeout and len(cache["distrib_users"]) >= (len(candies_id) * 2) :
                                 end_msg = random.choice(["Distribution terminée, à la prochaine !",
@@ -425,7 +425,7 @@ class October(commands.Cog):
                 await self.remove_candy(user, candy_id)
                 status["dur_flip"] = BASE_DURATIONS["flip"]
                 basetime = time.time()
-                while time.time() <= (basetime + status["dur_flip"]):
+                while time.time() <= (basetime + self.get_member_status(user)["dur_flip"]):
                     await asyncio.sleep(5)
                 await user.edit(nick=original, reason="Fin d'effet")
                 status["dur_flip"] = 0
@@ -460,7 +460,7 @@ class October(commands.Cog):
                         return roles[0]
                     new_role = old_role = None
                     basetime = time.time()
-                    while time.time() <= (basetime + status["dur_rainbow"]):
+                    while time.time() <= (basetime + self.get_member_status(user)["dur_rainbow"]):
                         await asyncio.sleep(30)
                         if old_role:
                             await user.remove_roles([old_role], reason="Effet d'event halloween")
@@ -506,7 +506,7 @@ class October(commands.Cog):
                 await self.remove_candy(user, candy_id)
                 status["dur_haunt"] = BASE_DURATIONS["haunt"]
                 basetime = time.time()
-                while time.time() <= (basetime + status["dur_haunt"]):
+                while time.time() <= (basetime + self.get_member_status(user)["dur_haunt"]):
                     await asyncio.sleep(5)
                 status["dur_haunt"] = 0
             else:
@@ -552,7 +552,7 @@ class October(commands.Cog):
                 await self.remove_candy(user, candy_id)
                 status["dur_ego"] = BASE_DURATIONS["ego"]
                 basetime = time.time()
-                while time.time() <= (basetime + status["dur_ego"]):
+                while time.time() <= (basetime + self.get_member_status(user)["dur_ego"]):
                     await asyncio.sleep(5)
                 status["dur_ego"] = 0
             else:
@@ -617,7 +617,7 @@ class October(commands.Cog):
                 await self.remove_candy(user, candy_id)
                 status["dur_malus"] = BASE_DURATIONS["malus"]
                 basetime = time.time()
-                while time.time() <= (basetime + status["dur_malus"]):
+                while time.time() <= (basetime + self.get_member_status(user)["dur_malus"]):
                     await asyncio.sleep(5)
                 status["dur_malus"] = 0
             else:
@@ -644,7 +644,7 @@ class October(commands.Cog):
                     role = ctx.guild.get_role(role_id)
                     await user.add_roles([role], reason="Effet event d'halloween")
                     basetime = time.time()
-                    while time.time() <= (basetime + status["dur_room"]):
+                    while time.time() <= (basetime + self.get_member_status(user)["dur_room"]):
                         await asyncio.sleep(5)
                     status["dur_room"] = 0
                     await user.remove_roles([role], reason="Fin effet event d'halloween")
