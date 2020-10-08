@@ -206,7 +206,7 @@ class October(commands.Cog):
                             start_adding_reactions(spawn, ["🤲"])
                             try:
                                 react, user = await self.bot.wait_for("reaction_add",
-                                                                      check=lambda r, u: r.message.id == spawn.id,
+                                                                      check=lambda r, u: r.message.id == spawn.id and not u.bot,
                                                                       timeout=60)
                             except asyncio.TimeoutError:
                                 await spawn.delete()
@@ -226,6 +226,7 @@ class October(commands.Cog):
                                 post_em.set_thumbnail(url=candy["img"])
                                 post_em.set_footer(text="ASTUCE · " + random.choice(ASTUCES))
                                 await spawn.edit(embed=post_em)
+                                await spawn.remove_reaction("🤲", self.bot.user)
                                 await spawn.delete(delay=10)
                         else:
                             candies_id = random.sample(list(CANDIES.keys()), k=random.randint(2, 4))
@@ -276,6 +277,7 @@ class October(commands.Cog):
                                                          "Terminé, j'en ai plus à vous donner.",
                                                          "Je n'ai plus de bonbons à vous donner, au revoir !",
                                                          "Plus rien à donner, j'arrête la distribution."])
+                            await spawn.remove_reaction("🤲", self.bot.user)
                             if cache["distrib_users"]:
                                 tabl = []
                                 for uid, gain in cache["distrib_users"].iteritems():
@@ -310,12 +312,13 @@ class October(commands.Cog):
         message = reaction.message
         if message.guild:
             cache = self.get_cache(message.guild)
-            if message.id == cache["distrib_msg"]:
-                if reaction.emoji == "🤲":
-                    if user.id not in cache["distrib_users"]:
-                        candy = random.choice(cache["distrib_candies"])
-                        await self.add_candy(user, candy, 1)
-                        cache["distrib_users"][user.id] = candy
+            if not user.bot:
+                if message.id == cache["distrib_msg"]:
+                    if reaction.emoji == "🤲":
+                        if user.id not in cache["distrib_users"]:
+                            candy = random.choice(cache["distrib_candies"])
+                            await self.add_candy(user, candy, 1)
+                            cache["distrib_users"][user.id] = candy
 
     @commands.Cog.listener()
     async def on_typing(self, channel, user, start):
