@@ -259,7 +259,7 @@ class October(commands.Cog):
                                     userlist = list(cache["distrib_users"].keys())
                                     tabl = []
                                     for uid, gain in cache["distrib_users"].items():
-                                        tabl.append((channel.guild.get_member(uid).mention, CANDIES[gain]["name"]))
+                                        tabl.append((channel.guild.get_member(uid).name, CANDIES[gain]["name"]))
                                     nem = discord.Embed(title="Récolte d'Halloween • Distribution générale",
                                                        description=text + ctxt,
                                                        color=emcolor)
@@ -281,7 +281,7 @@ class October(commands.Cog):
                             if cache["distrib_users"]:
                                 tabl = []
                                 for uid, gain in cache["distrib_users"].items():
-                                    tabl.append((channel.guild.get_member(uid).mention, CANDIES[gain]["name"]))
+                                    tabl.append((channel.guild.get_member(uid).name, CANDIES[gain]["name"]))
                                 end_em = discord.Embed(title="Récolte d'Halloween • Distribution générale (terminée)",
                                                     description=end_msg,
                                                     color=emcolor)
@@ -367,7 +367,7 @@ class October(commands.Cog):
         status = self.get_member_status(user)
         if status["dur_malus"] != 0:
             return await ctx.send("**Vous êtes malade** • Vous ne pouvez plus manger de bonbons pendant quelques minutes...")
-        effect = random.choices(candy["ep"], candy["ew"], k=1)
+        effect = random.choices(candy["ep"], candy["ew"], k=1)[0]
         if effect == "none":
             await self.remove_candy(user, candy_id)
             async with ctx.channel.typing():
@@ -671,10 +671,10 @@ class October(commands.Cog):
             if inv:
                 items = []
                 for i in inv:
-                    items.append([i, inv[i]])
+                    items.append([CANDIES[i]["name"], inv[i]])
                 tabl = "```{}```".format(tabulate(items, headers=["Bonbon", "Quantité"]))
                 em = discord.Embed(title="Votre inventaire", description=tabl, color=HALLOWEEN_COLOR())
-                em.set_footer(text="Pour en manger un, faîtes ;eat <bonbon>")
+                em.set_footer(text="Pour en manger un, faîtes ;hw eat <bonbon>")
                 await ctx.send(embed=em)
             else:
                 await ctx.send("**Inventaire vide** • Essayez d'avoir des bonbons !")
@@ -687,10 +687,10 @@ class October(commands.Cog):
         if inv:
             items = []
             for i in inv:
-                items.append([i, inv[i]])
+                items.append([CANDIES[i]["name"], inv[i]])
             tabl = "```{}```".format(tabulate(items, headers=["Bonbon", "Quantité"]))
             em = discord.Embed(title="Votre inventaire", description=tabl, color=HALLOWEEN_COLOR())
-            em.set_footer(text="Pour en manger un, faîtes ;eat <bonbon>")
+            em.set_footer(text="Pour en manger un, faîtes ;hw eat <bonbon>")
             await ctx.send(embed=em)
         else:
             await ctx.send("**Inventaire vide** • Essayez d'avoir des bonbons !")
@@ -721,7 +721,7 @@ class October(commands.Cog):
         members = await self.config.all_members(ctx.guild)
         before = []
         for m in members:
-            before.append([members[m]["score"], ctx.guild.get_member(m).mention])
+            before.append([ctx.guild.get_member(m).name, members[m]["score"]])
         if before:
             after = sorted(before, key=operator.itemgetter(0), reverse=True)
             tabl = "```{}```".format(tabulate(after, headers=["Membre", "Score"]))
