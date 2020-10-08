@@ -177,6 +177,7 @@ class October(commands.Cog):
                     logger.info("Spawn lancé")
                     cache["last_spawn"] = time.time()
                     cache["spawn_counter"] = 0
+                    await asyncio.sleep(random.randint(5, 20))
                     spawn_channel = message.guild.get_channel(await self.config.guild(message.guild).spawn_channel())
                     if spawn_channel:
                         type = random.choice(["fastest", "giveaway"])
@@ -205,7 +206,7 @@ class October(commands.Cog):
                             start_adding_reactions(spawn, ["🤲"])
                             try:
                                 react, user = await self.bot.wait_for("reaction_add",
-                                                                      check=lambda r: r.message.id == spawn.id,
+                                                                      check=lambda r, u: r.message.id == spawn.id,
                                                                       timeout=60)
                             except asyncio.TimeoutError:
                                 await spawn.delete()
