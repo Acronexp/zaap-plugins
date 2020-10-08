@@ -174,6 +174,7 @@ class October(commands.Cog):
             cache["spawn_counter"] += 1 if not random.randint(0, 2) else 0
             if cache["spawn_counter"] >= await self.config.guild(message.guild).spawn_counter_trigger():
                 if time.time() > cache["last_spawn"] + await self.config.guild(message.guild).spawn_cooldown():
+                    logger.info("Spawn lancé")
                     cache["last_spawn"] = time.time()
                     cache["spawn_counter"] = 0
                     spawn_channel = message.guild.get_channel(await self.config.guild(message.guild).spawn_channel())
