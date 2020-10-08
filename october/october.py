@@ -678,7 +678,7 @@ class October(commands.Cog):
             if candy_id in inv:
                 await self.manage_effects(ctx, candy_id)
             else:
-                await ctx.send("**Introuvable** • Vous ne possédez pas *{}*".format(candy["name"]))
+                await ctx.send("**Introuvable** • Vous ne possédez pas *{}*".format(CANDIES[candy_id]["name"]))
         else:
             inv = await self.config.member(author).inv()
             if inv:
@@ -787,7 +787,7 @@ class October(commands.Cog):
         Doit être supérieur à 10 (secondes)"""
         guild = ctx.guild
         if 10 <= val:
-            await self.config.guild(guild).spawn_counter_trigger.set(val)
+            await self.config.guild(guild).spawn_cooldown.set(val)
             await ctx.send(f"**Valeur modifiée** • Il y aura un cooldown de *{val}* secondes entre deux spawns (minimum)")
         else:
             await ctx.send(f"**Valeur invalide** • La valeur doit être supérieure à 10 (secondes).")
