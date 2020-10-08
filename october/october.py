@@ -21,19 +21,19 @@ CANDIES = {
                     "img": ""},
     "calisson": {"name": "Calisson", "ep": ["none", "fortune", "flip"], "ew": [2, 1, 2],
                  "img": ""},
-    "caramel": {"name": "Caramel", "ep": ["haunt", "ego"], "ew": [2, 1],
+    "caramel": {"name": "Caramel", "ep": ["haunt", "ego", "room"], "ew": [2, 2, 1],
                 "img": ""},
-    "chewinggum": {"name": "Chewing-gum", "ep": ["none", "room", "malus"], "ew": [2, 1, 1],
+    "chewinggum": {"name": "Chewing-gum", "ep": ["none", "room", "malus", "fortune"], "ew": [2, 1, 1, 1],
                    "img": ""},
     "dragee": {"name": "Dragée", "ep": ["none", "rainbow", "loss"], "ew": [2, 1, 2],
                "img": ""},
     "guimauve": {"name": "Guimauve", "ep": ["none", "loss", "fortune"], "ew": [1, 1, 1],
                  "img": ""},
-    "reglisse": {"name": "Réglisse", "ep": ["malus", "flip"], "ew": [2, 1],
+    "reglisse": {"name": "Réglisse", "ep": ["malus", "flip", "rainbow"], "ew": [2, 2, 1],
                  "img": ""},
     "sucette": {"name": "Sucette", "ep": ["room", "ego", "haunt"], "ew": [2, 1, 2],
                 "img": ""},
-    "nougat": {"name": "Nougat", "ep": ["none", "rainbow"], "ew": [2, 2],
+    "nougat": {"name": "Nougat", "ep": ["none", "rainbow", "flip"], "ew": [2, 2, 1],
                "img": ""}
 }
 
