@@ -407,7 +407,6 @@ class October(commands.Cog):
                 em = discord.Embed(description=result, color=HALLOWEEN_COLOR())
                 em.set_author(name=user.name, icon_url=user.avatar_url)
                 em.set_footer(text="Vous mangez x1 {}".format(candy["name"]))
-                await ctx.send(embed=em)
             if not status["dur_flip"]:
                 original = user.display_name
                 char = "abcdefghijklmnopqrstuvwxyz"
@@ -422,6 +421,7 @@ class October(commands.Cog):
                     await user.edit(nick=name, reason="Effet event d'halloween")
                 except:
                     return await self.manage_effects(ctx, candy_id, exclude_effects=["flip"])
+                await ctx.send(embed=em)
                 await self.remove_candy(user, candy_id)
                 status["dur_flip"] = BASE_DURATIONS["flip"]
                 basetime = time.time()
@@ -430,6 +430,7 @@ class October(commands.Cog):
                 await user.edit(nick=original, reason="Fin d'effet")
                 status["dur_flip"] = 0
             else:
+                await ctx.send(embed=em)
                 await self.remove_candy(user, candy_id)
                 status["dur_flip"] += BASE_DURATIONS["flip"] / 2
         elif effect == "rainbow":
