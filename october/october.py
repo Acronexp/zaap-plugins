@@ -15,17 +15,17 @@ logger = logging.getLogger("red.zaap-plugins.october")
 HALLOWEEN_COLOR = lambda: random.choice([0x5E32BA, 0xEB6123, 0x18181A, 0x96C457])
 
 CANDIES = {
-    "berlingot": {"name": "Berlingot", "ep": ["none", "rainbow"], "ew": [3, 1],
+    "berlingot": {"name": "Berlingot", "ep": ["none", "rainbow"], "ew": [2, 1],
                   "img": ""},
-    "marshmallow": {"name": "Marshmallow", "ep": ["none", "haunt", "ego"], "ew": [3, 2, 1],
+    "marshmallow": {"name": "Marshmallow", "ep": ["none", "haunt", "ego"], "ew": [2, 2, 1],
                     "img": ""},
     "calisson": {"name": "Calisson", "ep": ["none", "fortune", "flip"], "ew": [2, 1, 2],
                  "img": ""},
-    "caramel": {"name": "Caramel", "ep": ["haunt", "ego"], "ew": [3, 1],
+    "caramel": {"name": "Caramel", "ep": ["haunt", "ego"], "ew": [2, 1],
                 "img": ""},
-    "chewinggum": {"name": "Chewing-gum", "ep": ["none", "room", "malus"], "ew": [3, 1, 1],
+    "chewinggum": {"name": "Chewing-gum", "ep": ["none", "room", "malus"], "ew": [2, 1, 1],
                    "img": ""},
-    "dragee": {"name": "Dragée", "ep": ["none", "rainbow", "loss"], "ew": [3, 1, 2],
+    "dragee": {"name": "Dragée", "ep": ["none", "rainbow", "loss"], "ew": [2, 1, 2],
                "img": ""},
     "guimauve": {"name": "Guimauve", "ep": ["none", "loss", "fortune"], "ew": [1, 1, 1],
                  "img": ""},
@@ -33,7 +33,7 @@ CANDIES = {
                  "img": ""},
     "sucette": {"name": "Sucette", "ep": ["room", "ego", "haunt"], "ew": [2, 1, 2],
                 "img": ""},
-    "nougat": {"name": "Nougat", "ep": ["none", "rainbow"], "ew": [3, 2],
+    "nougat": {"name": "Nougat", "ep": ["none", "rainbow"], "ew": [2, 2],
                "img": ""}
 }
 
