@@ -703,7 +703,7 @@ class October(commands.Cog):
                     if status[e] > 0:
                         st.append("`" + EFFECT_TRAD_FR[e] + "`")
             stats = "**Effets en cours** · {}\n" \
-                    "**Score · {}\n\n".format(" ".join(st) if st else "Aucun", await self.config.member(ctx.author.score()))
+                    "**Score · {}\n\n".format(" ".join(st) if st else "Aucun", await self.config.member(ctx.author).score())
             em = discord.Embed(title="Votre inventaire", description=stats + tabl, color=HALLOWEEN_COLOR())
             em.set_footer(text="Pour en manger un, faîtes ;hw eat <bonbon>")
             await ctx.send(embed=em)
@@ -716,7 +716,7 @@ class October(commands.Cog):
                         st.append("`" + EFFECT_TRAD_FR[e] + "`")
             stats = "**Effets en cours** · {}\n" \
                     "**Score · {}\n\n".format(" ".join(st) if st else "Aucun",
-                                              await self.config.member(ctx.author.score()))
+                                              await self.config.member(ctx.author).score())
             em = discord.Embed(title="Votre inventaire", description=stats + "**Inventaire vide**", color=HALLOWEEN_COLOR())
             em.set_footer(text="Essayez de gagner des bonbons en les attrapant sur les salons écrits !")
             await ctx.send(embed=em)
