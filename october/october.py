@@ -6,7 +6,7 @@ import time
 
 import discord
 from fuzzywuzzy import process
-from redbot.core import Config, commands
+from redbot.core import Config, commands, checks
 from redbot.core.utils.menus import start_adding_reactions
 from tabulate import tabulate
 
@@ -96,8 +96,8 @@ class October(commands.Cog):
         self.cache = {}
         self.status = {}
 
-    def get_cache(self, guild: discord.Guild):
-        if guild.id not in self.cache:
+    def get_cache(self, guild: discord.Guild, reset: bool = False):
+        if guild.id not in self.cache or reset:
             self.cache[guild.id] = {"spawn_counter": 0,
                                     "last_spawn": time.time(),
 
@@ -106,11 +106,11 @@ class October(commands.Cog):
                                     "distrib_candies": []}
         return self.cache[guild.id]
 
-    def get_member_status(self, user: discord.Member):
+    def get_member_status(self, user: discord.Member, reset: bool = False):
         guild = user.guild
         if guild.id not in self.status:
             self.status[guild.id] = {}
-        if user.id not in self.status[guild.id]:
+        if user.id not in self.status[guild.id] or reset:
             self.status[guild.id][user.id] = {"dur_flip": 0,
                                               "dur_rainbow": 0,
                                               "dur_haunt": 0,
@@ -177,119 +177,120 @@ class October(commands.Cog):
                     cache["last_spawn"] = time.time()
                     cache["spawn_counter"] = 0
                     spawn_channel = message.guild.get_channel(await self.config.guild(message.guild).spawn_channel())
-                    type = random.choice(["fastest", "giveaway"])
-                    if type == "fastest":
-                        candy_id = random.choice(list(CANDIES.keys()))
-                        candy = CANDIES[candy_id]
-                        qt = random.randint(1, 3)
-                        text = random.choice([
-                            "Je donne {} au plus rapide ! Dépêchez-vous !",
-                            "Voici {} ! Premier arrivé, premier servi.",
-                            "_Lance {} sur le salon_",
-                            "Nouvelle livraison de {} ! Cliquez vite."
-                        ])
-                        if qt > 1:
-                            namef = "**{}** x{}".format(candy["name"], qt)
-                        else:
-                            namef = "**" + candy["name"] + "**"
-
-                        emcolor = HALLOWEEN_COLOR()
-                        em = discord.Embed(title="Récolte d'Halloween • Au plus rapide", description=text.format(namef),
-                                           color=emcolor)
-                        em.set_thumbnail(url=candy["img"])
-                        em.set_footer(text="Soyez le premier à cliquer sur la réaction")
-
-                        spawn = await spawn_channel.send(embed=em)
-                        start_adding_reactions(spawn, ["🤲"])
-                        try:
-                            react, user = await self.bot.wait_for("reaction_add",
-                                                                  check=lambda r: r.message.id == spawn.id,
-                                                                  timeout=60)
-                        except asyncio.TimeoutError:
-                            await spawn.delete()
-                            cache["spawn_counter"] = await self.config.guild(message.guild).spawn_counter_trigger() / 2
-                            return
-                        else:
-                            await self.add_candy(user, candy_id, qt)
-                            wintxt = random.choice([
-                                "{0} empoche {1} avec succès !",
-                                "C'est {0} qui partira donc avec {1} !",
-                                "{0} a été le/la plus rapide, repartant avec {1}.",
-                                "Bien joué {0} ! Tu pars avec {1}.",
-                                "Bravo à {0} qui repart avec {1}."
+                    if spawn_channel:
+                        type = random.choice(["fastest", "giveaway"])
+                        if type == "fastest":
+                            candy_id = random.choice(list(CANDIES.keys()))
+                            candy = CANDIES[candy_id]
+                            qt = random.randint(1, 3)
+                            text = random.choice([
+                                "Je donne {} au plus rapide ! Dépêchez-vous !",
+                                "Voici {} ! Premier arrivé, premier servi.",
+                                "_Lance {} sur le salon_",
+                                "Nouvelle livraison de {} ! Cliquez vite."
                             ])
-                            post_em = discord.Embed(title="Récolte d'Halloween • Au plus rapide", description=wintxt.format(user.mention, namef),
-                                                   color=emcolor)
-                            post_em.set_thumbnail(url=candy["img"])
-                            post_em.set_footer(text="ASTUCE · " + random.choice(ASTUCES))
-                            await spawn.edit(embed=post_em)
-                            await spawn.delete(delay=10)
-                    else:
-                        candies_id = random.sample(list(CANDIES.keys()), k=random.randint(2, 4))
-                        text = random.choice([
-                            "Je donne ces bonbons :\n",
-                            "Voilà ce que je donne aujourd'hui :\n",
-                            "Distribution générale ! Piochez là-dedans :\n",
-                            "Je vous propose de piocher dans tout ça :\n"
-                        ])
-                        ctxt = ""
-                        for c in candies_id:
-                            candy = CANDIES[c]
-                            ctxt = "- **{}**\n".format(candy["name"])
+                            if qt > 1:
+                                namef = "**{}** x{}".format(candy["name"], qt)
+                            else:
+                                namef = "**" + candy["name"] + "**"
 
-                        emcolor = HALLOWEEN_COLOR()
-                        em = discord.Embed(title="Récolte d'Halloween • Distribution générale", description=text + ctxt,
-                                           color=emcolor)
-                        em.set_footer(text="Cliquez sur la réaction pour en obtenir un (au hasard)")
+                            emcolor = HALLOWEEN_COLOR()
+                            em = discord.Embed(title="Récolte d'Halloween • Au plus rapide", description=text.format(namef),
+                                               color=emcolor)
+                            em.set_thumbnail(url=candy["img"])
+                            em.set_footer(text="Soyez le premier à cliquer sur la réaction")
 
-                        spawn = await spawn_channel.send(embed=em)
-                        start_adding_reactions(spawn, ["🤲"])
+                            spawn = await spawn_channel.send(embed=em)
+                            start_adding_reactions(spawn, ["🤲"])
+                            try:
+                                react, user = await self.bot.wait_for("reaction_add",
+                                                                      check=lambda r: r.message.id == spawn.id,
+                                                                      timeout=60)
+                            except asyncio.TimeoutError:
+                                await spawn.delete()
+                                cache["spawn_counter"] = await self.config.guild(message.guild).spawn_counter_trigger() / 2
+                                return
+                            else:
+                                await self.add_candy(user, candy_id, qt)
+                                wintxt = random.choice([
+                                    "{0} empoche {1} avec succès !",
+                                    "C'est {0} qui partira donc avec {1} !",
+                                    "{0} a été le/la plus rapide, repartant avec {1}.",
+                                    "Bien joué {0} ! Tu pars avec {1}.",
+                                    "Bravo à {0} qui repart avec {1}."
+                                ])
+                                post_em = discord.Embed(title="Récolte d'Halloween • Au plus rapide", description=wintxt.format(user.mention, namef),
+                                                       color=emcolor)
+                                post_em.set_thumbnail(url=candy["img"])
+                                post_em.set_footer(text="ASTUCE · " + random.choice(ASTUCES))
+                                await spawn.edit(embed=post_em)
+                                await spawn.delete(delay=10)
+                        else:
+                            candies_id = random.sample(list(CANDIES.keys()), k=random.randint(2, 4))
+                            text = random.choice([
+                                "Je donne ces bonbons :\n",
+                                "Voilà ce que je donne aujourd'hui :\n",
+                                "Distribution générale ! Piochez là-dedans :\n",
+                                "Je vous propose de piocher dans tout ça :\n"
+                            ])
+                            ctxt = ""
+                            for c in candies_id:
+                                candy = CANDIES[c]
+                                ctxt = "- **{}**\n".format(candy["name"])
 
-                        cache["distrib_users"] = []
-                        cache["distrib_candies"] = candies_id
-                        cache["distrib_msg"] = spawn.id
-                        userlist = []
-                        timeout = time.time() + 60
-                        while time.time() < timeout and len(cache["distrib_users"]) < (len(candies_id) * 2):
-                            if cache["distrib_users"].keys() != userlist:
-                                userlist = cache["distrib_users"]
+                            emcolor = HALLOWEEN_COLOR()
+                            em = discord.Embed(title="Récolte d'Halloween • Distribution générale", description=text + ctxt,
+                                               color=emcolor)
+                            em.set_footer(text="Cliquez sur la réaction pour en obtenir un (au hasard)")
+
+                            spawn = await spawn_channel.send(embed=em)
+                            start_adding_reactions(spawn, ["🤲"])
+
+                            cache["distrib_users"] = []
+                            cache["distrib_candies"] = candies_id
+                            cache["distrib_msg"] = spawn.id
+                            userlist = []
+                            timeout = time.time() + 60
+                            while time.time() < timeout and len(cache["distrib_users"]) < (len(candies_id) * 2):
+                                if cache["distrib_users"].keys() != userlist:
+                                    userlist = cache["distrib_users"]
+                                    tabl = []
+                                    for uid, gain in cache["distrib_users"].iteritems():
+                                        tabl.append((channel.guild.get_member(uid).mention, CANDIES[gain]["name"]))
+                                    nem = discord.Embed(title="Récolte d'Halloween • Distribution générale",
+                                                       description=text + ctxt,
+                                                       color=emcolor)
+                                    nem.set_footer(text="Cliquez sur la réaction pour en obtenir un (au hasard)")
+                                    nem.add_field(name="— Obtenus —", value="```{}```".format(tabulate(tabl, headers=["Membre", "Bonbon"])))
+                                    await spawn.edit(embed=nem)
+                                await asyncio.sleep(1)
+                            await spawn.delete()
+                            if time.time() >= timeout and len(cache["distrib_users"]):
+                                end_msg = random.choice(["Distribution terminée, à la prochaine !",
+                                                         "Temps écoulé, au revoir !",
+                                                         "Trop tard, au revoir !"])
+                            else:
+                                end_msg = random.choice(["J'en ai plus donc ça se termine là. Bye !",
+                                                         "Terminé, j'en ai plus à vous donner.",
+                                                         "Je n'ai plus de bonbons à vous donner, au revoir !",
+                                                         "Plus rien à donner, j'arrête la distribution."])
+                            if cache["distrib_users"]:
                                 tabl = []
                                 for uid, gain in cache["distrib_users"].iteritems():
                                     tabl.append((channel.guild.get_member(uid).mention, CANDIES[gain]["name"]))
-                                nem = discord.Embed(title="Récolte d'Halloween • Distribution générale",
-                                                   description=text + ctxt,
-                                                   color=emcolor)
-                                nem.set_footer(text="Cliquez sur la réaction pour en obtenir un (au hasard)")
-                                nem.add_field(name="— Obtenus —", value="```{}```".format(tabulate(tabl, headers=["Membre", "Bonbon"])))
-                                await spawn.edit(embed=nem)
-                            await asyncio.sleep(1)
-                        await spawn.delete()
-                        if time.time() >= timeout and len(cache["distrib_users"]):
-                            end_msg = random.choice(["Distribution terminée, à la prochaine !",
-                                                     "Temps écoulé, au revoir !",
-                                                     "Trop tard, au revoir !"])
-                        else:
-                            end_msg = random.choice(["J'en ai plus donc ça se termine là. Bye !",
-                                                     "Terminé, j'en ai plus à vous donner.",
-                                                     "Je n'ai plus de bonbons à vous donner, au revoir !",
-                                                     "Plus rien à donner, j'arrête la distribution."])
-                        if cache["distrib_users"]:
-                            tabl = []
-                            for uid, gain in cache["distrib_users"].iteritems():
-                                tabl.append((channel.guild.get_member(uid).mention, CANDIES[gain]["name"]))
-                            end_em = discord.Embed(title="Récolte d'Halloween • Distribution générale (terminée)",
-                                                description=end_msg,
-                                                color=emcolor)
-                            end_em.set_footer(text="ASTUCE · " + random.choice(ASTUCES))
-                            end_em.add_field(name="— Obtenus —", value="```{}```".format(tabulate(tabl, headers=["Membre", "Bonbon"])))
-                            await spawn_channel.send(embed=end_em, delete_delay=10)
-                        else:
-                            end_em = discord.Embed(title="Récolte d'Halloween • Distribution générale (terminée)",
-                                                   description=end_msg,
-                                                   color=emcolor)
-                            end_em.set_footer(text="ASTUCE · " + random.choice(ASTUCES))
-                            end_em.add_field(name="— Obtenus —", value="Personne n'a participé à la distribution")
-                            await spawn_channel.send(embed=end_em, delete_delay=10)
+                                end_em = discord.Embed(title="Récolte d'Halloween • Distribution générale (terminée)",
+                                                    description=end_msg,
+                                                    color=emcolor)
+                                end_em.set_footer(text="ASTUCE · " + random.choice(ASTUCES))
+                                end_em.add_field(name="— Obtenus —", value="```{}```".format(tabulate(tabl, headers=["Membre", "Bonbon"])))
+                                await spawn_channel.send(embed=end_em, delete_delay=10)
+                            else:
+                                end_em = discord.Embed(title="Récolte d'Halloween • Distribution générale (terminée)",
+                                                       description=end_msg,
+                                                       color=emcolor)
+                                end_em.set_footer(text="ASTUCE · " + random.choice(ASTUCES))
+                                end_em.add_field(name="— Obtenus —", value="Personne n'a participé à la distribution")
+                                await spawn_channel.send(embed=end_em, delete_delay=10)
             status = self.get_member_status(message.author)
             if status["dur_haunt"]:
                 if not random.randint(0, 4):
@@ -719,9 +720,128 @@ class October(commands.Cog):
         if before:
             after = sorted(before, key=operator.itemgetter(0), reverse=True)
             tabl = "```{}```".format(tabulate(after, headers=["Membre", "Score"]))
-            em = discord.Embed(title="Top sur {}".format(ctx.guild.name), description=tabl, color=HALLOWEEN_COLOR(),
+            em = discord.Embed(title="Top sur {} • Event d'Halloween".format(ctx.guild.name), description=tabl, color=HALLOWEEN_COLOR(),
                                timestamp=ctx.message.timestamp)
             await ctx.send(embed=em)
         else:
             await ctx.send("Aucun top à afficher")
+
+    @commands.group(name="hwset")
+    @commands.guild_only()
+    @checks.admin_or_permissions(manage_messages=True)
+    async def _halloween_set(self, ctx):
+        """Commandes de gestion de l'event d'Halloween"""
+
+    @_halloween_set.command()
+    async def spawncounter(self, ctx, val: int):
+        """Modifie la base de comptage utilisée pour faire spawn des bonbons sur le salon de spawn
+
+        Doit être compris entre 25 et 500"""
+        guild = ctx.guild
+        if 25 <= val <= 500:
+            await self.config.guild(guild).spawn_counter_trigger.set(val)
+            await ctx.send(f"**Valeur modifiée** • Le trigger se lancera sur une base de *{val}*")
+        else:
+            await ctx.send(f"**Valeur invalide** • La valeur doit être comprise entre 25 et 500.")
+
+    @_halloween_set.command()
+    async def spawncd(self, ctx, val: int):
+        """Modifie le cooldown (en secondes) entre deux spawn
+
+        Doit être supérieur à 10 (secondes)"""
+        guild = ctx.guild
+        if 10 <= val:
+            await self.config.guild(guild).spawn_counter_trigger.set(val)
+            await ctx.send(f"**Valeur modifiée** • Il y aura un cooldown de *{val}* secondes entre deux spawns (minimum)")
+        else:
+            await ctx.send(f"**Valeur invalide** • La valeur doit être supérieure à 10 (secondes).")
+
+    @_halloween_set.command()
+    async def spawnchannel(self, ctx, channel: discord.TextChannel = None):
+        """Défini le salon écrit utilisé pour faire spawner les bonbons"""
+        guild = ctx.guild
+        if channel:
+            await self.config.guild(guild).spawn_channel.set(channel.id)
+            await ctx.send(f"**Salon modifié** • Les bonbons apparaissent désormais sur {channel.mention}")
+        else:
+            await self.config.guild(guild).spawn_channel.set(None)
+            await ctx.send(f"**Salon retiré** • Plus aucun bonbon n'apparaîtra sur ce serveur.")
+
+    @_halloween_set.command()
+    async def rainbowroles(self, ctx, *,
+                           red: discord.Role,
+                           orange: discord.Role,
+                           yellow: discord.Role,
+                           green: discord.Role,
+                           blue: discord.Role,
+                           purple: discord.Role):
+        """Lie 6 rôles (rouge, orange, jaune, vert, bleu et violet) pour l'effet arc-en-ciel
+
+        Assurez-vous que les rôles soient au dessus des autres rôles communs des membres (et sans droits particuliers)"""
+        guild = ctx.guild
+        if all(red, orange, yellow, green, blue, purple):
+            set_roles = await self.config.guild(guild).rainbow_roles()
+            set_roles["red"] = red.id
+            set_roles["orange"] = orange.id
+            set_roles["yellow"] = yellow.id
+            set_roles["green"] = green.id
+            set_roles["blue"] = blue.id
+            set_roles["purple"] = purple.id
+            await self.config.guild(guild).rainbow_roles.set(set_roles)
+            await ctx.send(f"**Rôles modifiés** • Ces rôles ont été liés pour faire fonctionner l'effet Rainbow.")
+        else:
+            await self.config.guild(guild).rainbow_roles.set({"red": None, "orange": None, "yellow": None,
+                                                              "green": None, "blue": None, "purple": None})
+            await ctx.send(f"**Rôles retirés** • L'effet rainbow n'est plus configuré.")
+
+    @_halloween_set.command()
+    async def roomrole(self, ctx, role: discord.Role = None):
+        """Défini le rôle pour accéder au salon secret
+
+        Le rôle est retiré si aucun n'est précisé dans la commande"""
+        guild = ctx.guild
+        if role:
+            await self.config.guild(guild).room_role.set(role.id)
+            await ctx.send(f"**Rôle modifié** • Ce rôle servira à donner l'accès au salon secret voulu.")
+        else:
+            await self.config.guild(guild).room_role.set(None)
+            await ctx.send(f"**Rôle retiré** • Le salon secret est désactivé.")
+
+    @_halloween_set.command()
+    async def resetuser(self, ctx, user: discord.Member):
+        """Reset les effets d'un utilisateur"""
+        self.get_member_status(user, reset=True)
+        await ctx.send(f"Reset des status de {user.name} réalisé.")
+
+    @_halloween_set.command()
+    async def resetguild(self, ctx):
+        """Reset le cache du serveur"""
+        self.get_cache(ctx.guild, reset=True)
+        await ctx.send(f"Reset du cache réalisé.")
+
+    @_halloween_set.command()
+    @checks.is_owner()
+    async def setcounter(self, ctx, val: int):
+        """Modifie le counter du cache de ce serveur"""
+        self.get_cache(ctx.guild)["spawn_counter"] = val
+        await ctx.send(f"Valeur `spawn_counter` modifiée pour {val}")
+
+    @_halloween_set.command()
+    @checks.is_owner()
+    async def setlastspawn(self, ctx, val: int):
+        """Modifie le last_spawn du cache de ce serveur"""
+        self.get_cache(ctx.guild)["last_spawn"] = val
+        await ctx.send(f"Valeur `last_spawn` modifiée pour {val}")
+
+    @_halloween_set.command(aliases=["suf"])
+    @checks.is_owner()
+    async def setusereffect(self, ctx, user: discord.Member, effect: str, val: int):
+        """Modifie la valeur d'un effet d'un membre"""
+        user_status = self.get_member_status(user)
+        if effect.lower() in user_status:
+            user_status[effect.lower()] = val
+            await ctx.send(f"Valeur `{effect}` de {user.name} modifiée pour {val}")
+        else:
+            await ctx.send("Nom d'effet inconnu")
+
 
