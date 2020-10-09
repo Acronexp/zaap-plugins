@@ -347,11 +347,6 @@ class October(commands.Cog):
                         ])
                         await channel.send(txt.format(user.display_name))
 
-    @commands.group(name="halloween", aliases=["hw"])
-    @commands.guild_only()
-    async def _halloween(self, ctx):
-        """Commandes de l'event d'Halloween"""
-
     def guess_candy(self, input: str):
         """Devine quel bonbon est demandé (fuzzywuzzy)"""
         candies = list(CANDIES.keys())
@@ -665,7 +660,7 @@ class October(commands.Cog):
                     em.set_footer(text="Vous ne perdez pas votre bonbon")
                     await ctx.send(embed=em)
 
-    @_halloween.command(aliases=["mange"])
+    @commands.command(aliases=["mange"])
     @commands.guild_only()
     @commands.cooldown(1, 10, commands.BucketType.member)
     async def eat(self, ctx, *candy):
@@ -694,7 +689,7 @@ class October(commands.Cog):
             else:
                 await ctx.send("**Inventaire vide** • Essayez d'avoir des bonbons !")
 
-    @_halloween.command(name="inv")
+    @commands.command(name="poche", aliases=["poches"])
     @commands.guild_only()
     async def _inv_candy(self, ctx):
         """Voir son inventaire de bonbons"""
@@ -729,7 +724,7 @@ class October(commands.Cog):
             em.set_footer(text="Essayez de gagner des bonbons en les attrapant sur les salons écrits !")
             await ctx.send(embed=em)
 
-    @_halloween.command(name="give")
+    @commands.command(name="gift", aliases=["cadeau"])
     @commands.guild_only()
     async def _give_candy(self, ctx, user: discord.Member, candy: str, qte: int = 1):
         """Donner un/des bonbon(s) à un membre
@@ -748,7 +743,7 @@ class October(commands.Cog):
         else:
             await ctx.send(f"**Don impossible** • Bonbon introuvable ou non possédé")
 
-    @_halloween.command(name="top")
+    @commands.command(name="topevent")
     @commands.guild_only()
     async def _top_hw(self, ctx):
         """Affiche le top global"""
