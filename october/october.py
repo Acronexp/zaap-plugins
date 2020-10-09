@@ -359,12 +359,13 @@ class October(commands.Cog):
 
     async def get_rainbow_roles(self, guild: discord.Guild):
         roles = await self.config.guild(guild).rainbow_roles()
+        ordre = ["red", "orange", "yellow", "green", "blue", "purple"]
         all_roles = []
         for r in roles:
             if roles[r]:
-                all_roles.append([r, guild.get_role(roles[r])])
+                all_roles.append([ordre.index(r), guild.get_role(roles[r])])
         if len(all_roles) == 6:
-            so = sorted(all_roles, key=operator.itemgetter(0), reverse=True)
+            so = sorted(all_roles, key=operator.itemgetter(0))
             return [i[1] for i in so]
         return None
 
@@ -463,7 +464,7 @@ class October(commands.Cog):
                     basetime = time.time()
                     while time.time() <= (basetime + self.get_member_status(user)["dur_rainbow"]):
                         if old_role:
-                            await user.remove_roles([old_role], reason="Effet d'event halloween")
+                            await user.remove_roles(old_role, reason="Effet d'event halloween")
                             new_role = cycle_roles(old_role)
                             await user.add_roles(new_role, reason="Effet d'event halloween")
                         else:
@@ -643,12 +644,12 @@ class October(commands.Cog):
                     await self.remove_candy(user, candy_id)
                     status["dur_room"] = BASE_DURATIONS["room"]
                     role = ctx.guild.get_role(role_id)
-                    await user.add_roles([role], reason="Effet event d'halloween")
+                    await user.add_roles(role, reason="Effet event d'halloween")
                     basetime = time.time()
                     while time.time() <= (basetime + self.get_member_status(user)["dur_room"]):
                         await asyncio.sleep(5)
                     status["dur_room"] = 0
-                    await user.remove_roles([role], reason="Fin effet event d'halloween")
+                    await user.remove_roles(role, reason="Fin effet event d'halloween")
                 else:
                     await self.remove_candy(user, candy_id)
                     status["dur_room"] += BASE_DURATIONS["room"] / 2
