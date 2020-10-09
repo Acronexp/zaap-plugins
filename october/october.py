@@ -290,7 +290,6 @@ class October(commands.Cog):
                                                          "Je n'ai plus de bonbons à vous donner, au revoir !",
                                                          "Plus rien à donner, j'arrête la distribution."])
                             await spawn.remove_reaction("🤲", self.bot.user)
-                            await spawn.delete()
                             if cache["distrib_users"]:
                                 tabl = []
                                 for uid, gain in cache["distrib_users"].items():
@@ -300,14 +299,14 @@ class October(commands.Cog):
                                                     color=emcolor)
                                 end_em.set_footer(text="ASTUCE · " + random.choice(ASTUCES))
                                 end_em.add_field(name="» Bonbons obtenus", value="```{}```".format(tabulate(tabl, headers=["Membre", "Bonbon"])))
-                                await spawn_channel.send(embed=end_em, delete_delay=10)
+                                await spawn.edit(embed=end_em, delete_delay=10)
                             else:
                                 end_em = discord.Embed(title="Récolte d'Halloween • Distribution générale (terminée)",
                                                        description=end_msg,
                                                        color=emcolor)
                                 end_em.set_footer(text="ASTUCE · " + random.choice(ASTUCES))
                                 end_em.add_field(name="» Bonbons obtenus", value="Personne n'a participé à la distribution")
-                                await spawn_channel.send(embed=end_em, delete_delay=10)
+                                await spawn.edit(embed=end_em, delete_delay=10)
 
             status = self.get_member_status(message.author)
             if status["dur_haunt"]:
