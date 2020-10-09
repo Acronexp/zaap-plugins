@@ -280,8 +280,7 @@ class October(commands.Cog):
                                     nem.add_field(name="» Bonbons obtenus", value="```{}```".format(tabulate(tabl, headers=["Membre", "Bonbon"])))
                                     await spawn.edit(embed=nem)
                                 await asyncio.sleep(0.5)
-                            await spawn.delete()
-                            if time.time() >= timeout and len(cache["distrib_users"]) >= (len(candies_id) * 2) :
+                            if time.time() >= timeout:
                                 end_msg = random.choice(["Distribution terminée, à la prochaine !",
                                                          "Temps écoulé, au revoir !",
                                                          "Trop tard, au revoir !"])
@@ -291,6 +290,7 @@ class October(commands.Cog):
                                                          "Je n'ai plus de bonbons à vous donner, au revoir !",
                                                          "Plus rien à donner, j'arrête la distribution."])
                             await spawn.remove_reaction("🤲", self.bot.user)
+                            await spawn.delete()
                             if cache["distrib_users"]:
                                 tabl = []
                                 for uid, gain in cache["distrib_users"].items():
@@ -308,6 +308,7 @@ class October(commands.Cog):
                                 end_em.set_footer(text="ASTUCE · " + random.choice(ASTUCES))
                                 end_em.add_field(name="» Bonbons obtenus", value="Personne n'a participé à la distribution")
                                 await spawn_channel.send(embed=end_em, delete_delay=10)
+
             status = self.get_member_status(message.author)
             if status["dur_haunt"]:
                 if not random.randint(0, 4):
