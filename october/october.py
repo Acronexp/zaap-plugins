@@ -45,10 +45,16 @@ ASTUCES = [
     "Chaque bonbon a plus de chance de donner certains effets plutôt que d'autres",
     "Tous les bonbons ne peuvent pas donner tous les effets",
     "Il y a une limite de bonbons pouvant apparaître pendant un laps de temps donné",
-    "Il y a 2 types de dons de bonbons : 'Au plus rapide' et 'Distribution générale'",
+    "Il y a 2 types de spawn de bonbons : 'Au plus rapide' et 'Distribution générale'",
     "Ceci n'est pas une astuce",
     "Les bonbons virtuels ne donnent pas de caries",
-    "Si vous mangez trop de bonbons, vous allez devenir e-diabétique"
+    "Si vous mangez trop de bonbons, vous allez devenir e-diabétique",
+    "Pour voir votre inventaire, votre score et les effets que vous subissez, faîtes ;poche",
+    "Un top est disponible avec ;topevent",
+    "Pour certaines commandes comme ';eat' vous pouvez noter vaguement le nom du bonbon, il sera reconnu automatiquement",
+    "Des MAJ peuvent avoir lieues dans le mois pour modifier ou ajouter des choses, prenez garde !",
+    "Vos bonbons n'ont pas de date limite de consommation",
+    "Attention à l'abus de certains bonbons qui peuvent vous rendre malade : vous ne pourrez plus en manger pendant plusieurs minutes !"
 ]
 
 BASE_DURATIONS = {
@@ -684,7 +690,7 @@ class October(commands.Cog):
                     items.append([CANDIES[i]["name"], inv[i]])
                 tabl = "```{}```".format(tabulate(items, headers=["Bonbon", "Quantité"]))
                 em = discord.Embed(title="Votre inventaire", description=tabl, color=HALLOWEEN_COLOR())
-                em.set_footer(text="Pour en manger un, faîtes ;hw eat <bonbon>")
+                em.set_footer(text="Pour en manger un, faîtes ;eat <bonbon>")
                 await ctx.send(embed=em)
             else:
                 await ctx.send("**Inventaire vide** • Essayez d'avoir des bonbons !")
@@ -708,7 +714,7 @@ class October(commands.Cog):
             stats = "**Effets en cours** · {}\n" \
                     "**Score** · {}\n\n".format(" ".join(st) if st else "Aucun", await self.config.member(ctx.author).score())
             em = discord.Embed(title="Votre inventaire", description=stats + tabl, color=HALLOWEEN_COLOR())
-            em.set_footer(text="Pour en manger un, faîtes ;hw eat <bonbon>")
+            em.set_footer(text="Pour en manger un, faîtes ;eat <bonbon>")
             await ctx.send(embed=em)
         else:
             status = self.get_member_status(ctx.author)
