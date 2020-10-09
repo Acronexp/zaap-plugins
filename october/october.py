@@ -184,7 +184,7 @@ class October(commands.Cog):
                     logger.info("Spawn lancé")
                     cache["last_spawn"] = time.time()
                     cache["spawn_counter"] = 0
-                    await asyncio.sleep(random.randint(1, 3))
+                    await asyncio.sleep(random.randint(3, 15))
                     spawn_channel = message.guild.get_channel(await self.config.guild(message.guild).spawn_channel())
                     if spawn_channel:
                         type = random.choice(["fastest", "giveaway"])
@@ -271,7 +271,7 @@ class October(commands.Cog):
                                                        description=text + ctxt,
                                                        color=emcolor)
                                     nem.set_footer(text="Cliquez sur la réaction pour en obtenir un (au hasard)")
-                                    nem.add_field(name="» Obtenus", value="```{}```".format(tabulate(tabl, headers=["Membre", "Bonbon"])))
+                                    nem.add_field(name="» Bonbons obtenus", value="```{}```".format(tabulate(tabl, headers=["Membre", "Bonbon"])))
                                     await spawn.edit(embed=nem)
                                 await asyncio.sleep(0.5)
                             await spawn.delete()
@@ -293,14 +293,14 @@ class October(commands.Cog):
                                                     description=end_msg,
                                                     color=emcolor)
                                 end_em.set_footer(text="ASTUCE · " + random.choice(ASTUCES))
-                                end_em.add_field(name="» Obtenus", value="```{}```".format(tabulate(tabl, headers=["Membre", "Bonbon"])))
+                                end_em.add_field(name="» Bonbons obtenus", value="```{}```".format(tabulate(tabl, headers=["Membre", "Bonbon"])))
                                 await spawn_channel.send(embed=end_em, delete_delay=10)
                             else:
                                 end_em = discord.Embed(title="Récolte d'Halloween • Distribution générale (terminée)",
                                                        description=end_msg,
                                                        color=emcolor)
                                 end_em.set_footer(text="ASTUCE · " + random.choice(ASTUCES))
-                                end_em.add_field(name="» Obtenus", value="Personne n'a participé à la distribution")
+                                end_em.add_field(name="» Bonbons obtenus", value="Personne n'a participé à la distribution")
                                 await spawn_channel.send(embed=end_em, delete_delay=10)
             status = self.get_member_status(message.author)
             if status["dur_haunt"]:
@@ -382,7 +382,7 @@ class October(commands.Cog):
         if effect == "none":
             await self.remove_candy(user, candy_id)
             async with ctx.channel.typing():
-                await asyncio.sleep(random.randint(2, 5))
+                await asyncio.sleep(random.randint(1, 3))
                 result = random.choice([
                     "Vous dégustez votre bonbon mais vous ne ressentez aucun effet particulier.",
                     "Bonbon absolument délicieux, mais sans aucun effet particulier.",
@@ -393,7 +393,7 @@ class October(commands.Cog):
                 ])
                 em = discord.Embed(description=result, color=HALLOWEEN_COLOR())
                 em.set_author(name=user.name, icon_url=user.avatar_url)
-                em.set_footer(text="Vous mangez x1 {}".format(candy["name"]))
+                em.set_footer(text="Vous mangez x1 {}".format(candy["name"].lower()))
                 await ctx.send(embed=em)
                 return True
         elif effect == "flip":
@@ -407,7 +407,7 @@ class October(commands.Cog):
                 ])
                 em = discord.Embed(description=result, color=HALLOWEEN_COLOR())
                 em.set_author(name=user.name, icon_url=user.avatar_url)
-                em.set_footer(text="Vous mangez x1 {}".format(candy["name"]))
+                em.set_footer(text="Vous mangez x1 {}".format(candy["name"].lower()))
             if not status["dur_flip"]:
                 original = user.display_name
                 char = "abcdefghijklmnopqrstuvwxyz"
@@ -449,7 +449,7 @@ class October(commands.Cog):
                     ])
                     em = discord.Embed(description=result, color=HALLOWEEN_COLOR())
                     em.set_author(name=user.name, icon_url=user.avatar_url)
-                    em.set_footer(text="Vous mangez x1 {}".format(candy["name"]))
+                    em.set_footer(text="Vous mangez x1 {}".format(candy["name"].lower()))
                     await ctx.send(embed=em)
                 if not status["dur_rainbow"]:
                     await self.remove_candy(user, candy_id)
@@ -488,7 +488,7 @@ class October(commands.Cog):
                     ])
                     em = discord.Embed(description=result, color=HALLOWEEN_COLOR())
                     em.set_author(name=user.name, icon_url=user.avatar_url)
-                    em.set_footer(text="Vous ne perdez pas votre bonbon".format(candy["name"]))
+                    em.set_footer(text="Vous ne perdez pas votre bonbon")
                     await ctx.send(embed=em)
         elif effect == "haunt":
             async with ctx.channel.typing():
@@ -502,7 +502,7 @@ class October(commands.Cog):
                 ])
                 em = discord.Embed(description=result, color=HALLOWEEN_COLOR())
                 em.set_author(name=user.name, icon_url=user.avatar_url)
-                em.set_footer(text="Vous mangez x1 {}".format(candy["name"]))
+                em.set_footer(text="Vous mangez x1 {}".format(candy["name"].lower()))
                 await ctx.send(embed=em)
             if not status["dur_haunt"]:
                 await self.remove_candy(user, candy_id)
@@ -530,7 +530,7 @@ class October(commands.Cog):
             ])
             em = discord.Embed(description=text.format(new_candy["name"], qte, candy["name"]), color=HALLOWEEN_COLOR())
             em.set_author(name=user.name, icon_url=user.avatar_url)
-            em.set_footer(text="Vous mangez x1 {}".format(candy["name"]))
+            em.set_footer(text="Vous mangez x1 {}".format(candy["name"].lower()))
             await ctx.send(embed=em)
         elif effect == "ego":
             async with ctx.channel.typing():
@@ -548,7 +548,7 @@ class October(commands.Cog):
                 ])
                 em = discord.Embed(description=result, color=HALLOWEEN_COLOR())
                 em.set_author(name=user.name, icon_url=user.avatar_url)
-                em.set_footer(text="Vous mangez x1 {}".format(candy["name"]))
+                em.set_footer(text="Vous mangez x1 {}".format(candy["name"].lower()))
                 await ctx.send(embed=em)
             if not status["dur_ego"]:
                 await self.remove_candy(user, candy_id)
@@ -577,7 +577,7 @@ class October(commands.Cog):
                     ])
                     em = discord.Embed(description=result, color=HALLOWEEN_COLOR())
                     em.set_author(name=user.name, icon_url=user.avatar_url)
-                    em.set_footer(text="Vous mangez x1 {}".format(candy["name"]))
+                    em.set_footer(text="Vous mangez x1 {}".format(candy["name"].lower()))
                     await ctx.send(embed=em)
                 await self.remove_candy(user, rdn, loss)
             else:
@@ -592,7 +592,7 @@ class October(commands.Cog):
                     ])
                     em = discord.Embed(description=result, color=HALLOWEEN_COLOR())
                     em.set_author(name=user.name, icon_url=user.avatar_url)
-                    em.set_footer(text="Vous mangez x1 {}".format(candy["name"]))
+                    em.set_footer(text="Vous mangez x1 {}".format(candy["name"].lower()))
                     await ctx.send(embed=em)
         elif effect == "malus":
             loss = random.randint(1, 5)
@@ -613,7 +613,7 @@ class October(commands.Cog):
                 ])
                 em = discord.Embed(description=result, color=HALLOWEEN_COLOR())
                 em.set_author(name=user.name, icon_url=user.avatar_url)
-                em.set_footer(text="Vous mangez x1 {} — Vous perdez {} points".format(candy["name"], loss))
+                em.set_footer(text="Vous mangez x1 {} — Vous perdez {} points".format(candy["name"].lower(), loss))
                 await ctx.send(embed=em)
             if not status["dur_malus"]:
                 await self.remove_candy(user, candy_id)
@@ -638,7 +638,7 @@ class October(commands.Cog):
                     ])
                     em = discord.Embed(description=result, color=HALLOWEEN_COLOR())
                     em.set_author(name=user.name, icon_url=user.avatar_url)
-                    em.set_footer(text="Vous mangez x1 {}".format(candy["name"]))
+                    em.set_footer(text="Vous mangez x1 {}".format(candy["name"].lower()))
                     await ctx.send(embed=em)
                 if not status["dur_room"]:
                     await self.remove_candy(user, candy_id)
@@ -662,7 +662,7 @@ class October(commands.Cog):
                     ])
                     em = discord.Embed(description=result, color=HALLOWEEN_COLOR())
                     em.set_author(name=user.name, icon_url=user.avatar_url)
-                    em.set_footer(text="Vous ne perdez pas votre bonbon".format(candy["name"]))
+                    em.set_footer(text="Vous ne perdez pas votre bonbon")
                     await ctx.send(embed=em)
 
     @_halloween.command(aliases=["mange"])
