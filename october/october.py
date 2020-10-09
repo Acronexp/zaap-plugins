@@ -759,7 +759,7 @@ class October(commands.Cog):
         for m in members:
             before.append([ctx.guild.get_member(m).name, members[m]["score"]])
         if before:
-            after = sorted(before, key=operator.itemgetter(0), reverse=True)
+            after = sorted(before, key=operator.itemgetter(1), reverse=True)
             tabl = "```{}```".format(tabulate(after, headers=["Membre", "Score"]))
             em = discord.Embed(title="Top sur {} • Event d'Halloween".format(ctx.guild.name), description=tabl, color=HALLOWEEN_COLOR())
             await ctx.send(embed=em)
