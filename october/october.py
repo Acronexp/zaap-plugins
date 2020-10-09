@@ -15,7 +15,7 @@ logger = logging.getLogger("red.zaap-plugins.october")
 HALLOWEEN_COLOR = lambda: random.choice([0x5E32BA, 0xEB6123, 0x18181A, 0x96C457])
 
 CANDIES = {
-    "berlingot": {"name": "Berlingot", "ep": ["none", "rainbow"], "ew": [2, 1],
+    "berlingot": {"name": "Berlingot", "ep": ["none", "rainbow", "flip"], "ew": [2, 1, 2],
                   "img": ""},
     "marshmallow": {"name": "Marshmallow", "ep": ["none", "haunt", "ego"], "ew": [2, 2, 1],
                     "img": ""},
@@ -33,7 +33,7 @@ CANDIES = {
                  "img": ""},
     "sucette": {"name": "Sucette", "ep": ["room", "ego", "haunt"], "ew": [2, 1, 2],
                 "img": ""},
-    "nougat": {"name": "Nougat", "ep": ["none", "rainbow", "flip"], "ew": [2, 2, 1],
+    "nougat": {"name": "Nougat", "ep": ["none", "rainbow", "flip"], "ew": [2, 1, 1],
                "img": ""}
 }
 
@@ -61,9 +61,9 @@ BASE_DURATIONS = {
     "none": None,
     "flip": 300,
     "rainbow": 300,
-    "haunt": 300,
+    "haunt": 180,
     "fortune": None,
-    "ego": 160,
+    "ego": 120,
     "loss": None,
     "malus": 600,
     "room": 600
@@ -579,7 +579,7 @@ class October(commands.Cog):
                         "Ce bonbon était maudit... Vous perdez x{1} **{0}**...",
                         "C'était pas bon et en plus vous avez perdu x{1} **{0}** dans votre confusion."
                     ])
-                    em = discord.Embed(description=result, color=HALLOWEEN_COLOR())
+                    em = discord.Embed(description=result.format(candy["name"], loss), color=HALLOWEEN_COLOR())
                     em.set_author(name=user.name, icon_url=user.avatar_url)
                     em.set_footer(text="Vous mangez x1 {}".format(candy["name"].lower()))
                     await ctx.send(embed=em)
