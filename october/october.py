@@ -63,7 +63,7 @@ BASE_DURATIONS = {
     "rainbow": 300,
     "haunt": 180,
     "fortune": None,
-    "ego": 120,
+    "ego": 180,
     "loss": None,
     "malus": 600,
     "room": 600
@@ -340,7 +340,7 @@ class October(commands.Cog):
             if status["dur_ego"]:
                 if time.time() >= status["ego_cd"]:
                     if not random.randint(0, 4):
-                        status["ego_cd"] = time.time() + 45
+                        status["ego_cd"] = time.time() + 50
                         txt = random.choice([
                             "Agenouillez-vous, **{}** va parler.",
                             "Notre maître à tous **{}** va parler :pray:...",
@@ -499,7 +499,8 @@ class October(commands.Cog):
                     "Vous vous sentez surveillé soudainement...",
                     "On dirait qu'un esprit vous surveille...",
                     "Vous êtes hanté !",
-                    "Ce bonbon était hanté !"
+                    "Ce bonbon était hanté !",
+                    "Les esprits sont très en colère contre vous, fuyez !"
                 ])
                 em = discord.Embed(description=result, color=HALLOWEEN_COLOR())
                 em.set_author(name=user.name, icon_url=user.avatar_url)
@@ -545,7 +546,8 @@ class October(commands.Cog):
                     "Ce bonbon vous fait prendre un melon énorme...",
                     "Vous vous sentez soudainement célèbre et important.",
                     "Vous semblez devenir temporairement une e-pop.",
-                    "Les esprits des anciens White knights vous suivent..."
+                    "Les esprits des anciens White knights vous suivent...",
+                    "Vous êtes suivi par des groupies..."
                 ])
                 em = discord.Embed(description=result, color=HALLOWEEN_COLOR())
                 em.set_author(name=user.name, icon_url=user.avatar_url)
