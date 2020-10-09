@@ -567,7 +567,10 @@ class October(commands.Cog):
             if inv:
                 rdn = random.choice(list(inv.keys()))
                 max_qte = inv[rdn]
-                loss = random.randint(1, int(max_qte / 2))
+                if max_qte > 1:
+                    loss = random.randint(1, int(max_qte / 2))
+                else:
+                    loss = 1
                 async with ctx.channel.typing():
                     await asyncio.sleep(random.randint(2, 5))
                     result = random.choice([
