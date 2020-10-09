@@ -732,6 +732,7 @@ class October(commands.Cog):
 
     @commands.command(name="gift", aliases=["cadeau"])
     @commands.guild_only()
+    @commands.cooldown(1, 60, commands.BucketType.member)
     async def _give_candy(self, ctx, user: discord.Member, candy: str, qte: int = 1):
         """Donner un/des bonbon(s) à un membre
 
