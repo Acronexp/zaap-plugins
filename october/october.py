@@ -745,7 +745,7 @@ class October(commands.Cog):
             stats = "**Effets en cours** · {}\n" \
                     "**Score** · {}\n\n".format(" ".join(st) if st else "Aucun",
                                               await self.config.member(ctx.author).score())
-            em = discord.Embed(title="Votre inventaire", description=stats + "**Inventaire vide**", color=HALLOWEEN_COLOR())
+            em = discord.Embed(title="Votre inventaire", description=stats + "`Inventaire vide`", color=HALLOWEEN_COLOR())
             em.set_footer(text="Essayez de gagner des bonbons en les attrapant sur les salons écrits !")
             await ctx.send(embed=em)
 
