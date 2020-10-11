@@ -24,17 +24,17 @@ CANDIES = {
     "caramel": {"name": "Caramel", "ep": ["haunt", "ego", "room"], "ew": [2, 1, 1],
                 "img": "https://i.imgur.com/aDWlDke.png"},
     "chewinggum": {"name": "Chewing-gum", "ep": ["none", "room", "malus", "fortune"], "ew": [2, 1, 1, 1],
-                   "img": ""},
+                   "img": "https://i.imgur.com/RE4PVNV.png"},
     "dragee": {"name": "Dragée", "ep": ["none", "rainbow", "loss"], "ew": [2, 1, 2],
-               "img": ""},
+               "img": "https://i.imgur.com/RPO03jr.png"},
     "guimauve": {"name": "Guimauve", "ep": ["none", "loss", "fortune"], "ew": [2, 1, 1],
-                 "img": ""},
+                 "img": "https://i.imgur.com/a9abEgv.png"},
     "reglisse": {"name": "Réglisse", "ep": ["malus", "flip", "rainbow"], "ew": [2, 2, 1],
-                 "img": ""},
+                 "img": "https://i.imgur.com/FFDP0v5.png"},
     "sucette": {"name": "Sucette", "ep": ["room", "ego", "haunt"], "ew": [2, 1, 2],
-                "img": ""},
+                "img": "https://i.imgur.com/0UXTdLR.png"},
     "nougat": {"name": "Nougat", "ep": ["none", "rainbow", "flip"], "ew": [2, 1, 1],
-               "img": ""}
+               "img": "https://i.imgur.com/VR84nWx.png"}
 }
 
 ASTUCES = [
