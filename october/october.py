@@ -792,17 +792,20 @@ class October(commands.Cog):
 
         Si vous ne précisez pas de quantité, vous ne donnez qu'un seul bonbon"""
         authorinv = await self.config.member(ctx.author).inv()
-        candy_id = self.guess_candy(candy)
-        if candy_id in authorinv:
-            candy_name = CANDIES[candy_id]["name"]
-            if await self.enough_candies(ctx.author, candy_id, qte):
-                await self.remove_candy(ctx.author, candy_id, qte)
-                await self.add_candy(user, candy_id, qte)
-                await ctx.send(f"**Don réalisé** • {candy_name} x{qte} ont été donnés à {user.mention}")
+        candy_id, prc = self.guess_candy(candy)
+        if prc >= 70:
+            if candy_id in authorinv:
+                candy_name = CANDIES[candy_id]["name"]
+                if await self.enough_candies(ctx.author, candy_id, qte):
+                    await self.remove_candy(ctx.author, candy_id, qte)
+                    await self.add_candy(user, candy_id, qte)
+                    await ctx.send(f"**Don réalisé** • {candy_name} x{qte} ont été donnés à {user.mention}")
+                else:
+                    await ctx.send(f"**Don impossible** • Vous ne possédez pas autant de ce bonbon : {candy_name}")
             else:
-                await ctx.send(f"**Don impossible** • Vous ne possédez pas autant de ce bonbon : {candy_name}")
+                await ctx.send(f"**Don impossible** • Bonbon non possédé")
         else:
-            await ctx.send(f"**Don impossible** • Bonbon introuvable ou non possédé")
+            await ctx.send(f"**Don impossible** • Bonbon inconnu")
 
     @commands.command(name="recycle", aliases=["crush"])
     @commands.guild_only()
@@ -814,24 +817,27 @@ class October(commands.Cog):
         inv = await self.config.member(ctx.author).inv()
         curr_sugar = await self.config.member(ctx.author).sugar()
         if curr_sugar < 100:
-            candy_id = self.guess_candy(candy)
-            if candy_id in inv:
-                if await self.enough_candies(ctx.author, candy_id, qte):
-                    await self.remove_candy(ctx.author, candy_id, qte)
-                    sugar = CANDIES[candy_id]["sugar"] * qte
-                    new_sugar = curr_sugar + sugar if curr_sugar + sugar < 100 else 100
-                    await self.config.member(ctx.author).sugar.set(new_sugar)
-                    if new_sugar < 100:
-                        await ctx.send("**Opération réussie** • Vous avez écrasé **{}** x{} et obtenu *{}%* de sucre.\n"
-                                       "Vous avez désormais ***{}%*** de sucre à disposition.".format(CANDIES[candy_id]["name"], qte, sugar, new_sugar))
+            candy_id, prc  = self.guess_candy(candy)
+            if prc >= 70:
+                if candy_id in inv:
+                    if await self.enough_candies(ctx.author, candy_id, qte):
+                        await self.remove_candy(ctx.author, candy_id, qte)
+                        sugar = CANDIES[candy_id]["sugar"] * qte
+                        new_sugar = curr_sugar + sugar if curr_sugar + sugar < 100 else 100
+                        await self.config.member(ctx.author).sugar.set(new_sugar)
+                        if new_sugar < 100:
+                            await ctx.send("**Opération réussie** • Vous avez écrasé **{}** x{} et obtenu *{}%* de sucre.\n"
+                                           "Vous avez désormais ***{}%*** de sucre à disposition.".format(CANDIES[candy_id]["name"], qte, sugar, new_sugar))
+                        else:
+                            await ctx.send("**Opération réussie** • Vous avez écrasé **{}** x{} et obtenu *{}%* de sucre.\n"
+                                           "Vous avez désormais ***{}%*** de sucre à disposition. Relancez la commande pour le recycler en bonbon et en points !".format(
+                                CANDIES[candy_id]["name"], qte, sugar, new_sugar))
                     else:
-                        await ctx.send("**Opération réussie** • Vous avez écrasé **{}** x{} et obtenu *{}%* de sucre.\n"
-                                       "Vous avez désormais ***{}%*** de sucre à disposition. Relancez la commande pour le recycler en bonbon et en points !".format(
-                            CANDIES[candy_id]["name"], qte, sugar, new_sugar))
+                        await ctx.send(f"**Opération impossible** • Vous ne possédez pas cette quantité de ce bonbon.")
                 else:
-                    await ctx.send(f"**Opération impossible** • Vous ne possédez pas cette quantité de ce bonbon.")
+                    await ctx.send(f"**Opération impossible** • Bonbon non possédé")
             else:
-                await ctx.send(f"**Opération impossible** • Bonbon introuvable ou non possédé")
+                await ctx.send(f"**Opération impossible** • Bonbon inconnu")
         else:
             options_txt = "🍬 · Recycler le sucre en bonbon et en points\n" \
                           "❌ · Annuler"
