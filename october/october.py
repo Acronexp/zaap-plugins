@@ -149,16 +149,17 @@ class October(commands.Cog):
             return False
         raise InvalidCandy("Il n'y a aucun bonbon à ce nom ou la quantité est invalide")
 
-    async def add_candy(self, user: discord.Member, candy_id: str, qte: int):
+    async def add_candy(self, user: discord.Member, candy_id: str, qte: int, points: bool = True):
         """Ajoute un bonbon au membre"""
         if candy_id in CANDIES and qte > 0:
             score, inv = await self.config.member(user).score(), await self.config.member(user).inv()
-            score += qte
             if candy_id not in inv:
                 inv[candy_id] = qte
             else:
                 inv[candy_id] += qte
-            await self.config.member(user).score.set(score)
+            if points:
+                score += qte
+                await self.config.member(user).score.set(score)
             await self.config.member(user).inv.set(inv)
             return True
         raise InvalidCandy("Il n'y a aucun bonbon à ce nom ou la quantité est invalide")
@@ -556,7 +557,7 @@ class October(commands.Cog):
                 new_candy_id = random.choice(list(CANDIES.keys()))
                 new_candy = CANDIES[new_candy_id]
                 qte = random.randint(2, 5)
-                await self.add_candy(user, new_candy_id, qte)
+                await self.add_candy(user, new_candy_id, qte, points=False)
                 text = random.choice([
                     "Coup de chance ! **{0}** x{1} vous tombe comme par magie dans les mains !",
                     "Quelle chance ! Un inconnu vous donne **{0}** x{1} en plus !",
