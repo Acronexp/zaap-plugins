@@ -810,34 +810,38 @@ class October(commands.Cog):
     @commands.command(name="recycle", aliases=["crush"])
     @commands.guild_only()
     @commands.cooldown(1, 5, commands.BucketType.member)
-    async def _recycle_candy(self, ctx, candy: str, qte: int = 1):
+    async def _recycle_candy(self, ctx, candy: str = None, qte: int = 1):
         """Ecrase un/des bonbon(s) pour en récupérer du sucre
 
         Vous pouvez écraser plusieurs bonbons en même temps, précisez la quantité après le nom du bonbon"""
         inv = await self.config.member(ctx.author).inv()
         curr_sugar = await self.config.member(ctx.author).sugar()
         if curr_sugar < 100:
-            candy_id, prc  = self.guess_candy(candy)
-            if prc >= 70:
-                if candy_id in inv:
-                    if await self.enough_candies(ctx.author, candy_id, qte):
-                        await self.remove_candy(ctx.author, candy_id, qte)
-                        sugar = CANDIES[candy_id]["sugar"] * qte
-                        new_sugar = curr_sugar + sugar if curr_sugar + sugar < 100 else 100
-                        await self.config.member(ctx.author).sugar.set(new_sugar)
-                        if new_sugar < 100:
-                            await ctx.send("**Opération réussie** • Vous avez écrasé **{}** x{} et obtenu *{}%* de sucre.\n"
-                                           "Vous avez désormais ***{}%*** de sucre à disposition.".format(CANDIES[candy_id]["name"], qte, sugar, new_sugar))
+            if candy:
+                candy_id, prc  = self.guess_candy(candy)
+                if prc >= 70:
+                    if candy_id in inv:
+                        if await self.enough_candies(ctx.author, candy_id, qte):
+                            await self.remove_candy(ctx.author, candy_id, qte)
+                            sugar = CANDIES[candy_id]["sugar"] * qte
+                            new_sugar = curr_sugar + sugar if curr_sugar + sugar < 100 else 100
+                            await self.config.member(ctx.author).sugar.set(new_sugar)
+                            if new_sugar < 100:
+                                await ctx.send("**Opération réussie** • Vous avez écrasé **{}** x{} et obtenu *{}%* de sucre.\n"
+                                               "Vous avez désormais ***{}%*** de sucre à disposition.".format(CANDIES[candy_id]["name"], qte, sugar, new_sugar))
+                            else:
+                                await ctx.send("**Opération réussie** • Vous avez écrasé **{}** x{} et obtenu *{}%* de sucre.\n"
+                                               "Vous avez désormais ***{}%*** de sucre à disposition. Relancez la commande pour le recycler en bonbon et en points !".format(
+                                    CANDIES[candy_id]["name"], qte, sugar, new_sugar))
                         else:
-                            await ctx.send("**Opération réussie** • Vous avez écrasé **{}** x{} et obtenu *{}%* de sucre.\n"
-                                           "Vous avez désormais ***{}%*** de sucre à disposition. Relancez la commande pour le recycler en bonbon et en points !".format(
-                                CANDIES[candy_id]["name"], qte, sugar, new_sugar))
+                            await ctx.send(f"**Opération impossible** • Vous ne possédez pas cette quantité de ce bonbon.")
                     else:
-                        await ctx.send(f"**Opération impossible** • Vous ne possédez pas cette quantité de ce bonbon.")
+                        await ctx.send(f"**Opération impossible** • Bonbon non possédé")
                 else:
-                    await ctx.send(f"**Opération impossible** • Bonbon non possédé")
+                    await ctx.send(f"**Opération impossible** • Bonbon inconnu")
             else:
-                await ctx.send(f"**Opération impossible** • Bonbon inconnu")
+                await ctx.send(f"**Sucre insuffisant** • Vous ne pouvez pas encore recycler votre sucre en bonbon.\n"
+                               f"Pour obtenir du sucre, recyclez vos bonbons en faisant `;recycle <bonbon>`.")
         else:
             options_txt = "🍬 · Recycler le sucre en bonbon et en points\n" \
                           "❌ · Annuler"
