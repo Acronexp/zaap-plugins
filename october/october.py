@@ -25,7 +25,7 @@ CANDIES = {
     "caramel": {"name": "Caramel", "ep": ["haunt", "ego", "room"], "ew": [2, 1, 1],
                 "img": "https://i.imgur.com/aDWlDke.png", "sugar": 25},
     "chewinggum": {"name": "Chewing-gum", "ep": ["none", "room", "malus", "fortune"], "ew": [2, 1, 1, 1],
-                   "img": "https://i.imgur.com/RE4PVNV.png", "sugar": 15},
+                   "img": "https://i.imgur.com/RE4PVNV.png", "sugar": 12},
     "dragee": {"name": "Dragée", "ep": ["none", "rainbow", "loss"], "ew": [2, 1, 2],
                "img": "https://i.imgur.com/RPO03jr.png", "sugar": 8},
     "guimauve": {"name": "Guimauve", "ep": ["none", "loss", "fortune"], "ew": [2, 1, 1],
