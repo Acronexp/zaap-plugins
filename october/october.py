@@ -556,7 +556,7 @@ class October(commands.Cog):
                 await asyncio.sleep(random.randint(2, 5))
                 new_candy_id = random.choice(list(CANDIES.keys()))
                 new_candy = CANDIES[new_candy_id]
-                qte = random.randint(2, 5)
+                qte = random.randint(1, 3)
                 await self.add_candy(user, new_candy_id, qte, points=False)
                 text = random.choice([
                     "Coup de chance ! **{0}** x{1} vous tombe comme par magie dans les mains !",
@@ -640,8 +640,15 @@ class October(commands.Cog):
                     em.set_footer(text="Vous mangez x1 {}".format(candy["name"].lower()))
                     await ctx.send(embed=em)
         elif effect == "malus":
-            loss = random.randint(1, 5)
             score = await self.config.member(user).score()
+            if score <= 20:
+                loss = random.randint(1, 3)
+            elif 21 <= score <= 75:
+                loss = random.randint(3, 5)
+            elif 76 <= score <= 200:
+                loss = random.randint(5, 10)
+            else:
+                loss = random.randint(10, 30)
             if score <= loss:
                 score = 0
             else:
