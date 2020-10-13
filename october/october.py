@@ -9,6 +9,7 @@ from fuzzywuzzy import process
 from redbot.core import Config, commands, checks
 from redbot.core.utils.menus import start_adding_reactions
 from tabulate import tabulate
+from zalgo_text.zalgo import zalgo
 
 logger = logging.getLogger("red.zaap-plugins.october")
 
@@ -16,25 +17,27 @@ HALLOWEEN_COLOR = lambda: random.choice([0x5E32BA, 0xEB6123, 0x18181A, 0x96C457]
 
 CANDIES = {
     "berlingot": {"name": "Berlingot", "ep": ["none", "rainbow", "flip"], "ew": [2, 1, 2],
-                  "img": "https://i.imgur.com/CEjucfS.png"},
+                  "img": "https://i.imgur.com/CEjucfS.png", "sugar": 10},
     "marshmallow": {"name": "Marshmallow", "ep": ["none", "haunt", "ego"], "ew": [2, 2, 1],
-                    "img": "https://i.imgur.com/H06Mlem.png"},
+                    "img": "https://i.imgur.com/H06Mlem.png", "sugar": 20},
     "calisson": {"name": "Calisson", "ep": ["none", "fortune", "flip"], "ew": [2, 1, 2],
-                 "img": "https://i.imgur.com/iRCCPQk.png"},
+                 "img": "https://i.imgur.com/iRCCPQk.png", "sugar": 15},
     "caramel": {"name": "Caramel", "ep": ["haunt", "ego", "room"], "ew": [2, 1, 1],
-                "img": "https://i.imgur.com/aDWlDke.png"},
+                "img": "https://i.imgur.com/aDWlDke.png", "sugar": 25},
     "chewinggum": {"name": "Chewing-gum", "ep": ["none", "room", "malus", "fortune"], "ew": [2, 1, 1, 1],
-                   "img": "https://i.imgur.com/RE4PVNV.png"},
+                   "img": "https://i.imgur.com/RE4PVNV.png", "sugar": 15},
     "dragee": {"name": "Dragée", "ep": ["none", "rainbow", "loss"], "ew": [2, 1, 2],
-               "img": "https://i.imgur.com/RPO03jr.png"},
+               "img": "https://i.imgur.com/RPO03jr.png", "sugar": 8},
     "guimauve": {"name": "Guimauve", "ep": ["none", "loss", "fortune"], "ew": [2, 1, 1],
-                 "img": "https://i.imgur.com/a9abEgv.png"},
+                 "img": "https://i.imgur.com/a9abEgv.png", "sugar": 12},
     "reglisse": {"name": "Réglisse", "ep": ["malus", "flip", "rainbow"], "ew": [2, 2, 1],
-                 "img": "https://i.imgur.com/FFDP0v5.png"},
+                 "img": "https://i.imgur.com/FFDP0v5.png", "sugar": 6},
     "sucette": {"name": "Sucette", "ep": ["room", "ego", "haunt"], "ew": [2, 1, 2],
-                "img": "https://i.imgur.com/0UXTdLR.png"},
+                "img": "https://i.imgur.com/0UXTdLR.png", "sugar": 20},
     "nougat": {"name": "Nougat", "ep": ["none", "rainbow", "flip"], "ew": [2, 1, 1],
-               "img": "https://i.imgur.com/VR84nWx.png"}
+               "img": "https://i.imgur.com/VR84nWx.png", "sugar": 18},
+    "soucoupe": {"name": "Soucoupe", "ep": ["none", "flip", "haunt", "fortune"], "ew": [2, 2, 1, 1],
+                 "img": "", "sugar": 50}
 }
 
 ASTUCES = [
@@ -54,7 +57,9 @@ ASTUCES = [
     "Pour certaines commandes comme ';eat' vous pouvez noter vaguement le nom du bonbon, il sera reconnu automatiquement",
     "Des MAJ peuvent avoir lieues dans le mois pour modifier ou ajouter des choses, prenez garde !",
     "Vos bonbons n'ont pas de date limite de consommation",
-    "Attention à l'abus de certains bonbons qui peuvent vous rendre malade : vous ne pourrez plus en manger pendant plusieurs minutes !"
+    "Attention à l'abus de certains bonbons qui peuvent vous rendre malade : vous ne pourrez plus en manger pendant plusieurs minutes !",
+    "Vous pouvez obtenir du sucre en écrasant vos bonbons avec ';recycle', puis l'utiliser pour en obtenir d'autres !",
+    "Tous les bonbons ne donnent pas la même quantité de sucre une fois écrasé"
 ]
 
 BASE_DURATIONS = {
@@ -92,6 +97,7 @@ class October(commands.Cog):
         self.config = Config.get_conf(self, identifier=736144321857978388, force_registration=True)
 
         default_member = {"score": 0,
+                          "sugar": 0,
                           "inv": {}}
         default_guild = {"spawn_counter_trigger": 100,
                          "spawn_cooldown": 180,
@@ -127,6 +133,7 @@ class October(commands.Cog):
             self.status[guild.id][user.id] = {"dur_flip": 0,
                                               "dur_rainbow": 0,
                                               "dur_haunt": 0,
+                                              "haunt_cd": 0,
                                               "dur_ego": 0,
                                               "ego_cd": 0,
                                               "dur_malus": 0,
@@ -210,7 +217,7 @@ class October(commands.Cog):
                                 namef = "**" + candy["name"] + "**"
 
                             emcolor = HALLOWEEN_COLOR()
-                            em = discord.Embed(title="Récolte d'Halloween • Au plus rapide", description=text.format(namef),
+                            em = discord.Embed(title="🍬 Récolte d'Halloween • Au plus rapide", description=text.format(namef),
                                                color=emcolor)
                             em.set_thumbnail(url=candy["img"])
                             em.set_footer(text="Soyez le premier à cliquer sur la réaction")
@@ -234,7 +241,7 @@ class October(commands.Cog):
                                     "Bien joué {0} ! Tu pars avec {1}.",
                                     "Bravo à {0} qui repart avec {1}."
                                 ])
-                                post_em = discord.Embed(title="Récolte d'Halloween • Au plus rapide", description=wintxt.format(user.mention, namef),
+                                post_em = discord.Embed(title="🍬 Récolte d'Halloween • Au plus rapide", description=wintxt.format(user.mention, namef),
                                                        color=emcolor)
                                 post_em.set_thumbnail(url=candy["img"])
                                 post_em.set_footer(text="ASTUCE · " + random.choice(ASTUCES))
@@ -255,7 +262,7 @@ class October(commands.Cog):
                                 ctxt += "- **{}**\n".format(candy["name"])
 
                             emcolor = HALLOWEEN_COLOR()
-                            em = discord.Embed(title="Récolte d'Halloween • Distribution générale", description=text + ctxt,
+                            em = discord.Embed(title="🍬 Récolte d'Halloween • Distribution générale", description=text + ctxt,
                                                color=emcolor)
                             em.set_footer(text="Cliquez sur la réaction pour en obtenir un (au hasard)")
 
@@ -273,7 +280,7 @@ class October(commands.Cog):
                                     tabl = []
                                     for uid, gain in cache["distrib_users"].items():
                                         tabl.append((channel.guild.get_member(uid).name, CANDIES[gain]["name"]))
-                                    nem = discord.Embed(title="Récolte d'Halloween • Distribution générale",
+                                    nem = discord.Embed(title="🍬 Récolte d'Halloween • Distribution générale",
                                                        description=text + ctxt,
                                                        color=emcolor)
                                     nem.set_footer(text="Cliquez sur la réaction pour en obtenir un (au hasard)")
@@ -294,19 +301,20 @@ class October(commands.Cog):
                                 tabl = []
                                 for uid, gain in cache["distrib_users"].items():
                                     tabl.append((channel.guild.get_member(uid).name, CANDIES[gain]["name"]))
-                                end_em = discord.Embed(title="Récolte d'Halloween • Distribution générale (terminée)",
+                                end_em = discord.Embed(title="🍬 Récolte d'Halloween • Distribution générale (terminée)",
                                                     description=end_msg,
                                                     color=emcolor)
                                 end_em.set_footer(text="ASTUCE · " + random.choice(ASTUCES))
                                 end_em.add_field(name="» Bonbons obtenus", value="```{}```".format(tabulate(tabl, headers=["Membre", "Bonbon"])))
-                                await spawn.edit(embed=end_em, delete_delay=10)
+                                await spawn.edit(embed=end_em)
                             else:
-                                end_em = discord.Embed(title="Récolte d'Halloween • Distribution générale (terminée)",
+                                end_em = discord.Embed(title="🍬 Récolte d'Halloween • Distribution générale (terminée)",
                                                        description=end_msg,
                                                        color=emcolor)
                                 end_em.set_footer(text="ASTUCE · " + random.choice(ASTUCES))
                                 end_em.add_field(name="» Bonbons obtenus", value="Personne n'a participé à la distribution")
-                                await spawn.edit(embed=end_em, delete_delay=10)
+                                await spawn.edit(embed=end_em)
+                            await spawn.delete(delay=15)
 
             status = self.get_member_status(message.author)
             if status["dur_haunt"]:
@@ -340,7 +348,8 @@ class October(commands.Cog):
             if status["dur_ego"]:
                 if time.time() >= status["ego_cd"]:
                     if not random.randint(0, 4):
-                        status["ego_cd"] = time.time() + 50
+                        await asyncio.sleep(0.5)
+                        status["ego_cd"] = time.time() + 45
                         txt = random.choice([
                             "Agenouillez-vous, **{}** va parler.",
                             "Notre maître à tous **{}** va parler :pray:...",
@@ -351,7 +360,27 @@ class October(commands.Cog):
                             "Oh mon dieu !!! **{}** est en train d'écrire j'y crois pas 🤩 !",
                             "La star **{}** va parler ! Taisez-vous !"
                         ])
-                        await channel.send(txt.format(user.display_name))
+                        await channel.send(txt.format(user.display_name), delete_after=10)
+            if status["dur_haunt"]:
+                if time.time() >= status["haunt_cd"]:
+                    if not random.randint(0, 4):
+                        await asyncio.sleep(random.randint(1, 4))
+                        status["haunt_cd"] = time.time() + 45
+                        if not random.randint(0, 5):
+                            txt = random.choice([
+                                "Attention ce soir en allant te coucher **{}**...",
+                                "Je ne te quitterai jamais **{}**...",
+                                "Je t'observe **{}**...",
+                                "On se retrouvera de l'autre côté **{}**...",
+                                "Eheh, à bientôt **{}**...",
+                                "Dis au revoir à tes amis, **{}**...",
+                                "Je vais m'amuser avec toi **{}**",
+                                "On s'amuse bien ici, pas vrai **{}** ?"
+                            ])
+                            txt = zalgo().zalgofy(txt)
+                        else:
+                            txt = "https://i.imgur.com/L0N1W8Y.png"
+                        await channel.send(txt.format(user.display_name), delete_after=10)
 
     def guess_candy(self, input: str):
         """Devine quel bonbon est demandé (fuzzywuzzy)"""
@@ -473,7 +502,7 @@ class October(commands.Cog):
                         else:
                             new_role = cycle_roles()
                             await user.add_roles(new_role, reason="Effet d'event halloween")
-                        await asyncio.sleep(30)
+                        await asyncio.sleep(20)
                         old_role = new_role
                     if old_role:
                         await user.remove_roles(old_role, reason="Fin effet d'event halloween")
@@ -522,23 +551,24 @@ class October(commands.Cog):
                 status["dur_haunt"] += BASE_DURATIONS["haunt"] / 2
         elif effect == "fortune":
             await self.remove_candy(user, candy_id)
-            await asyncio.sleep(random.randint(2, 5))
-            new_candy_id = random.choice(list(CANDIES.keys()))
-            new_candy = CANDIES[new_candy_id]
-            qte = random.randint(2, 5)
-            await self.add_candy(user, new_candy_id, qte)
-            text = random.choice([
-                "Coup de chance ! **{0}** x{1} vous tombe comme par magie dans les mains !",
-                "Quelle chance ! Un inconnu vous donne **{0}** x{1} en plus !",
-                "Vous trébuchez sur un paquet de **{0}** x{1} en mangeant {2} !",
-                "On dirait que la chance vous sourit, vous recevez un bonus de {1} **{0}** !",
-                "Vous étiez tranquille, à déguster votre bonbon et soudain... **{0}** x{1} tombe du ciel !"
-            ])
-            em = discord.Embed(description=text.format(new_candy["name"], qte, candy["name"]), color=HALLOWEEN_COLOR())
-            em.set_author(name=user.name, icon_url=user.avatar_url)
-            em.set_thumbnail(url=candy["img"])
-            em.set_footer(text="Vous mangez x1 {}".format(candy["name"].lower()))
-            await ctx.send(embed=em)
+            async with ctx.channel.typing():
+                await asyncio.sleep(random.randint(2, 5))
+                new_candy_id = random.choice(list(CANDIES.keys()))
+                new_candy = CANDIES[new_candy_id]
+                qte = random.randint(2, 5)
+                await self.add_candy(user, new_candy_id, qte)
+                text = random.choice([
+                    "Coup de chance ! **{0}** x{1} vous tombe comme par magie dans les mains !",
+                    "Quelle chance ! Un inconnu vous donne **{0}** x{1} en plus !",
+                    "Vous trébuchez sur un paquet de **{0}** x{1} en mangeant {2} !",
+                    "On dirait que la chance vous sourit, vous recevez un bonus de {1} **{0}** !",
+                    "Vous étiez tranquille, à déguster votre bonbon et soudain... **{0}** x{1} tombe du ciel !"
+                ])
+                em = discord.Embed(description=text.format(new_candy["name"], qte, candy["name"]), color=HALLOWEEN_COLOR())
+                em.set_author(name=user.name, icon_url=user.avatar_url)
+                em.set_thumbnail(url=candy["img"])
+                em.set_footer(text="Vous mangez x1 {}".format(candy["name"].lower()))
+                await ctx.send(embed=em)
         elif effect == "ego":
             async with ctx.channel.typing():
                 await asyncio.sleep(random.randint(2, 5))
@@ -729,9 +759,12 @@ class October(commands.Cog):
             for e in status:
                 if e.startswith("dur"):
                     if status[e] > 0:
-                        st.append("`" + EFFECT_TRAD_FR[e] + "`")
+                        st.append("`" + EFFECT_TRAD_FR[e].title() + "`")
             stats = "**Effets en cours** · {}\n" \
-                    "**Score** · {}\n\n".format(" ".join(st) if st else "Aucun", await self.config.member(ctx.author).score())
+                    "**Score** · {}\n" \
+                    "**Sucre** · *{}%*\n\n".format(" ".join(st) if st else "Aucun",
+                                                 await self.config.member(ctx.author).score(),
+                                                 await self.config.member(ctx.author).sugar())
             em = discord.Embed(title="Votre inventaire", description=stats + tabl, color=HALLOWEEN_COLOR())
             em.set_footer(text="Pour en manger un, faîtes ;eat <bonbon>")
             await ctx.send(embed=em)
@@ -741,10 +774,12 @@ class October(commands.Cog):
             for e in status:
                 if e.startswith("dur"):
                     if status[e] > 0:
-                        st.append("`" + EFFECT_TRAD_FR[e] + "`")
+                        st.append("`" + EFFECT_TRAD_FR[e].title() + "`")
             stats = "**Effets en cours** · {}\n" \
-                    "**Score** · {}\n\n".format(" ".join(st) if st else "Aucun",
-                                              await self.config.member(ctx.author).score())
+                    "**Score** · {}\n" \
+                    "**Sucre** · *{}%*\n\n".format(" ".join(st) if st else "Aucun",
+                                                 await self.config.member(ctx.author).score(),
+                                                 await self.config.member(ctx.author).sugar())
             em = discord.Embed(title="Votre inventaire", description=stats + "`Inventaire vide`", color=HALLOWEEN_COLOR())
             em.set_footer(text="Essayez de gagner des bonbons en les attrapant sur les salons écrits !")
             await ctx.send(embed=em)
@@ -768,6 +803,81 @@ class October(commands.Cog):
                 await ctx.send(f"**Don impossible** • Vous ne possédez pas autant de ce bonbon : {candy_name}")
         else:
             await ctx.send(f"**Don impossible** • Bonbon introuvable ou non possédé")
+
+    @commands.command(name="recycle", aliases=["crush"])
+    @commands.guild_only()
+    @commands.cooldown(1, 5, commands.BucketType.member)
+    async def _recycle_candy(self, ctx, candy: str, qte: int = 1):
+        """Ecrase un/des bonbon(s) pour en récupérer du sucre
+
+        Vous pouvez écraser plusieurs bonbons en même temps, précisez la quantité après le nom du bonbon"""
+        inv = await self.config.member(ctx.author).inv()
+        curr_sugar = await self.config.member(ctx.author).sugar()
+        if curr_sugar < 100:
+            candy_id = self.guess_candy(candy)
+            if candy_id in inv:
+                if await self.enough_candies(ctx.author, candy_id, qte):
+                    await self.remove_candy(ctx.author, candy_id, qte)
+                    sugar = CANDIES[candy_id]["sugar"] * qte
+                    new_sugar = curr_sugar + sugar if curr_sugar + sugar < 100 else 100
+                    await self.config.member(ctx.author).sugar.set(new_sugar)
+                    if new_sugar < 100:
+                        await ctx.send("**Opération réussie** • Vous avez écrasé **{}** x{} et obtenu *{}%* de sucre.\n"
+                                       "Vous avez désormais ***{}%*** de sucre à disposition.".format(CANDIES[candy_id]["name"], qte, sugar, new_sugar))
+                    else:
+                        await ctx.send("**Opération réussie** • Vous avez écrasé **{}** x{} et obtenu *{}%* de sucre.\n"
+                                       "Vous avez désormais ***{}%*** de sucre à disposition. Relancez la commande pour le recycler en bonbon et en points !".format(
+                            CANDIES[candy_id]["name"], qte, sugar, new_sugar))
+                else:
+                    await ctx.send(f"**Opération impossible** • Vous ne possédez pas cette quantité de ce bonbon.")
+            else:
+                await ctx.send(f"**Opération impossible** • Bonbon introuvable ou non possédé")
+        else:
+            options_txt = "🍬 · Recycler le sucre en bonbon et en points\n" \
+                          "❌ · Annuler"
+            em = discord.Embed(title=f"Vous avez 100% de sucre, voulez-vous recycler celui-ci ?",
+                               description=options_txt, color=HALLOWEEN_COLOR())
+            em.set_footer(text="Cette opération consomme tout le sucre possédé")
+            msg = await ctx.send(embed=em)
+            emojis = ["🍬", "❌"]
+
+            start_adding_reactions(msg, emojis)
+            try:
+                react, user = await self.bot.wait_for("reaction_add",
+                                                      check=lambda r, u: u == ctx.author and r.message.id == msg.id,
+                                                      timeout=30)
+            except asyncio.TimeoutError:
+                await msg.delete()
+                return
+            else:
+                emoji = react.emoji
+
+            if emoji == "🍬":
+                await msg.delete()
+                await self.config.member(ctx.author).sugar.set(0)
+                async with ctx.channel.typing():
+                    await asyncio.sleep(random.randint(1, 3))
+                    candy_id = random.choice(list(CANDIES.keys()))
+                    candy = CANDIES[candy_id]
+                    qte = random.randint(2, 5)
+                    await self.add_candy(user, candy_id, qte)
+                    pts = await self.config.member(ctx.author).score()
+                    await self.config.member(ctx.author).score(pts + qte)
+                    text = random.choice([
+                        "Vous recyclez votre sucre et vous obtenez **{0}** x{1}",
+                        "En recyclant votre sucre, vous obtenez x{1} **{0}**",
+                        "Bien joué ! En recyclant votre sucre vous avez obtenu **{0}** x{1}",
+                        "Excellent ! Vous obtenez **{0}** x{1}"
+                    ])
+                    em = discord.Embed(description=text.format(candy["name"], qte),
+                                       color=HALLOWEEN_COLOR())
+                    em.set_author(name=user.name, icon_url=user.avatar_url)
+                    em.set_thumbnail(url=candy["img"])
+                    em.set_footer(text="Vous obtenez {} points".format(qte))
+                    await ctx.send(embed=em)
+            else:
+                await msg.delete()
+                return
 
     @commands.command(name="topevent")
     @commands.guild_only()

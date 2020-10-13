@@ -5,7 +5,8 @@
 	"short": "Event d'Halloween",
 	"tags": ["fun", "halloween"],
 	"requirements" : [
-		"tabulate"
+		"tabulate",
+		"zalgo-text"
 	],
 	"type": "COG"
 }
