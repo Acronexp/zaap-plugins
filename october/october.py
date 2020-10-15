@@ -899,17 +899,21 @@ class October(commands.Cog):
 
     @commands.command(name="topevent")
     @commands.guild_only()
-    async def _top_hw(self, ctx):
-        """Affiche le top 30 global de l'event"""
+    async def _top_hw(self, ctx, top: int = 30):
+        """Affiche le top 50 global de l'event"""
         members = await self.config.all_members(ctx.guild)
         before = []
         for m in members:
-            if len(before) < 30:
-                before.append([ctx.guild.get_member(m).name, members[m]["score"]])
+            if len(before) < top:
+                try:
+                    name = ctx.guild.get_member(m).name
+                    before.append([name, members[m]["score"]])
+                except:
+                    pass
         if before:
             after = sorted(before, key=operator.itemgetter(1), reverse=True)
             tabl = "```{}```".format(tabulate(after, headers=["Membre", "Score"]))
-            em = discord.Embed(title="Top 30 sur {} • Event d'Halloween".format(ctx.guild.name), description=tabl, color=HALLOWEEN_COLOR())
+            em = discord.Embed(title="Top {} sur {} • Event d'Halloween".format(top, ctx.guild.name), description=tabl, color=HALLOWEEN_COLOR())
             await ctx.send(embed=em)
         else:
             await ctx.send("Aucun top à afficher")
