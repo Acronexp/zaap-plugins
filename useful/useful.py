@@ -61,7 +61,7 @@ class Useful(commands.Cog):
             if r:
                 page = wikipedia.page(r, auto_suggest=souple)
                 images = page.images
-                image = [i for i in images if i.endswith(".png") or i.endswith(".gif") or i.endswith(".jpg") or i.endswith(".jpeg")][-1]
+                image = [i for i in images if i.endswith(".png") or i.endswith(".gif") or i.endswith(".jpg") or i.endswith(".jpeg")][0]
                 resum = page.summary
                 if not resum:
                     resum = "Contenu indisponible"
