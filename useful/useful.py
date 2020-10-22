@@ -624,7 +624,7 @@ class Useful(commands.Cog):
                         cache = self.cache["fav_msg"]
                         if message.id not in cache:
                             favchan = message.guild.get_channel(await self.config.guild(message.guild).fav_channel())
-                            em = discord.Embed(color=0xF7A731, timestamp=message.created_at)
+                            em = discord.Embed(description = message.content, color=0xF7A731, timestamp=message.created_at)
                             em.set_author(name=message.author.name, icon_url=message.author.avatar_url)
                             em.set_footer(text=f"{message.channel.mention}")
                             if message.attachments:
