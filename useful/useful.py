@@ -467,24 +467,21 @@ class Useful(commands.Cog):
 
     @_savemsg.command()
     @commands.max_concurrency(1, commands.BucketType.channel)
-    async def compile(self, ctx, start_id: int, end_id: int):
+    async def compile(self, ctx, start_id: int, end_id: int = None):
         """Compile la sélection de messages en un seul message / séries de messages (embed)
 
         Limité à 10000 caractères (équivalent à 4 messages long. max.)
         <start_id> = Identifiant du premier message (utiliser le mode développeur)
-        <end_id> = Identifiant du dernier message"""
+        <end_id> = Identifiant du dernier message*
+
+        (*) optionnel, ne pas en mettre ne recopie que le premier message \"<start>\""""
         em_color = await ctx.embed_color()
         guild = ctx.guild
+
         try:
             start = await ctx.fetch_message(int(start_id))
         except:
             await ctx.send("**Erreur** • L'identfiant du message de début n'est pas valide.")
-            return
-
-        try:
-            end = await ctx.fetch_message(int(end_id))
-        except:
-            await ctx.send("**Erreur** • L'identfiant du message de fin n'est pas valide.")
             return
 
         author = start.author
@@ -511,36 +508,52 @@ class Useful(commands.Cog):
                     em.set_footer(text=f"Page #{page}")
                     await channel.send(embed=em)
 
-        if start.author == end.author:
-            txt = start.content + "\n"
-            nb = 0
+        if end_id:
             try:
-                async for message in start.channel.history(limit=None, after=start, oldest_first=True):
-                    if message.author == start.author:
-                        if message.id != end_id:
-                            if len(txt) <= 10000:
+                end = await ctx.fetch_message(int(end_id))
+            except:
+                await ctx.send("**Erreur** • L'identfiant du message de fin n'est pas valide.")
+                return
+
+            if start.author == end.author:
+                txt = start.content + "\n"
+                nb = 0
+                try:
+                    async for message in start.channel.history(limit=None, after=start, oldest_first=True):
+                        if message.author == start.author:
+                            if message.id != end_id:
+                                if len(txt) <= 10000:
+                                    txt += message.content + "\n"
+                                    nb += 1
+                                    continue
+                                break
+                            else:
                                 txt += message.content + "\n"
                                 nb += 1
-                                continue
-                            break
-                        else:
-                            txt += message.content + "\n"
-                            nb += 1
-                            break
+                                break
 
-            except discord.Forbidden:
-                await ctx.send("Je n'ai pas accès à tous les messages demandés")
-            except discord.HTTPException:
-                await ctx.send("Une erreur Discord m'empêche de continuer la récolte des messages demandée")
+                except discord.Forbidden:
+                    await ctx.send("Je n'ai pas accès à tous les messages demandés")
+                except discord.HTTPException:
+                    await ctx.send("Une erreur Discord m'empêche de continuer la récolte des messages demandée")
 
-            if txt:
-                try:
-                    async with channel.typing():
-                        await post_all(txt)
-                except:
-                    await channel.send("**Erreur** • Je n'ai pas réussi à afficher le message compilé...")
+                if txt:
+                    try:
+                        async with channel.typing():
+                            await post_all(txt)
+                    except:
+                        await channel.send("**Erreur** • Je n'ai pas réussi à afficher le message compilé...")
+            else:
+                await ctx.send("**Auteurs différents** • L'auteur du message de départ et de fin doit être le même.")
         else:
-            await ctx.send("**Auteurs différents** • L'auteur du message de départ et de fin doit être le même.")
+            author = start.author
+            channel = start.channel
+            txt = start.content
+            try:
+                async with channel.typing():
+                    await post_all(txt)
+            except:
+                await channel.send("**Erreur** • Je n'ai pas réussi à afficher le message compilé...")
 
     @commands.Cog.listener()
     async def on_message(self, message):
