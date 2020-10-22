@@ -639,7 +639,7 @@ class Useful(commands.Cog):
                                 srcem = message.embeds[0]
                                 em = discord.Embed(description=content, color=0xF7A731, timestamp=message.created_at)
                                 em.set_author(name=srcem.author.name, icon_url=srcem.author.icon_url, url=srcem.author.url)
-                                em.set_footer(text=f"#{message.channel.name}")
+                                em.set_footer(text=f"#{message.channel.name} (compilation)")
                                 if srcem.image:
                                     em.set_image(url=srcem.image.url)
                             else:
