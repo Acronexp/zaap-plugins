@@ -626,7 +626,7 @@ class Useful(commands.Cog):
                             favchan = message.guild.get_channel(await self.config.guild(message.guild).fav_channel())
                             em = discord.Embed(description = message.content, color=0xF7A731, timestamp=message.created_at)
                             em.set_author(name=message.author.name, icon_url=message.author.avatar_url)
-                            em.set_footer(text=f"{message.channel.mention}")
+                            em.set_footer(text=f"#{message.channel.name}")
                             if message.attachments:
                                 attach = message.attachments[0]
                                 em.set_image(url=attach.url)
