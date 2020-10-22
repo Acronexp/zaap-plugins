@@ -32,10 +32,12 @@ class Useful(commands.Cog):
         self.config = Config.get_conf(self, identifier=736144321857978388, force_registration=True)
         default_global = {"INSTALOADER_LOGIN": "",
                           "INSTALOADER_PASSWORD": ""}
+        default_guild = {"fav_channel": None}
         self.config.register_global(**default_global)
+        self.config.register_guild(**default_guild)
 
         self.instaload = instaloader.Instaloader()
-        self.cache = {"_instagram": {}, "instaload": False, "tales": {}}
+        self.cache = {"_instagram": {}, "instaload": False, "tales": {}, "fav_msg": []}
 
         self.temp = cog_data_path(self) / "temp"
         self.temp.mkdir(exist_ok=True, parents=True)
@@ -249,6 +251,19 @@ class Useful(commands.Cog):
             except:
                 await ctx.send("**Impossible** • Je n'ai pas réussi à upload la version sous Spoiler")
             os.remove(filepath)
+
+    @checks.admin_or_permissions(manage_messages=True)
+    @commands.guild_only()
+    @commands.command()
+    async def favconfig(self, ctx, channel: discord.TextChannel):
+        """Configurer le salon où sont postés les messages favoris"""
+        guild = ctx.guild
+        if channel:
+            await self.config.guild(guild).fav_channel.set(channel.id)
+            await ctx.send(f"**Salon modifié** • Les messages favoris seront postés sur {channel.mention}")
+        else:
+            await self.config.guild(guild).fav_channel.set(None)
+            await ctx.send(f"**Salon retiré** • La fonctionnalité est désactivée.")
 
     @commands.group(name="savemsg")
     @commands.guild_only()
@@ -497,7 +512,7 @@ class Useful(commands.Cog):
                     await channel.send(embed=em)
 
         if start.author == end.author:
-            txt = ""
+            txt = start.content + "\n"
             nb = 0
             try:
                 async for message in start.channel.history(limit=None, after=start, oldest_first=True):
@@ -603,3 +618,18 @@ class Useful(commands.Cog):
                                         await message.remove_reaction("👁", user)
                                     except:
                                         pass
+            elif reaction.emoji == "⭐":
+                if await self.config.guild(message.guild).fav_channel():
+                    if user.permissions_in(channel).manage_messages:
+                        cache = self.cache["fav_msg"]
+                        if message.id not in cache:
+                            favchan = message.guild.get_channel(await self.config.guild(message.guild).fav_channel())
+                            em = discord.Embed(color=0xF7A731, timestamp=message.created_at)
+                            em.set_author(name=message.author.name, icon_url=message.author.avatar_url)
+                            em.set_footer(text=f"{message.channel.mention}")
+                            if message.attachments:
+                                attach = message.attachments[0]
+                                em.set_image(url=attach.url)
+                            await favchan.send(embed=em)
+                            self.cache["fav_msg"].append(message.id)
+
