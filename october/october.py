@@ -37,7 +37,7 @@ CANDIES = {
     "nougat": {"name": "Nougat", "ep": ["none", "rainbow", "flip"], "ew": [2, 1, 1],
                "img": "https://i.imgur.com/VR84nWx.png", "sugar": 18},
     "soucoupe": {"name": "Soucoupe", "ep": ["none", "flip", "haunt", "fortune"], "ew": [2, 2, 1, 1],
-                 "img": "", "sugar": 50}
+                 "img": "https://i.imgur.com/dNBGGf6.gif", "sugar": 50}
 }
 
 ASTUCES = [
