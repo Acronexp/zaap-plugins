@@ -37,7 +37,13 @@ CANDIES = {
     "nougat": {"name": "Nougat", "ep": ["none", "rainbow", "flip"], "ew": [2, 1, 1],
                "img": "https://i.imgur.com/VR84nWx.png", "sugar": 18},
     "soucoupe": {"name": "Soucoupe", "ep": ["none", "flip", "haunt", "fortune"], "ew": [2, 2, 1, 1],
-                 "img": "https://i.imgur.com/dNBGGf6.gif", "sugar": 50}
+                 "img": "https://i.imgur.com/dNBGGf6.gif", "sugar": 50},
+    "patedefruit": {"name": "Pâte de fruit", "ep": ["rainbow", "haunt", "ego"], "ew": [2, 1, 1],
+                    "img": "", "sugar": 25},
+    "praline": {"name": "Praline", "ep": ["none", "room", "malus"], "ew": [2, 1, 1],
+                    "img": "", "sugar": 15},
+    "coquillage": {"name": "Coquillage", "ep": ["rainbow", "fortune", "none"], "ew": [1, 2, 1],
+                    "img": "", "sugar": 32}
 }
 
 ASTUCES = [
@@ -64,14 +70,14 @@ ASTUCES = [
 
 BASE_DURATIONS = {
     "none": None,
-    "flip": 300,
-    "rainbow": 300,
-    "haunt": 180,
+    "flip": 600,
+    "rainbow": 420,
+    "haunt": 300,
     "fortune": None,
-    "ego": 180,
+    "ego": 300,
     "loss": None,
     "malus": 600,
-    "room": 600
+    "room": 1800
 }
 
 EFFECT_TRAD_FR = {"dur_flip": "renversé",
@@ -361,7 +367,7 @@ class October(commands.Cog):
                             "Oh mon dieu !!! **{}** est en train d'écrire j'y crois pas 🤩 !",
                             "La star **{}** va parler ! Taisez-vous !"
                         ])
-                        await channel.send(txt.format(user.display_name), delete_after=10)
+                        await channel.send(txt.format(user.display_name), delete_after=30)
             if status["dur_haunt"]:
                 if time.time() >= status["haunt_cd"]:
                     if not random.randint(0, 4):
@@ -378,10 +384,10 @@ class October(commands.Cog):
                                 "Je vais m'amuser avec toi **{}**",
                                 "On s'amuse bien ici, pas vrai **{}** ?"
                             ])
-                            txt = zalgo().zalgofy(txt)
+                            txt = zalgo().zalgofy(txt.format(user.display_name))
                         else:
                             txt = "https://i.imgur.com/L0N1W8Y.png"
-                        await channel.send(txt.format(user.display_name), delete_after=10)
+                        await channel.send(txt, delete_after=30)
 
     def guess_candy(self, input: str):
         """Devine quel bonbon est demandé (fuzzywuzzy)"""
@@ -722,7 +728,7 @@ class October(commands.Cog):
 
     @commands.command(aliases=["mange"])
     @commands.guild_only()
-    @commands.cooldown(1, 10, commands.BucketType.member)
+    @commands.cooldown(1, 5, commands.BucketType.member)
     async def eat(self, ctx, *candy):
         """Manger un bonbon de votre inventaire
 
@@ -794,7 +800,7 @@ class October(commands.Cog):
 
     @commands.command(name="gift", aliases=["cadeau"])
     @commands.guild_only()
-    @commands.cooldown(1, 60, commands.BucketType.member)
+    @commands.cooldown(1, 120, commands.BucketType.member)
     async def _give_candy(self, ctx, user: discord.Member, candy: str, qte: int = 1):
         """Donner un/des bonbon(s) à un membre
 
