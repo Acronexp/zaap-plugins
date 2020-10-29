@@ -8,27 +8,27 @@ from tabulate import tabulate
 logger = logging.getLogger("red.zaap-plugins.logs")
 
 _TRIGGERS = {
-    "message.delete" : "Un message a été supprimé",
-    "message.edit": "Un message a été édité",
-    "voice.join": "Un membre rejoint un salon vocal",
-    "voice.quit": "Un membre quitte un salon vocal",
-    "voice.update": "Un membre change de salon vocal",
-    "voice.mute": "Un membre est mute/démute serveur",
-    "voice.selfmute": "Un membre s'est mute/démute",
-    "voice.deaf": "Un membre est sourd/non-sourd serveur",
-    "voice.selfdeaf": "Un membre s'est mute/démute",
-    "voice.stream": "Un membre lance/arrête un stream",
-    "voice.video": "Un membre commence/arrête la diffusion de vidéo",
-    "member.join": "Un membre rejoint le serveur",
-    "member.join.infos": "Un membre rejoint le serveur (+ affiche ses infos)",
-    "member.quit": "Un membre quitte le serveur",
-    "member.ban": "Un membre est banni",
-    "member.unban": "Un member est débanni",
-    "member.update.name": "Un membre change son pseudo",
-    "member.update.nick": "Un membre change son surnom",
-    "member.update.avatar": "Un membre change d'avatar",
-    "invite.create": "Une invitation a été crée",
-    "invite.delete": "Une invitation a été supprimée"
+    "message.delete" : "Message supprimé",
+    "message.edit": "Message édité",
+    "voice.join": "Connexion vocale",
+    "voice.quit": "Déconnexion vocale",
+    "voice.update": "Changement de salon vocal",
+    "voice.mute": "Membre mute/demute serveur",
+    "voice.selfmute": "Membre self-mute/demute ",
+    "voice.deaf": "Membre ajouté/retiré de sourdine",
+    "voice.selfdeaf": "Membre sourd/non-sourd perso.",
+    "voice.stream": "Début/fin de stream",
+    "voice.video": "Début/fin de diffusion de vidéo",
+    "member.join": "Nouvel arrivant",
+    "member.join.infos": "Infos du nouvel arrivant",
+    "member.quit": "Départ du serveur",
+    "member.ban": "Membre banni",
+    "member.unban": "Membre débanni",
+    "member.update.name": "Changement de pseudo",
+    "member.update.nick": "Changement de surnom",
+    "member.update.avatar": "Changement d'avatar",
+    "invite.create": "Création d'invitation",
+    "invite.delete": "Suppression d'une invitation"
 }
 
 class LogsError(Exception):
@@ -63,7 +63,7 @@ class Logs(commands.Cog):
         all_channels = guild.text_channels
         triggers = await self.config.guild(guild).channels()
         for trig in triggers:
-            loadcache[trig] = (chan for chan in all_channels if chan.id in triggers[trig])
+            loadcache[trig] = [chan for chan in all_channels if chan.id in triggers[trig]]
         self.channels[guild.id] = loadcache
         return self.channels[guild.id]
 
@@ -77,7 +77,7 @@ class Logs(commands.Cog):
         triggers = await self.get_preloaded_channels(guild)
         if trigger.lower() in triggers:
             channels = triggers[trigger.lower()]
-            async for chan in channels:
+            for chan in channels:
                 try:
                     await chan.send(embed=content)
                 except:
@@ -195,7 +195,7 @@ class Logs(commands.Cog):
                     preload = await self.get_preloaded_channels(message.guild)
                     if "message.delete" in preload:
                         em = discord.Embed(title="`Message supprimé`", description=message.content,
-                                           timestamp=message.timestamp, color=color)
+                                           timestamp=message.created_at, color=color)
                         em.set_author(name=message.author.name, icon_url=message.author.avatar_url)
                         em.set_footer(text=f"ID{message.author.id} • #{message.channel.name}")
                         await self.manage_logging(message.guild, "message.delete", em)
@@ -210,7 +210,7 @@ class Logs(commands.Cog):
                         preload = await self.get_preloaded_channels(after.guild)
                         if "message.edit" in preload:
                             em = discord.Embed(title="`Message édité`", url=after.jump_url,
-                                               timestamp=after.timestamp, color=color)
+                                               timestamp=after.created_at, color=color)
                             em.add_field(name="Avant", value=before.content, inline=False)
                             em.add_field(name="Après", value=after.content, inline=False)
                             em.set_author(name=after.author.name, icon_url=after.author.avatar_url)
