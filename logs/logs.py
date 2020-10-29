@@ -196,7 +196,7 @@ class Logs(commands.Cog):
                     if "message.delete" in preload:
                         em = discord.Embed(title="`Message supprimé`", description=message.content,
                                            timestamp=message.created_at, color=color)
-                        em.set_author(name=message.author.name, icon_url=message.author.avatar_url)
+                        em.set_author(name=str(message.author), icon_url=message.author.avatar_url)
                         em.set_footer(text=f"ID{message.author.id} • #{message.channel.name}")
                         await self.manage_logging(message.guild, "message.delete", em)
 
@@ -213,7 +213,7 @@ class Logs(commands.Cog):
                                                timestamp=after.created_at, color=color)
                             em.add_field(name="Avant", value=before.content, inline=False)
                             em.add_field(name="Après", value=after.content, inline=False)
-                            em.set_author(name=after.author.name, icon_url=after.author.avatar_url)
+                            em.set_author(name=str(after.author), icon_url=after.author.avatar_url)
                             em.set_footer(text=f"ID{after.author.id} • #{after.channel.name}")
                             await self.manage_logging(after.guild, "message.edit", em)
 
@@ -222,7 +222,7 @@ class Logs(commands.Cog):
         if user.guild:
             ts = datetime.utcnow()
             color = await self.bot.get_embed_color(user)
-            preload = await self.get_preloaded_channels(after.guild)
+            preload = await self.get_preloaded_channels(user.guild)
 
             if after.channel:
                 if not before.channel:
@@ -230,7 +230,7 @@ class Logs(commands.Cog):
                         em = discord.Embed(title="`Connexion à un salon vocal`",
                                            description=f"{user.mention} s'est connecté à {after.channel.mention}",
                                            timestamp=ts, color=color)
-                        em.set_author(name=user.name, icon_url=user.avatar_url)
+                        em.set_author(name=str(user), icon_url=user.avatar_url)
                         em.set_footer(text=f"ID{user.id} • #{after.channel.name}")
                         await self.manage_logging(user.guild, "voice.join", em)
                 elif after.channel != before.channel:
@@ -238,7 +238,7 @@ class Logs(commands.Cog):
                         em = discord.Embed(title="`Changement de salon vocal`",
                                            description=f"{user.mention} est passé de {before.channel.mention} à {after.channel.mention}",
                                            timestamp=ts, color=color)
-                        em.set_author(name=user.name, icon_url=user.avatar_url)
+                        em.set_author(name=str(user), icon_url=user.avatar_url)
                         em.set_footer(text=f"ID{user.id} • #{before.channel.name} / #{after.channel.name}")
                         await self.manage_logging(user.guild, "voice.update", em)
 
@@ -247,7 +247,7 @@ class Logs(commands.Cog):
                     em = discord.Embed(title="`Déconnexion d'un salon vocal`",
                                        description=f"{user.mention} s'est déconnecté de {before.channel.mention}",
                                        timestamp=ts, color=color)
-                    em.set_author(name=user.name, icon_url=user.avatar_url)
+                    em.set_author(name=str(user), icon_url=user.avatar_url)
                     em.set_footer(text=f"ID{user.id} • #{before.channel.name}")
                     await self.manage_logging(user.guild, "voice.quit", em)
 
@@ -318,7 +318,7 @@ class Logs(commands.Cog):
                         em = discord.Embed(title=f"`{title}`",
                                            description=desc,
                                            timestamp=ts, color=color)
-                        em.set_author(name=user.name, icon_url=user.avatar_url)
+                        em.set_author(name=str(user), icon_url=user.avatar_url)
                         em.set_footer(text=f"ID{user.id} • #{after.channel.name}")
                         await self.manage_logging(user.guild, type, em)
 
@@ -331,13 +331,13 @@ class Logs(commands.Cog):
                 if "member.update.nick" in preload:
                     ts = datetime.utcnow()
                     if after.display_name == after.name:
-                        desc = f"{after.mention} a retiré son surnom ({before.nick})"
+                        desc = f"{after.mention} a retiré son surnom (**{before.nick}**)"
                     else:
-                        desc = f"Changement de surnom pour {after.nick}"
+                        desc = f"{after.mention} a changé de surnom pour **{after.nick}**"
                     em = discord.Embed(title=f"`Modification de surnom`",
                                        description=desc,
                                        timestamp=ts, color=color)
-                    em.set_author(name=after.name, icon_url=after.avatar_url)
+                    em.set_author(name=str(after), icon_url=after.avatar_url)
                     em.set_footer(text=f"ID{after.id}")
                     await self.manage_logging(after.guild, "member.update.nick", em)
 
@@ -352,7 +352,7 @@ class Logs(commands.Cog):
                     em = discord.Embed(title=f"`Changement de pseudo`",
                                        description=f"{before.name} a changé de nom pour **{after.name}**",
                                        timestamp=ts, color=color)
-                    em.set_author(name=after.name, icon_url=after.avatar_url)
+                    em.set_author(name=str(after), icon_url=after.avatar_url)
                     em.set_footer(text=f"ID{after.id}")
                     await self.manage_logging(after.guild, "member.update.name", em)
             if after.avatar_url != before.avatar_url:
@@ -362,7 +362,7 @@ class Logs(commands.Cog):
                                        description=f"{after.mention} a changé d'avatar",
                                        timestamp=ts, color=color)
                     em.set_thumbnail(url=url)
-                    em.set_author(name=after.name, icon_url=after.avatar_url)
+                    em.set_author(name=str(after), icon_url=after.avatar_url)
                     em.set_footer(text=f"ID{after.id}")
                     await self.manage_logging(after.guild, "member.update.avatar", em)
 
@@ -375,7 +375,7 @@ class Logs(commands.Cog):
             em = discord.Embed(title=f"`Nouvel arrivant`",
                                description=f"{user.mention} a rejoint le serveur",
                                timestamp=ts, color=color)
-            em.set_author(name=user.name, icon_url=user.avatar_url)
+            em.set_author(name=str(user), icon_url=user.avatar_url)
             em.set_footer(text=f"ID{user.id}")
             await self.manage_logging(user.guild, "member.join", em)
         if "member.join.infos" in preload and self.social:
@@ -398,7 +398,7 @@ class Logs(commands.Cog):
                                description=desc,
                                timestamp=ts, color=user.color)
             em.set_thumbnail(url=user.avatar_url)
-            em.set_author(name=user.name, icon_url=user.avatar_url)
+            em.set_author(name=str(user), icon_url=user.avatar_url)
             em.set_footer(text=f"ID{user.id}")
             await self.manage_logging(user.guild, "member.join.infos", em)
 
@@ -411,7 +411,7 @@ class Logs(commands.Cog):
             em = discord.Embed(title=f"`Départ d'un membre`",
                                description=f"**{user.name}** a quitté le serveur",
                                timestamp=ts, color=color)
-            em.set_author(name=user.name, icon_url=user.avatar_url)
+            em.set_author(name=str(user), icon_url=user.avatar_url)
             em.set_footer(text=f"ID{user.id}")
             await self.manage_logging(user.guild, "member.quit", em)
 
@@ -424,7 +424,7 @@ class Logs(commands.Cog):
             em = discord.Embed(title=f"`Bannissement d'un membre`",
                                description=f"**{user.name}** a été banni du serveur",
                                timestamp=ts, color=color)
-            em.set_author(name=user.name, icon_url=user.avatar_url)
+            em.set_author(name=str(user), icon_url=user.avatar_url)
             em.set_footer(text=f"ID{user.id}")
             await self.manage_logging(user.guild, "member.ban", em)
 
@@ -437,7 +437,7 @@ class Logs(commands.Cog):
             em = discord.Embed(title=f"`Débannissement d'un membre`",
                                description=f"**{user.name}** a été débanni du serveur",
                                timestamp=ts, color=color)
-            em.set_author(name=user.name, icon_url=user.avatar_url)
+            em.set_author(name=str(user), icon_url=user.avatar_url)
             em.set_footer(text=f"ID{user.id}")
             await self.manage_logging(user.guild, "member.unban", em)
 
@@ -450,12 +450,12 @@ class Logs(commands.Cog):
             em = discord.Embed(title=f"`Création d'une invitation`",
                                description=f"{invite.inviter.mention} a créé une invitation (**{invite.code}**)",
                                timestamp=ts, color=color)
-            em.set_author(name=invite.inviter.name, icon_url=invite.inviter.avatar_url)
+            em.set_author(name=str(invite.inviter), icon_url=invite.inviter.avatar_url)
             em.set_footer(text=f"ID{invite.inviter.id}")
             await self.manage_logging(invite.guild, "invite.create", em)
 
     @commands.Cog.listener()
-    async def on_invite_create(self, invite):
+    async def on_invite_delete(self, invite):
         preload = await self.get_preloaded_channels(invite.guild)
         color = await self.bot.get_embed_color(invite.channel)
         ts = datetime.utcnow()
@@ -463,7 +463,7 @@ class Logs(commands.Cog):
             em = discord.Embed(title=f"`Suppression d'une invitation`",
                                description=f"L'invitation **{invite.code}** (par {invite.inviter.mention}) a été supprimée",
                                timestamp=ts, color=color)
-            em.set_author(name=invite.inviter.name, icon_url=invite.inviter.avatar_url)
+            em.set_author(name=str(invite.inviter), icon_url=invite.inviter.avatar_url)
             em.set_footer(text=f"ID{invite.inviter.id}")
             await self.manage_logging(invite.guild, "invite.delete", em)
 
