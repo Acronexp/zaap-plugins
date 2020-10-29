@@ -102,12 +102,13 @@ class Logs(commands.Cog):
                 tables[type] = [t]
             else:
                 tables[type].append(t)
-        em = discord.Embed(color=em_color, description="> Lister les triggers d'un salon : `;logs get`\n"
-                                                       "> Ajouter un trigger à ce salon : `;logs add`\n"
-                                                       "> Retirer un trigger à ce salon : `;logs remove`")
+        em = discord.Embed(color=em_color, description="Lister les triggers d'un salon : `;logs get`\n"
+                                                       "Ajouter un trigger à ce salon : `;logs add`\n"
+                                                       "Retirer un trigger à ce salon : `;logs remove`")
+        em.set_footer(text="Utilisez \";help logs\" pour plus d'infos sur les commandes")
         em.set_author(name="Logs disponibles", icon_url=self.bot.user.avatar_url)
         for type in tables:
-            title = f"Type \"{type.title()}\""
+            title = f"Ciblant \"{type.title()}\""
             table = []
             for trig in tables[type]:
                 table.append([trig, _TRIGGERS[trig]])
