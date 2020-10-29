@@ -242,7 +242,7 @@ class Logs(commands.Cog):
                         em.set_footer(text=f"ID{user.id} • #{before.channel.name} / #{after.channel.name}")
                         await self.manage_logging(user.guild, "voice.update", em)
 
-            elif before.channel > after.channel:
+            elif before.channel:
                 if "voice.quit" in preload:
                     em = discord.Embed(title="`Déconnexion d'un salon vocal`",
                                        description=f"{user.mention} s'est déconnecté de {before.channel.mention}",
@@ -461,10 +461,9 @@ class Logs(commands.Cog):
         ts = datetime.utcnow()
         if "invite.delete" in preload:
             em = discord.Embed(title=f"`Suppression d'une invitation`",
-                               description=f"L'invitation **{invite.code}** (par {invite.inviter.mention}) a été supprimée",
+                               description=f"L'invitation **{invite.code}** a été supprimée",
                                timestamp=ts, color=color)
-            em.set_author(name=str(invite.inviter), icon_url=invite.inviter.avatar_url)
-            em.set_footer(text=f"ID{invite.inviter.id}")
+            em.set_author(name=str(self.bot.user), icon_url=self.bot.user.avatar_url)
             await self.manage_logging(invite.guild, "invite.delete", em)
 
 
