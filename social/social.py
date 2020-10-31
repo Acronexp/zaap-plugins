@@ -448,6 +448,10 @@ class Social(commands.Cog):
     @commands.Cog.listener()
     async def on_member_join(self, user):
         await self.add_logs(user, "A rejoint le serveur")
+        records = await self.config.guild(user.guild).records()
+        if user.id not in records:
+            records[user.id] = time.time()
+            await self.config.guild(user.guild).records.set(records)
 
     @commands.Cog.listener()
     async def on_member_remove(self, user):
