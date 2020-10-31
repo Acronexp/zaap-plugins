@@ -379,11 +379,12 @@ class Logs(commands.Cog):
             em.set_author(name=str(user), icon_url=user.avatar_url)
             em.set_footer(text=f"ID{user.id}")
             await self.manage_logging(user.guild, "member.join", em)
+
         if "member.join.infos" in preload and self.social:
             created_since = (datetime.now() - user.created_at).days
             try:
                 first_record = datetime.fromtimestamp(await self.social.config.guild(user.guild).records.get_raw(user.id))
-            except KeyError:
+            except:
                 first_record = user.joined_at
             if first_record > user.joined_at:
                 first_record = user.joined_at
@@ -392,7 +393,7 @@ class Logs(commands.Cog):
             desc = "**Ouverture du compte Discord** : {} · **{}**j\n" \
                    "**Première trace sur ce serveur** : {} · **{}**j".format(user.created_at.strftime("%d/%m/%Y"), created_since,
                                                                     first_record.strftime("%d/%m/%Y"), record_since)
-            if await self.social.config.member(user).all()["mod_notes"]:
+            if await self.social.config.member(user).mod_notes():
                 desc += f"\n__Notes de modération trouvées__ : utilisez `;uc {user.name}`"
 
             em = discord.Embed(title=f"`Infos sur un nouvel arrivant`",
