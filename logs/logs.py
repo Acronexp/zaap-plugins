@@ -302,7 +302,7 @@ class Logs(commands.Cog):
                 elif before.self_stream < after.self_stream:
                     type = "voice.stream"
                     title = "Début de stream"
-                    desc = f"{user.mention} a commencé à streamer"
+                    desc = f"{user.mention} a commencé à streamer sur {after.channel.mention}"
 
                 # Video
                 if before.self_video > after.self_video:
@@ -312,7 +312,7 @@ class Logs(commands.Cog):
                 elif before.self_video < after.self_video:
                     type = "voice.video"
                     title = "Début de diffusion de vidéo"
-                    desc = f"{user.mention} a commencé à diffuser"
+                    desc = f"{user.mention} a commencé à diffuser sur {after.channel.mention}"
 
                 if all([title, desc, type]):
                     if type in preload:
