@@ -60,16 +60,15 @@ class Dotack(commands.Cog):
                             emoji = random.choice(emojis)
                             await message.add_reaction(emoji)
 
-                    if not random.randint(0, 50):
+                    if "et" in content and not random.randint(0, 5):
                         if self.cache["rdn_msg_cd"] + 1200 > time.time():
                             async with message.channel.typing():
                                 self.cache["rdn_msg_cd"] = time.time()
-                                if "et" in content:
-                                    new = random.choice(["et venu :venu:", "et venu...", "et péter, pisser, chier et venu :venu:"])
-                                    msg = f"> {content}\n{new}"
-                                    wait = len(msg) / 10
-                                    await asyncio.sleep(wait)
-                                    await message.channel.send(msg)
+                                new = random.choice(["et venu :venu:", "et venu...", "et péter, pisser, chier et venu :venu:"])
+                                msg = f"> {content}\n{new}"
+                                wait = len(msg) / 10
+                                await asyncio.sleep(wait)
+                                await message.channel.send(msg)
 
                     if message.mentions:
                         if [user for user in message.mentions if user.id == 185443599524036608]:
