@@ -23,7 +23,7 @@ class Dotack(commands.Cog):
     async def on_message(self, message):
         if message.guild:
             if message.guild.id == 204585334925819904:
-                content = message.content.lower
+                content = message.content.lower()
 
                 if "pays" in content or "venu" in content:
                     rdn = random.randint(0, 4)
