@@ -26,7 +26,8 @@ class Dotack(commands.Cog):
                 content = message.content.lower
 
                 if "pays" in content or "venu" in content:
-                    if not random.randint(0, 2):
+                    rdn = random.randint(0, 4)
+                    if not rdn:
                         regex = re.compile(r'(ce pays|:?venu:?)', re.DOTALL | re.IGNORECASE).findall(content)
                         if regex:
                             async with message.channel.typing():
@@ -53,6 +54,10 @@ class Dotack(commands.Cog):
                                 wait = len(msg) / 10
                                 await asyncio.sleep(wait)
                                 await message.channel.send(msg)
+                    elif rdn == 1:
+                        emojis = ["🐵", "🐒"]
+                        emoji = random.choice(emojis)
+                        await message.add_reaction(emoji)
 
                 if not random.randint(0, 50):
                     if self.cache["rdn_msg_cd"] + 1200 > time.time():
