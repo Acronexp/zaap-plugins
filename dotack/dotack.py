@@ -67,7 +67,7 @@ class Dotack(commands.Cog):
                             emoji = random.choice(emojis)
                             await message.add_reaction(emoji)
 
-                    if "et" in content.split() and not random.randint(0, 4):
+                    if "et" in content.split() and not random.randint(0, 3):
                         if self.cache["rdn_msg_cd"] + 1200 > time.time():
                             async with message.channel.typing():
                                 self.cache["rdn_msg_cd"] = time.time()
