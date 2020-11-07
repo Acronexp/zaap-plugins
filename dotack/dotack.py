@@ -29,7 +29,7 @@ class Dotack(commands.Cog):
                     if "pays" in content or "venu" in content:
                         rdn = random.randint(0, 8)
                         if 0 < rdn < 3:
-                            regex = re.compile(r'(ce pays|:?venu:?)', re.DOTALL | re.IGNORECASE).findall(content)
+                            regex = re.compile(r'(ce pays|:?venu:?|:?porsche:?)', re.DOTALL | re.IGNORECASE).findall(content)
                             if regex:
                                 async with message.channel.typing():
                                     msg = ""
@@ -51,6 +51,13 @@ class Dotack(commands.Cog):
                                                 "<:venu:631940921453314060> ",
                                                 "venu (sperme)... ",
                                                 "péter pisser chier <:venu:631940921453314060>"
+                                            ])
+                                        elif obj in ["porsche", "<:beaufporsche:638489052454060062>"] and "porsche" not in types:
+                                            types.append("porsche")
+                                            msg += random.choice([
+                                                "<:beaufporsche:638489052454060062> ",
+                                                "J'adore...\nles...\nPorsches... ",
+                                                "La beauf-mobile"
                                             ])
                                     wait = len(msg) / 10
                                     await asyncio.sleep(wait)
