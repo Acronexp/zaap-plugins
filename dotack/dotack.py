@@ -45,12 +45,12 @@ class Dotack(commands.Cog):
                                             elif lvl == 3:
                                                 msg += "**CE PAYS PUTAIN** "
                                             self.cache["putain_lvl"] = self.cache["putain_lvl"] + 1 if self.cache["putain_lvl"] < 3 else 1
-                                        elif obj in ["venu", ":venu:"] and "venu" not in types:
+                                        elif obj in ["venu", "<:venu:631940921453314060>"] and "venu" not in types:
                                             types.append("venu")
                                             msg += random.choice([
-                                                ":venu: ",
+                                                "<:venu:631940921453314060> ",
                                                 "venu (sperme)... ",
-                                                "péter pisser chier :venu:"
+                                                "péter pisser chier <:venu:631940921453314060>"
                                             ])
                                     wait = len(msg) / 10
                                     await asyncio.sleep(wait)
@@ -64,7 +64,7 @@ class Dotack(commands.Cog):
                         if self.cache["rdn_msg_cd"] + 1200 > time.time():
                             async with message.channel.typing():
                                 self.cache["rdn_msg_cd"] = time.time()
-                                new = random.choice(["et venu :venu:", "et venu...", "et péter, pisser, chier et venu :venu:"])
+                                new = random.choice(["et venu <:venu:631940921453314060>", "et venu...", "et péter, pisser, chier et venu <:venu:631940921453314060>"])
                                 msg = f"> {content}\n{new}"
                                 wait = len(msg) / 10
                                 await asyncio.sleep(wait)
