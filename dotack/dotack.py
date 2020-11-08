@@ -67,18 +67,18 @@ class Dotack(commands.Cog):
                             emoji = random.choice(emojis)
                             await message.add_reaction(emoji)
 
-                    if "et" in content.split() and not random.randint(0, 3):
-                        if self.cache["rdn_msg_cd"] + 1200 < time.time():
+                    if "et" in content.split() and not random.randint(0, 4):
+                        if self.cache["rdn_msg_cd"] + 3600 < time.time():
                             async with message.channel.typing():
                                 self.cache["rdn_msg_cd"] = time.time()
                                 new = random.choice(["et venu <:venu:631940921453314060>", "et venu...", "et péter, pisser, chier et venu <:venu:631940921453314060>"])
                                 msg = f"> {content}\n{new}"
-                                wait = len(msg) / 10
+                                wait = len(msg) / 20
                                 await asyncio.sleep(wait)
                                 await message.channel.send(msg)
 
-                    if message.mentions:
-                        if [user for user in message.mentions if user.id == 185443599524036608]:
+                    if message.mentions or "dotack" in content.split():
+                        if [user for user in message.mentions if user.id == 185443599524036608] or "dotack" in content.split():
                             learn = self.cache["learner"]
                             if content.lower() not in learn:
                                 def check(msg: discord.Message):
@@ -97,7 +97,7 @@ class Dotack(commands.Cog):
                                     wait = len(msg) / 10
                                     await asyncio.sleep(wait)
                                     await message.channel.send(msg)
-                        elif [user for user in message.mentions if user.id == self.bot.user.id]:
+                        elif [user for user in message.mentions if user.id == self.bot.user.id] or 'dotack' in content.split():
                             proc = process.extractBests(content.lower(), list(self.cache["learner"].keys()))
                             bests = [p[0] for p in proc if p[1] >= 90]
                             if bests:
