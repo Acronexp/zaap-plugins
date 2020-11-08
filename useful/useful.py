@@ -226,7 +226,9 @@ class Useful(commands.Cog):
 
     @commands.command()
     async def spoiler(self, ctx, url = None):
-        """Reposte l'image en spoiler"""
+        """Reposte le fichier sous spoiler
+
+        Si aucun fichier n'est donné avec la commande, le spoiler sera appliqué au dernier fichier récent posté"""
         if not url:
             url = await self.search_for_files(ctx)
             if not url:
