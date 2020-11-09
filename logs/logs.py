@@ -128,7 +128,7 @@ class Logs(commands.Cog):
                     color = color.replace("#", "0x")
                     color = int(color, base=16) + 0x200
                 except:
-                    return await ctx.send("**Erreur** • La couleur doit être fournie au format hexadécimal (ex. `#D5D5D5` ou `0xD5D5D5`")
+                    return await ctx.send("**Erreur** • La couleur doit être fournie au format hexadécimal (ex. `#D5D5D5` ou `0xD5D5D5`)")
                 em = discord.Embed(title="Couleur changée • Démonstration",
                                    description=f"La couleur du trigger `{trigger}` a été modifiée avec succès.",
                                    color=color)
