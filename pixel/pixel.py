@@ -394,9 +394,9 @@ class Pixel(commands.Cog):
 
     @_pixel.command(name="edit")
     @checks.admin_or_permissions(manage_messages=True)
-    @commands.cooldown(1, 10, commands.BucketType.member)
+    @commands.max_concurrency(1, commands.BucketType.member)
     async def pixel_edit(self, ctx, name: str):
-        """Retirer un fichier personnalisé"""
+        """Editer un fichier du serveur (Nom, URL, fichier local etc.)"""
         author, guild = ctx.author, ctx.guild
         em_color = await ctx.embed_color()
         if ":" in name:
