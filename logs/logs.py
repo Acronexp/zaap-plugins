@@ -56,7 +56,7 @@ class Logs(commands.Cog):
                          "colors": {}}
         self.config.register_guild(**default_guild)
         self.channels = {}
-        self.delays = {"discord_status": 0, "guilds_disconnect": 0}
+        self.delays = {"discord_status": 0, "status_cd": 0, "status_mode": False, "guilds_disconnect": 0}
         try:
             self.social = self.bot.get_cog("Social")
         except:
@@ -255,11 +255,25 @@ class Logs(commands.Cog):
             page = statuspage.json()["page"]["url"]
             ts = datetime.utcnow()
             if status != "none":
-                em = discord.Embed(description=f"Les serveurs de Discord connaissent actuellement des instabilités. "
+                if self.delays["status_cd"] <= time.time():
+                    self.delays["status_cd"] = time.time() + 1800
+                    self.delays["status_mode"] = True
+                    em = discord.Embed(description=f"Les serveurs de Discord connaissent actuellement des instabilités. "
+                                                   f"Consultez {page} pour plus d'infos.", timestamp=ts)
+                    em.set_author(name="Instabilité des serveurs Discord", icon_url=self.bot.user.avatar_url)
+                    em.set_footer(text=f"Message global")
+                    await self.global_logging("discord.status", em)
+                else:
+                    pass
+            elif self.delays["status_mode"]:
+                self.delays["status_mode"] = False
+                em = discord.Embed(description=f"Le problème des instabilités de Discord semble avoir été résolu. "
                                                f"Consultez {page} pour plus d'infos.", timestamp=ts)
-                em.set_author(name="Instabilité des serveurs Discord", icon_url=self.bot.user.avatar_url)
+                em.set_author(name="Fin des instabilité des serveurs Discord", icon_url=self.bot.user.avatar_url)
                 em.set_footer(text=f"Message global")
                 await self.global_logging("discord.status", em)
+
+
 
     @commands.Cog.listener()
     async def on_message_delete(self, message):
