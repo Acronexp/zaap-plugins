@@ -256,23 +256,29 @@ class Logs(commands.Cog):
             ts = datetime.utcnow()
             if status != "none":
                 if self.delays["status_cd"] <= time.time():
-                    self.delays["status_cd"] = time.time() + 1800
-                    self.delays["status_mode"] = True
-                    em = discord.Embed(description=f"Les serveurs de Discord connaissent actuellement des instabilités. "
-                                                   f"Consultez {page} pour plus d'infos.", timestamp=ts)
-                    em.set_author(name="Instabilité des serveurs Discord", icon_url=self.bot.user.avatar_url)
-                    em.set_footer(text=f"Message global")
+                    self.delays["status_cd"] = time.time() + 3600
+                    if not self.delays["status_mode"]:
+                        self.delays["status_mode"] = True
+                        em = discord.Embed(description=f"Les serveurs de Discord connaissent actuellement des instabilités.\n"
+                                                       f"Consultez {page} pour plus d'infos.", timestamp=ts)
+                        em.set_author(name="Instabilité des serveurs Discord", icon_url=self.bot.user.avatar_url)
+                        em.set_footer(text=f"Message global")
+                    else:
+                        em = discord.Embed(
+                            description=f"Les perturbations sur les serveurs Discord se poursuivent.\n"
+                                        f"Consultez {page} pour plus d'infos.", timestamp=ts)
+                        em.set_author(name="Instabilité des serveurs Discord", icon_url=self.bot.user.avatar_url)
+                        em.set_footer(text=f"Message global")
                     await self.global_logging("discord.status", em)
                 else:
                     pass
             elif self.delays["status_mode"]:
                 self.delays["status_mode"] = False
-                em = discord.Embed(description=f"Le problème des instabilités de Discord semble avoir été résolu. "
+                em = discord.Embed(description=f"Les perturbations des serveurs Discord semblent avoir été résolus.\n"
                                                f"Consultez {page} pour plus d'infos.", timestamp=ts)
                 em.set_author(name="Fin des instabilité des serveurs Discord", icon_url=self.bot.user.avatar_url)
                 em.set_footer(text=f"Message global")
                 await self.global_logging("discord.status", em)
-
 
 
     @commands.Cog.listener()
