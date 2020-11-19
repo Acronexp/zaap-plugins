@@ -251,19 +251,6 @@ class Useful(commands.Cog):
                 await ctx.send("**Impossible** • Je n'ai pas réussi à upload la version sous Spoiler")
             os.remove(filepath)
 
-    @checks.admin_or_permissions(manage_messages=True)
-    @commands.guild_only()
-    @commands.command()
-    async def favconfig(self, ctx, channel: discord.TextChannel):
-        """Configurer le salon où sont postés les messages favoris"""
-        guild = ctx.guild
-        if channel:
-            await self.config.guild(guild).fav_channel.set(channel.id)
-            await ctx.send(f"**Salon modifié** • Les messages favoris seront postés sur {channel.mention}")
-        else:
-            await self.config.guild(guild).fav_channel.set(None)
-            await ctx.send(f"**Salon retiré** • La fonctionnalité est désactivée.")
-
     @commands.group(name="savemsg")
     @commands.guild_only()
     async def _savemsg(self, ctx):
@@ -630,28 +617,4 @@ class Useful(commands.Cog):
                                         await message.remove_reaction("👁", user)
                                     except:
                                         pass
-            elif reaction.emoji == "⭐":
-                if await self.config.guild(message.guild).fav_channel():
-                    if user.permissions_in(channel).manage_messages:
-                        cache = self.cache["fav_msg"]
-                        if message.id not in cache:
-                            favchan = message.guild.get_channel(await self.config.guild(message.guild).fav_channel())
-                            if message.embeds:
-                                content = message.content + "\n" + "\n".join([e.description for e in message.embeds])
-                                srcem = message.embeds[0]
-                                em = discord.Embed(description=content, color=0xF7A731, timestamp=message.created_at)
-                                em.set_author(name=srcem.author.name, icon_url=srcem.author.icon_url, url=srcem.author.url)
-                                em.set_footer(text=f"#{message.channel.name} (compilation)")
-                                if srcem.image:
-                                    em.set_image(url=srcem.image.url)
-                            else:
-                                content = message.content
-                                em = discord.Embed(description = content, color=0xF7A731, timestamp=message.created_at)
-                                em.set_author(name=message.author.name, icon_url=message.author.avatar_url, url=message.jump_url)
-                                em.set_footer(text=f"#{message.channel.name}")
-                                if message.attachments:
-                                    attach = message.attachments[0]
-                                    em.set_image(url=attach.url)
-                            await favchan.send(embed=em)
-                            self.cache["fav_msg"].append(message.id)
 
