@@ -42,7 +42,6 @@ class Useful(commands.Cog):
 
         self.temp = cog_data_path(self) / "temp"
         self.temp.mkdir(exist_ok=True, parents=True)
-        self.watermarks = cog_data_path(self) / "watermarks"
 
 
     def redux(self, string: str, separateur: str = ".", limite: int = 2000):
@@ -279,7 +278,7 @@ class Useful(commands.Cog):
         else:
             url = [url, ctx.message]
         async with ctx.channel.typing():
-            apt = self.watermarks / "AptWatermark.png"
+            apt = self.temp / "AptWatermark.png"
             filepath = await self.download(url[0])
             result = self.watermark_with_transparency(filepath, filepath, apt, (-25, -25))
             file = discord.File(result)
