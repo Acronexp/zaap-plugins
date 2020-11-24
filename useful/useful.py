@@ -282,7 +282,7 @@ class Useful(commands.Cog):
         async with ctx.channel.typing():
             apt = self.temp / "AptWatermark.png"
             filepath = await self.download(url[0])
-            result = self.watermark_with_transparency(filepath, filepath, apt, (30, 30))
+            result = self.watermark_with_transparency(filepath, filepath, apt, (0, 0))
             file = discord.File(result)
             try:
                 await ctx.send(file=file)
