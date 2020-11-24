@@ -257,8 +257,10 @@ class Useful(commands.Cog):
         base_image = Image.open(input_image_path)
         watermark = Image.open(watermark_image_path)
         width, height = base_image.size
+        watermark = watermark.thumbnail((width / 10, height / 10))
         transparent = Image.new('RGBA', (width, height), (0, 0, 0, 0))
         transparent.paste(base_image, (0, 0))
+        position = (position[0] - width - watermark.size[0], position[1] - height - watermark.size[1])
         transparent.paste(watermark, position, mask=watermark)
         transparent.show()
         transparent.save(output_image_path)
@@ -280,7 +282,7 @@ class Useful(commands.Cog):
         async with ctx.channel.typing():
             apt = self.temp / "AptWatermark.png"
             filepath = await self.download(url[0])
-            result = self.watermark_with_transparency(filepath, filepath, apt, (-25, -25))
+            result = self.watermark_with_transparency(filepath, filepath, apt, (30, 30))
             file = discord.File(result)
             try:
                 await ctx.send(file=file)
