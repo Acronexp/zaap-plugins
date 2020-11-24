@@ -13,6 +13,7 @@ import discord
 import instaloader
 import wikipedia
 import wikipediaapi
+from PIL import Image
 from bs4 import BeautifulSoup
 from redbot.core import commands, Config, checks
 from redbot.core.data_manager import cog_data_path
@@ -41,6 +42,7 @@ class Useful(commands.Cog):
 
         self.temp = cog_data_path(self) / "temp"
         self.temp.mkdir(exist_ok=True, parents=True)
+        self.watermarks = cog_data_path(self) / "watermarks"
 
 
     def redux(self, string: str, separateur: str = ".", limite: int = 2000):
@@ -250,6 +252,43 @@ class Useful(commands.Cog):
             except:
                 await ctx.send("**Impossible** • Je n'ai pas réussi à upload la version sous Spoiler")
             os.remove(filepath)
+        return
+
+    def watermark_with_transparency(self, input_image_path, output_image_path, watermark_image_path, position):
+        base_image = Image.open(input_image_path)
+        watermark = Image.open(watermark_image_path)
+        width, height = base_image.size
+        transparent = Image.new('RGBA', (width, height), (0, 0, 0, 0))
+        transparent.paste(base_image, (0, 0))
+        transparent.paste(watermark, position, mask=watermark)
+        transparent.show()
+        transparent.save(output_image_path)
+        return output_image_path
+
+    @commands.command(aliases=["wapt"], hidden=True)
+    async def aptwatermark(self, ctx, url=None):
+        """Applique un watermark "L'Appart" sur l'image donnée
+
+        Si aucun fichier n'est donné avec la commande, le watermark sera posé sur le dernier fichier récent posté"""
+        if not url:
+            url = await self.search_for_files(ctx)
+            if not url:
+                return await ctx.send("**???** • Aucun fichier trouvé")
+            else:
+                url = url[0]
+        else:
+            url = [url, ctx.message]
+        async with ctx.channel.typing():
+            apt = self.watermarks / "AptWatermark.png"
+            filepath = await self.download(url[0])
+            result = self.watermark_with_transparency(filepath, filepath, apt, (-25, -25))
+            file = discord.File(result)
+            try:
+                await ctx.send(file=file)
+            except:
+                await ctx.send("**Impossible** • Je n'ai pas réussi à upload l'image avec watermark")
+            os.remove(result)
+        return
 
     @commands.group(name="savemsg")
     @commands.guild_only()
