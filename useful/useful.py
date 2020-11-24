@@ -257,7 +257,8 @@ class Useful(commands.Cog):
         base_image = Image.open(input_image_path)
         watermark = Image.open(watermark_image_path)
         width, height = base_image.size
-        watermark.thumbnail((width / 10, height / 10))
+        watermark.thumbnail((width / 9, height / 9))
+        watermark.putalpha(200)
         transparent = Image.new('RGBA', (width, height), (0, 0, 0, 0))
         transparent.paste(base_image, (0, 0))
         position = (width - watermark.size[0] - position[0], height - watermark.size[1] - position[1])
