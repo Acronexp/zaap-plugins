@@ -242,6 +242,7 @@ class Useful(commands.Cog):
             filepaths = []
             async with ctx.channel.typing():
                 info = False
+                msg = None
                 for url in urls:
                     if not info:
                         content = "De {}".format(url[1].author.mention)
@@ -250,12 +251,14 @@ class Useful(commands.Cog):
                             sanit_content = " ".join([i for i in url[1].content.split() if not i.startswith("http")])
                             content = ">>> {} : {}".format(url[1].author.mention, sanit_content)
                     filepath = await self.download(url[0])
-                    await url[1].delete()
+                    msg = url[1]
                     file = discord.File(filepath, spoiler=True)
                     files.append(file)
                     filepaths.append(filepath)
                 try:
                     await ctx.send(content, files=files)
+                    if msg:
+                        await msg.delete()
                 except:
                     await ctx.send("**Impossible** • Je n'ai pas réussi à upload les fichiers sous spoiler")
             if filepaths:
