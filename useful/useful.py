@@ -201,7 +201,7 @@ class Useful(commands.Cog):
                         urls.append([attachment.url, message])
                 match = FILES_LINKS.match(message.content)
                 if match:
-                    urls.append([match.group(1), message])
+                    urls.append((match.group(1), message))
         if urls:
             return urls[:nb]
         return []
@@ -225,33 +225,44 @@ class Useful(commands.Cog):
             logger.error("Error downloading", exc_info=True)
             return False
 
-    @commands.command()
-    async def spoiler(self, ctx, url = None):
+    @commands.command(aliases=["spoil"])
+    async def spoiler(self, ctx, *urls):
         """Reposte le fichier sous spoiler
 
-        Si aucun fichier n'est donné avec la commande, le spoiler sera appliqué au dernier fichier récent posté"""
-        if not url:
-            url = await self.search_for_files(ctx)
-            if not url:
+        Si aucun fichier n'est donné avec la commande, le spoiler sera appliqué aux fichiers du dernier message du salon"""
+        if not urls:
+            urls = await self.search_for_files(ctx, 3)
+            if not urls:
                 return await ctx.send("**???** • Aucun fichier trouvé à mettre en spoiler")
-            else:
-                url = url[0]
         else:
-            url = [url, ctx.message]
-        async with ctx.channel.typing():
-            content = "De {}".format(url[1].author.mention)
-            if url[1].content and url[1].content != ctx.message.content:
-                sanit_content = " ".join([i for i in url[1].content.split() if not i.startswith("http")])
-                content = ">>> {} : {}".format(url[1].author.mention, sanit_content)
-            filepath = await self.download(url[0])
-            await url[1].delete()
-            file = discord.File(filepath, spoiler=True)
-            try:
-                await ctx.send(content, file=file)
-            except:
-                await ctx.send("**Impossible** • Je n'ai pas réussi à upload la version sous Spoiler")
-            os.remove(filepath)
-        return
+            urls = [(u, ctx.message) for u in urls]
+
+        if urls:
+            files = []
+            filepaths = []
+            async with ctx.channel.typing():
+                info = False
+                for url in urls:
+                    if not info:
+                        content = "De {}".format(url[1].author.mention)
+                        info = True
+                        if url[1].content and url[1].content != ctx.message.content:
+                            sanit_content = " ".join([i for i in url[1].content.split() if not i.startswith("http")])
+                            content = ">>> {} : {}".format(url[1].author.mention, sanit_content)
+                    filepath = await self.download(url[0])
+                    await url[1].delete()
+                    file = discord.File(filepath, spoiler=True)
+                    files.append(file)
+                    filepaths.append(filepath)
+                try:
+                    await ctx.send(content, files=files)
+                except:
+                    await ctx.send("**Impossible** • Je n'ai pas réussi à upload les fichiers sous spoiler")
+            if filepaths:
+                for f in filepaths:
+                    os.remove(f)
+        else:
+            await ctx.send("**???** • Aucun fichier trouvé à mettre en spoiler")
 
     def watermark_with_transparency(self, input_image_path, output_image_path, watermark_image_path, position):
         base_image = Image.open(input_image_path)
