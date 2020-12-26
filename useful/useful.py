@@ -231,7 +231,7 @@ class Useful(commands.Cog):
 
         Si aucun fichier n'est donné avec la commande, le spoiler sera appliqué aux fichiers du dernier message du salon"""
         if not urls:
-            urls = await self.search_for_files(ctx, 3)
+            urls = await self.search_for_files(ctx, 5)
             if not urls:
                 return await ctx.send("**???** • Aucun fichier trouvé à mettre en spoiler")
         else:
