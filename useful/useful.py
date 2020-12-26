@@ -199,6 +199,7 @@ class Useful(commands.Cog):
                 if message.attachments:
                     for attachment in message.attachments:
                         urls.append([attachment.url, message])
+                    break
                 match = FILES_LINKS.match(message.content)
                 if match:
                     urls.append((match.group(1), message))
