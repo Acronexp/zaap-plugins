@@ -57,11 +57,6 @@ class Logs(commands.Cog):
         self.config.register_guild(**default_guild)
         self.channels = {}
         self.delays = {"discord_status": 0, "status_cd": 0, "status_mode": False, "guilds_disconnect": 0}
-        try:
-            self.social = self.bot.get_cog("Social")
-        except:
-            self.social = None
-            logger.info("Impossible de charger Social.py, les infos de membres ne seront pas disponibles")
 
     async def preload_channels(self, guild: discord.Guild):
         """Charge d'avance les salons pour fluidifier l'envoi des logs"""
@@ -465,10 +460,16 @@ class Logs(commands.Cog):
             em.set_footer(text=f"{user.id}")
             await self.manage_logging(user.guild, "member.join", em)
 
-        if preload.get("member.join.infos", False) and self.social:
+        if preload.get("member.join.infos", False):
+            userinfo = None
+            try:
+                userinfo = self.bot.get_cog("UserInfo")
+            except:
+                pass
+
             created_since = (datetime.now() - user.created_at).days
             try:
-                first_record = datetime.fromtimestamp(await self.social.config.guild(user.guild).records.get_raw(user.id))
+                first_record = datetime.now().fromisoformat(await userinfo.config.guild(user.guild).user_records.get_raw(user.id))
             except:
                 first_record = user.joined_at
             if first_record > user.joined_at:
@@ -478,8 +479,6 @@ class Logs(commands.Cog):
             desc = "**Ouverture du compte Discord** : {} · **{}**j\n" \
                    "**Première trace sur ce serveur** : {} · **{}**j".format(user.created_at.strftime("%d/%m/%Y"), created_since,
                                                                     first_record.strftime("%d/%m/%Y"), record_since)
-            if await self.social.config.member(user).mod_notes():
-                desc += f"\n__Notes de modération trouvées__ : utilisez `;uc {user.name}`"
 
             em = discord.Embed(description=desc, timestamp=ts)
             em.set_author(name=str(user) + " » Infos du nouvel arrivant",
